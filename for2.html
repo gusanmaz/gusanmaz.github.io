@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş p5.js 'while' ve 'for' Döngüleri Atölyesi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        h1 { font-size: 2.5em; }
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.5em; margin-top: 30px; }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+        pre {
+            background-color: #34495e;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        .example {
+            margin-top: 25px;
+            border-top: 2px dashed #bdc3c7;
+            padding-top: 25px;
+        }
+        .interactive-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .code-editor {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            resize: vertical;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .canvas-container {
+            flex-basis: 400px;
+            height: 400px;
+            background: #f0f0f0;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .canvas-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .run-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #27ae60;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        .run-button:hover {
+            background-color: #2ecc71;
+        }
+        .challenge {
+            background-color: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .challenge h4 {
+            margin-top: 0;
+            color: #d98218;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>p5.js ile Etkileşimli 'while' ve 'for' Döngüleri Defteri 🌀</h1>
+        
+        <p>Bu atölyede, önce <code>while</code> döngüsü ile temel tekrar yapısını öğrenecek, ardından <code>for</code> döngüsü ile aynı görevleri nasıl daha kısa/derli toplu ifade edebileceğimizi göreceğiz. Kodu değiştirin ve "🚀 Çalıştır" butonuna basarak sonucunu anında görün!</p>
+
+        <h2><code>while</code> Döngüsü Nedir?</h2>
+        <p><code>while</code>, bir koşul <b>doğru olduğu sürece</b> aynı kod bloğunu tekrarlar. Genelde bir sayaç değişkeni ile birlikte kullanılır.</p>
+        <pre><code style="color: black;">let i = 0;
+while (i &lt; 10) {
+  // Bu kod, koşul doğru kaldığı sürece çalışır
+  i = i + 1; // sayaç ilerletmeyi unutmayın!
+}</code></pre>
+        <p><code>while</code> döngüsünde iki kritik nokta vardır: (1) başlangıç değeri, (2) koşulu <i>yanlış</i> yapacak ilerleme. İlerlemeyi unutursanız sonsuz döngü olur. p5.js'te <code>draw()</code> her kare çalıştığı için, tek karede iş bitecekse <code>draw()</code> sonunda <code>noLoop()</code> çağırmak, animasyonu durdurur.</p>
+
+        <div class="example">
+            <h3>Örnek W1: Basit <code>while</code> (Dikey Çizgiler)</h3>
+            <p>Aynı desenleri <code>while</code> ile de üretebiliriz. Sayaç değerini <code>i++</code> ile ilerletmeyi unutmayın.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-w1">function setup() {
+  createCanvas(400, 400);
+  background(240);
+  stroke(0);
+  strokeWeight(2);
+
+  let adet = 10;
+  let bosluk = 30;
+  let i = 0;
+
+  while (i &lt; adet) {
+    let x = 40 + i * bosluk;
+    line(x, 50, x, 350);
+    i = i + 1; // i++
+  }
+}
+
+function draw() {
+  noLoop(); // Tek kare sonra dur
+}
+</textarea>
+                <div class="canvas-container" id="canvas-w1"></div>
+            </div>
+            <button class="run-button" data-target="code-w1" data-canvas="canvas-w1">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>adet</code>'i 20 yapın. Kaç çizgi oldu?</li>
+                    <li><code>bosluk</code>'u 10 yapın. Çizgiler nasıl değişti?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek W2a: Aynı Görev (<code>for</code> ile)</h3>
+            <p>20 küçük kareyi yatayda dizerken önce <code>for</code> ile yazalım.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-w2a">function setup() {
+  createCanvas(400, 400);
+  background(240);
+  noStroke();
+
+  let adet = 20;
+  let boyut = 12;
+  let bosluk = (width - 40) / (adet - 1);
+
+  for (let i = 0; i &lt; adet; i++) {
+    let x = 20 + i * bosluk;
+    fill(50 + i * 10, 100, 180);
+    rect(x, height / 2 - boyut / 2, boyut, boyut);
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-w2a"></div>
+            </div>
+            <button class="run-button" data-target="code-w2a" data-canvas="canvas-w2a">🚀 Çalıştır / Değiştir ve Gör</button>
+        </div>
+
+        <div class="example">
+            <h3>Örnek W2b: Aynı Görev (<code>while</code> ile)</h3>
+            <p>Aynı sonucu bu kez <code>while</code> ile üretelim.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-w2b">function setup() {
+  createCanvas(400, 400);
+  background(240);
+  noStroke();
+
+  let adet = 20;
+  let boyut = 12;
+  let bosluk = (width - 40) / (adet - 1);
+  let i = 0;
+
+  while (i &lt; adet) {
+    let x = 20 + i * bosluk;
+    fill(50 + i * 10, 100, 180);
+    rect(x, height / 2 - boyut / 2, boyut, boyut);
+    i = i + 1;
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-w2b"></div>
+            </div>
+            <button class="run-button" data-target="code-w2b" data-canvas="canvas-w2b">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>boyut</code>'u <code>i</code>'ye bağlı yapın: <code>let boyut = 8 + i;</code></li>
+                    <li>Renkleri tersine çevirin: <code>fill(200 - i * 10, 100, 180);</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek W3: Konsantrik Daireler (<code>while</code>)</h3>
+            <p>Merkezden dışa doğru giderek yarıçapı küçülen daireler çizeriz. Bu tür tekrarlar için <code>while</code> de uygundur.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-w3">function setup() {
+  createCanvas(400, 400);
+  background(255);
+  noFill();
+  stroke(0, 140);
+  strokeWeight(2);
+
+  let r = 180; // başlangıç yarıçapı
+  while (r &gt; 5) {
+    ellipse(width / 2, height / 2, r * 2, r * 2);
+    r = r - 12; // yarıçapı azalt
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-w3"></div>
+            </div>
+            <button class="run-button" data-target="code-w3" data-canvas="canvas-w3">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>stroke(0, 140);</code> yerine <code>stroke(255, 0, 0, 140);</code> deneyin.</li>
+                    <li><code>while</code>'ı <code>for</code>'a çevirin. Hangisi daha okunaklı?</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2><code>for</code> Döngüsü Nedir?</h2>
+        <p><code>for</code> döngüsü, bir kod bloğunu belirli bir sayıda tekrar tekrar çalıştırmanın en yaygın yoludur. Bilgisayara "Bu işi X kez yap" demektir. <code>while</code> ile aynı işi yapar fakat sayaç/ilerleme ve koşulu tek satırda toplar.</p>
+        <pre><code style="color:black">for (let i = 0; i < 10; i++) {
+  // Bu kod 10 kez çalışacak
+  // 'i' değişkeni sırasıyla 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 olacak
+}</code></pre>
+
+        <div class="example">
+            <h3>Örnek 1: Basit Döngü (Dikey Çizgiler)</h3>
+            <p><code>for</code> döngüsü kullanarak <code>i</code> değişkeninin her değerinde <code>x</code> pozisyonunu kaydırarak dikey çizgiler çizelim.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-1">function setup() {
+  createCanvas(400, 400);
+  background(240); // Açık gri arka plan
+  stroke(0); // Siyah çizgi rengi
+  strokeWeight(2); // Çizgi kalınlığı
+
+  // 10 adet dikey çizgi çizelim
+  let adet = 10;
+  let bosluk = 30; // Çizgiler arası boşluk
+
+  for (let i = 0; i < adet; i++) {
+    // x pozisyonunu i'ye göre hesapla
+    // i=0 için x=40, i=1 için x=70, i=2 için x=100...
+    let x = 40 + (i * bosluk); 
+    
+    // Çizgiyi çiz (x1, y1, x2, y2)
+    line(x, 50, x, 350); 
+  }
+}
+
+function draw() {
+  noLoop();
+}
+</textarea>
+                <div class="canvas-container" id="canvas-1"></div>
+            </div>
+            <button class="run-button" data-target="code-1" data-canvas="canvas-1">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör (Challenge)</h4>
+                <ul>
+                    <li><code>let adet = 10;</code> satırını <code>let adet = 20;</code> yap. Ne oldu?</li>
+                    <li><code>let bosluk = 30;</code> satırını <code>let bosluk = 10;</code> yap.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 2: Basit Döngü (Yatay Çizgiler)</h3>
+            <p>Bu sefer de aynı mantıkla, <code>i</code> değişkenini <code>y</code> pozisyonunu kontrol etmek için kullanalım ve yatay çizgiler çizelim.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-2">function setup() {
+  createCanvas(400, 400);
+  background(240);
+  stroke(200, 0, 0); // Kırmızı çizgi rengi
+  strokeWeight(2);
+
+  let adet = 10;
+  let bosluk = 30; 
+
+  for (let i = 0; i < adet; i++) {
+    // y pozisyonunu i'ye göre hesapla
+    // i=0 için y=40, i=1 için y=70, i=2 için y=100...
+    let y = 40 + (i * bosluk); 
+    
+    // Çizgiyi çiz (x1, y1, x2, y2)
+    line(50, y, 350, y); 
+  }
+}
+
+function draw() {
+  noLoop();
+}
+</textarea>
+                <div class="canvas-container" id="canvas-2"></div>
+            </div>
+            <button class="run-button" data-target="code-2" data-canvas="canvas-2">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>line(50, y, 350, y);</code> satırını <code>line(y, 50, y, 350);</code> yap. (Yeniden dikey oldular, ama neden?)</li>
+                    <li><code>stroke(200, 0, 0);</code> satırını <code>stroke(0, 0, 200);</code> yap. (Mavi oldular).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 3: İki Ayrı Döngü (Basit Izgara)</h3>
+            <p>Bir ızgara (grid) yapmak için Örnek 1 ve Örnek 2'deki mantığı birleştirebiliriz. Henüz iç içe döngüye gerek yok. Sadece iki tane *ayrı* <code>for</code> döngüsü kullanacağız.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-3">function setup() {
+  createCanvas(400, 400);
+  background(255);
+  strokeWeight(1);
+  
+  let bosluk = 40; // Hem yatay hem dikey boşluk
+
+  // 1. DÖNGÜ: Dikey çizgiler
+  stroke(200, 200, 200); // Gri dikey çizgiler
+  for (let x = bosluk; x < width; x += bosluk) {
+    line(x, 0, x, height);
+  }
+  
+  // 2. DÖNGÜ: Yatay çizgiler
+  stroke(150, 150, 150); // Koyu gri yatay çizgiler
+  for (let y = bosluk; y < height; y += bosluk) {
+    line(0, y, width, y);
+  }
+}
+
+function draw() {
+  noLoop();
+}
+</textarea>
+                <div class="canvas-container" id="canvas-3"></div>
+            </div>
+            <button class="run-button" data-target="code-3" data-canvas="canvas-3">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>let bosluk = 40;</code> satırını <code>let bosluk = 10;</code> yap.</li>
+                    <li>Dikey çizgileri kırmızı, yatay çizgileri mavi yapın.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 4: İç İçe Döngüler (Daire Izgarası)</h3>
+            <p>Örnek 3'te çizgileri çizmek için iki <i>ayrı</i> döngü kullandık. Şimdi, ızgaranın <i>her kesişim noktasına</i> bir daire çizmek için <b>iç içe döngü (nested loop)</b> kullanacağız. Dıştaki döngü satırlar (<code>y</code>) için, içteki döngü sütunlar (<code>x</code>) için çalışacak.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-4">function setup() {
+  createCanvas(400, 400);
+  background(20); // Koyu arka plan
+  noStroke(); // Dairelerin kenarlığı olmasın
+  
+  let bosluk = 40; // Daireler arası boşluk
+  let boyut = 30; // Daire boyutu
+
+  // Y (dikey) ekseni için DIŞ döngü
+  // y = 40, 80, 120, ... 360
+  for (let y = bosluk; y < height; y += bosluk) {
+    
+    // X (yatay) ekseni için İÇ döngü
+    // x = 40, 80, 120, ... 360
+    for (let x = bosluk; x < width; x += bosluk) {
+      
+      // Renk ayarı: x ve y'ye göre değişen bir renk
+      fill(x, y, 150); 
+      
+      ellipse(x, y, boyut, boyut);
+    }
+  }
+}
+
+function draw() {
+  noLoop();
+}
+</textarea>
+                <div class="canvas-container" id="canvas-4"></div>
+            </div>
+            <button class="run-button" data-target="code-4" data-canvas="canvas-4">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>ellipse(x, y, boyut, boyut);</code> satırını <code>rect(x, y, boyut, boyut);</code> yap. (Daireler kare oldu!)</li>
+                    <li><code>fill(x, y, 150);</code> satırını <code>fill(random(255), 0, 0);</code> yap. (Rastgele kırmızılar).</li>
+                    <li><code>let boyut = 30;</code> satırını <code>let boyut = x / 10;</code> yap. (Boyut x'e göre değişsin!)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 5: İç İçe Döngü + <code>if</code> (Satranç Tahtası)</h3>
+            <p>İç içe döngülerin en klasik örneklerinden biri. 8x8'lik bir ızgara çizeceğiz ve <code>if</code> komutu kullanarak her karenin rengini belirleyeceğiz. Sihirli hile: <code>(i + j) % 2</code> (satır ve sütun indekslerinin toplamının 2'ye bölümünden kalan).</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-5">function setup() {
+  createCanvas(400, 400);
+  noStroke();
+  
+  let kareSayisi = 8; // 8x8 bir tahta
+  let kareBoyutu = width / kareSayisi; // 400 / 8 = 50
+  
+  // Satırlar (j)
+  for (let j = 0; j < kareSayisi; j++) {
+    
+    // Sütunlar (i)
+    for (let i = 0; i < kareSayisi; i++) {
+      
+      // Karelerin (x, y) pozisyonu
+      let x = i * kareBoyutu;
+      let y = j * kareBoyutu;
+      
+      // Renk belirleme: (i+j) toplamı çift mi tek mi?
+      if ((i + j) % 2 == 0) {
+        fill(255); // Beyaz (veya açık renk)
+      } else {
+        fill(0); // Siyah (veya koyu renk)
+      }
+      
+      rect(x, y, kareBoyutu, kareBoyutu);
+    }
+  }
+}
+
+function draw() {
+  noLoop();
+}
+</textarea>
+                <div class="canvas-container" id="canvas-5"></div>
+            </div>
+            <button class="run-button" data-target="code-5" data-canvas="canvas-5">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>fill(255);</code> ve <code>fill(0);</code> satırlarını <code>fill(255, 0, 0);</code> (Kırmızı) ve <code>fill(0, 0, 255);</code> (Mavi) olarak değiştirin.</li>
+                    <li><code>let kareSayisi = 8;</code> satırını <code>let kareSayisi = 20;</code> yapın.</li>
+                    <li><code>if ((i + j) % 2 == 0)</code> koşulunu <code>if (i % 2 == 0)</code> olarak değiştirin. Ne oldu? (Dikey çizgiler!)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 6: Döngü + Animasyon (Hareketli Dalgalar)</h3>
+            <p>Artık <code>setup()</code> yerine <code>draw()</code> (saniyede 60 kez çalışır) fonksiyonu içinde döngü kullanalım. <code>frameCount</code> değişkeni "zamanı" temsil eder ve <code>sin()</code> fonksiyonu ile birleşerek yumuşak dalgalar yaratır.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-6">function setup() {
+  createCanvas(400, 400);
+  stroke(255); // Beyaz çizgiler
+  noFill();
+  strokeWeight(2);
+}
+
+function draw() {
+  // Arka planı her karede hafif silik siyaha boya
+  // Bu, "hareket izi" (motion blur) efekti yaratır
+  background(0, 30); 
+
+  // Ekrana 5 tane dalga çizelim
+  for (let j = 0; j < 5; j++) {
+    
+    beginShape(); // Bir şekil çizmeye başla
+    
+    // x ekseninde 0'dan 400'e kadar 5'er piksel arayla git
+    for (let x = 0; x <= width; x += 5) {
+      
+      // sin() fonksiyonu -1 ile 1 arası yumuşak bir dalga üretir
+      let angle = (x * 0.01) + (frameCount * 0.03) + (j * 0.5);
+      
+      // sin() sonucunu y pozisyonuna çevir
+      let y = height / 2 + sin(angle) * (50 - j * 10); 
+      
+      vertex(x, y); // Şekle bir köşe ekle
+    }
+    
+    endShape(); // Şekli bitir
+  }
+}
+</textarea>
+                <div class="canvas-container" id="canvas-6"></div>
+            </div>
+            <button class="run-button" data-target="code-6" data-canvas="canvas-6">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>background(0, 30);</code> satırını <code>background(0);</code> yap. (İz efekti kayboldu).</li>
+                    <li><code>for (let j = 0; j < 5; j++)</code> satırını <code>for (let j = 0; j < 1; j++)</code> yap. (Sadece 1 dalga).</li>
+                    <li><code>x += 5</code> kısmını <code>x += 20</code> yap. (Dalga daha keskin köşeli oldu).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 7: Döngü + Fare Etkileşimi (İnteraktif Sanat)</h3>
+            <p><code>for</code> döngüsü içindeki hesaplamalarda fare pozisyonunu (<code>mouseX</code>, <code>mouseY</code>) kullanarak interaktif sanat eserleri yaratabiliriz.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-7">function setup() {
+  createCanvas(400, 400);
+  background(255);
+  strokeWeight(1);
+}
+
+function draw() {
+  // Arka planı her seferinde temizle
+  background(250, 240, 230); // Açık somon rengi
+
+  // Adım sayısını fare'nin Y konumuna göre belirle
+  let adimSayisi = floor(map(mouseY, 0, height, 2, 20));
+  let bosluk = width / adimSayisi;
+
+  for (let i = 0; i <= adimSayisi; i++) {
+    
+    let x = i * bosluk;
+    
+    // Renk ayarı: Fare'nin X konumuna göre renk değişsin
+    let r = map(mouseX, 0, width, 0, 255);
+    stroke(r, 100, 150, 150); // Yarı şeffaf renk
+    
+    // Çizgiler çiz
+    line(x, 0, mouseX, mouseY); // Üst kenardan fareye
+    line(0, x, mouseX, mouseY); // Sol kenardan fareye
+    line(x, height, mouseX, mouseY); // Alt kenardan fareye
+    line(width, x, mouseX, mouseY); // Sağ kenardan fareye
+  }
+}
+</textarea>
+                <div class="canvas-container" id="canvas-7"></div>
+            </div>
+            <button class="run-button" data-target="code-7" data-canvas="canvas-7">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>strokeWeight(1);</code> satırını <code>setup()</code> içinde <code>strokeWeight(5);</code> yap.</li>
+                    <li><code>background(250, 240, 230);</code> satırını <code>draw()</code> dışına, <code>setup()</code> içine taşı. (Ekran temizlenmiyor!)</li>
+                    <li><code>let r = map(mouseX, 0, width, 0, 255);</code> satırını <code>let r = map(i, 0, adimSayisi, 0, 255);</code> yap.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 8: Gri Tonlar ve RGB Şeritleri (1 Boyutlu Gradyan)</h3>
+            <p>Tuvali 256 eşit dikey dilime bölüp her dilimi farklı gri değerle boyayalım. Aynı tekniği kırmızı ve yeşil kanallar için de uygulayıp üç şerit halinde görelim.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-8">function setup() {
+  createCanvas(400, 400);
+  noStroke();
+
+  let adim = 256;
+  let w = width / adim;
+  let satirYuk = height / 3;
+
+  // Arkaplanı beyazla başlat
+  background(255);
+
+  // 1) Üst satır: Gri tonlar
+  for (let i = 0; i < adim; i++) {
+    let g = i; // 0..255
+    fill(g);
+    rect(i * w, 0, w + 1, satirYuk);
+  }
+
+  // 2) Orta satır: Kırmızı kanal
+  for (let i = 0; i < adim; i++) {
+    let r = i;
+    fill(r, 0, 0);
+    rect(i * w, satirYuk, w + 1, satirYuk);
+  }
+
+  // 3) Alt satır: Yeşil kanal
+  for (let i = 0; i < adim; i++) {
+    let g = i;
+    fill(0, g, 0);
+    rect(i * w, 2 * satirYuk, w + 1, satirYuk);
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-8"></div>
+            </div>
+            <button class="run-button" data-target="code-8" data-canvas="canvas-8">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>adim</code>'ı 64 yapın. Bantlar daha kalın olsun.</li>
+                    <li>Alt satırı mavi kanal yapın: <code>fill(0, 0, i);</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 9: 2 Eksenli RGB Haritası (İç İçe Döngü)</h3>
+            <p><code>x</code> ekseninde kırmızı, <code>y</code> ekseninde yeşil değişsin; mavi'yi sabit bir değere bağlayalım. Kod başındaki <code>b</code> değerini değiştirerek farklı renk haritaları görün.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-9">function setup() {
+  createCanvas(400, 400);
+  noStroke();
+
+  let b = 64; // SABİT MAVİ (manuel değiştirin: 0..255)
+  let hucre = 4; // hız için 4x4 bloklar
+
+  for (let y = 0; y < height; y += hucre) {
+    for (let x = 0; x < width; x += hucre) {
+      let r = map(x, 0, width, 0, 255);
+      let g = map(y, 0, height, 0, 255);
+      fill(r, g, b);
+      rect(x, y, hucre, hucre);
+    }
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-9"></div>
+            </div>
+            <button class="run-button" data-target="code-9" data-canvas="canvas-9">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>b</code>'yi 0, 128, 255 yapın. Renk haritası nasıl değişiyor?</li>
+                    <li><code>hucre</code>'yi 1 yapın (daha pürüzsüz ama daha yavaş).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 10: HSB (HSL benzeri) ile 2 Eksenli Harita</h3>
+            <p>p5.js, doğrudan <code>HSL</code> değil <code>HSB</code> renk modelini destekler (<code>colorMode(HSB, ...)</code>). <b>H</b>: ton (0–360), <b>S</b>: doygunluk (0–100), <b>B</b>: parlaklık (0–100), <b>A</b>: şeffaflık (0–100). Aşağıda <code>x</code>→<b>H</b>, <code>y</code>→<b>S</b> eşlenir, <b>B</b> sabittir.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-10">function setup() {
+  createCanvas(400, 400);
+  noStroke();
+  colorMode(HSB, 360, 100, 100, 100); // HSB aralıkları
+
+  let hucre = 4;
+  let sabitB = 90; // parlaklık
+
+  for (let y = 0; y < height; y += hucre) {
+    for (let x = 0; x < width; x += hucre) {
+      let h = map(x, 0, width, 0, 360);
+      let s = map(y, 0, height, 0, 100);
+      fill(h, s, sabitB, 100);
+      rect(x, y, hucre, hucre);
+    }
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-10"></div>
+            </div>
+            <button class="run-button" data-target="code-10" data-canvas="canvas-10">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>sabitB</code>'yi 50 yapın. Parlaklık azalınca renkler nasıl değişiyor?</li>
+                    <li><code>y</code>'yi <b>B</b>'ye, sabit <b>S</b> kullanın.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 11: Konsantrik Kareler (Gri ve Kırmızı Tonlar)</h3>
+            <p>Merkeze hizalı karelerin boyutunu her adımda küçültelim. <code>rectMode(CENTER)</code> kareyi merkezden çizer. <code>noLoop()</code> tek karelik çizimler için animasyonu durdurur.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-11">function setup() {
+  createCanvas(400, 400);
+  background(255);
+  rectMode(CENTER);
+  noFill();
+  strokeWeight(2);
+
+  // Gri seri
+  let boyut = min(width, height) - 20;
+  let adim = 12;
+  let g = 0;
+  while (boyut > 10) {
+    stroke(g);
+    rect(width / 2, height / 2, boyut, boyut);
+    boyut -= adim;
+    g = (g + 14) % 256;
+  }
+
+  // Kırmızı tonları (ince çizgiler)
+  strokeWeight(1);
+  let boyut2 = min(width, height) - 30;
+  let r = 40;
+  while (boyut2 > 20) {
+    stroke(r, 0, 0, 120);
+    rect(width / 2, height / 2, boyut2, boyut2);
+    boyut2 -= 18;
+    r = (r + 18) % 256;
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-11"></div>
+            </div>
+            <button class="run-button" data-target="code-11" data-canvas="canvas-11">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>rectMode(CENTER)</code> yerine varsayılanı deneyin. Kareler kayar.</li>
+                    <li>Kırmızılar yerine mavi tonları kullanın.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 12: Grafik Çizimi (x² ve sin(x)) — Merkez Orijinde</h3>
+            <p>Orijini tuvalin ortasına taşımak için <code>translate(width/2, height/2)</code> kullanırız. Ekran koordinatlarında <code>y</code> aşağı doğru artar, matematiksel eksene benzetmek için <code>scale(1, -1)</code> ile <code>y</code>'yi ters çeviririz. <code>frameRate(30)</code> çizimin saniyedeki kare sayısını önerir.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-12">function setup() {
+  createCanvas(400, 400);
+  frameRate(30); // saniyede ~30 kare (animasyon yoksa fark az)
+}
+
+function drawAxes() {
+  stroke(200);
+  line(-width / 2, 0, width / 2, 0);   // x ekseni
+  line(0, -height / 2, 0, height / 2); // y ekseni
+}
+
+function draw() {
+  background(255);
+  translate(width / 2, height / 2); // orijin ortada
+  scale(1, -1); // y yukarı artacak şekilde çevir
+
+  drawAxes();
+
+  // x^2 grafiği (ölçekli)
+  stroke(255, 0, 0);
+  noFill();
+  beginShape();
+  for (let x = -200; x <= 200; x += 1) {
+    let y = 0.002 * x * x; // ölçek
+    vertex(x, y);
+  }
+  endShape();
+
+  // sin(x) grafiği (radyan)
+  stroke(0, 100, 255);
+  beginShape();
+  for (let x = -200; x <= 200; x += 1) {
+    let y = 50 * sin(x * 0.02); // frekans ve genlik
+    vertex(x, y);
+  }
+  endShape();
+
+  noLoop(); // statik çizim
+}
+</textarea>
+                <div class="canvas-container" id="canvas-12"></div>
+            </div>
+            <button class="run-button" data-target="code-12" data-canvas="canvas-12">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>0.002</code> katsayısını değiştirip parabolü genişletin/daraltın.</li>
+                    <li><code>0.02</code>'yi değiştirip sinüsün frekansını değiştirin.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>Örnek 13: 100 Rastgele Çizgi + Alfa (Şeffaflık) ile Bölünmüş Alanlar</h3>
+            <p>Her rastgele çizgi için iki tarafı düşük alfa ile farklı renklere boyayalım. Çizgiler üst üste bindikçe üçgensi bölgeler ortaya çıkar. <code>alpha</code> (RGBA'daki 4. bileşen) 0→tam şeffaf, 255→tam opaktır.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-13">function setup() {
+  createCanvas(400, 400);
+  background(245);
+  stroke(0, 120);
+
+  for (let i = 0; i < 100; i++) {
+    let x1 = random(width), y1 = random(height);
+    let x2 = random(width), y2 = random(height);
+
+    // Çizgiyi çiz
+    stroke(0, 120);
+    line(x1, y1, x2, y2);
+
+    // İki tarafı boyamak için çizgiye dik bir yön seçelim
+    let dx = x2 - x1, dy = y2 - y1;
+    let len = sqrt(dx * dx + dy * dy);
+    if (len === 0) continue;
+    let nx = -dy / len, ny = dx / len; // dik birim vektör
+    let L = 1000; // yarım düzlemi kaplayacak kadar büyük
+
+    noStroke();
+    // Bir tarafı kırmızımsı, diğer tarafı mavimsi düşük alfa ile boya
+    fill(255, 50, 50, 20);
+    triangle(x1, y1, x2, y2, x1 + nx * L, y1 + ny * L);
+    fill(50, 50, 255, 20);
+    triangle(x1, y1, x2, y2, x1 - nx * L, y1 - ny * L);
+  }
+}
+
+function draw() { noLoop(); }
+
+// Açıklama:
+// Alfa (A), rengin şeffaflığını kontrol eder. Düşük alfa değerleri
+// katmanların birbirini göstermesine izin vererek karışık renkli
+// bölgeler oluşturur.
+</textarea>
+                <div class="canvas-container" id="canvas-13"></div>
+            </div>
+            <button class="run-button" data-target="code-13" data-canvas="canvas-13">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li>Çizgi sayısını 200 yapın.</li>
+                    <li>Alfa değerlerini 10–40 arası deneyin.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function runSketch(code, canvasId) {
+            const container = document.getElementById(canvasId);
+            container.innerHTML = ""; 
+            const iframe = document.createElement('iframe');
+            
+            const p5LibraryUrl = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js';
+            const htmlContent = `
+                <html>
+                    <head>
+                        <script src="${p5LibraryUrl}"><\/script>
+                        <style> body { margin: 0; overflow: hidden; } </style>
+                    </head>
+                    <body>
+                        <script>
+                            try {
+                                ${code}
+                            } catch (e) {
+                                console.error(e);
+                                function setup() {
+                                    createCanvas(400, 400);
+                                    background(255, 200, 200);
+                                    fill(0);
+                                    noStroke();
+                                    textAlign(LEFT, TOP);
+                                    text("Kodunuzda bir hata var:\\n\\n" + e.message, 10, 10);
+                                    noLoop();
+                                }
+                            }
+                        <\/script>
+                    </body>
+                </html>
+            `;
+
+            container.appendChild(iframe);
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(htmlContent);
+            iframe.contentWindow.document.close();
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('.run-button').forEach(button => {
+                const targetId = button.dataset.target;
+                const canvasId = button.dataset.canvas;
+                
+                button.addEventListener('click', () => {
+                    const code = document.getElementById(targetId).value;
+                    runSketch(code, canvasId);
+                });
+
+                // Sayfa ilk yüklendiğinde tüm örnekleri otomatik olarak çalıştır
+                const initialCode = document.getElementById(targetId).value;
+                runSketch(initialCode, canvasId);
+            });
+        });
+    </script>
+
+</body>
+</html>
