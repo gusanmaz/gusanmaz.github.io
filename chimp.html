@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chimp Hafıza Oyunu Atölyesi 🐒 </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        h1 { font-size: 2.5em; }
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.5em; margin-top: 30px; }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+        pre {
+            background-color: #34495e;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        .example {
+            margin-top: 25px;
+            border-top: 2px dashed #bdc3c7;
+            padding-top: 25px;
+        }
+        .interactive-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .code-editor {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            resize: vertical;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .canvas-container {
+            flex-basis: 400px;
+            height: 400px;
+            background: #f0f0f0;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .canvas-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .run-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #27ae60;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        .run-button:hover {
+            background-color: #2ecc71;
+        }
+        .challenge {
+            background-color: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .challenge h4 {
+            margin-top: 0;
+            color: #d98218;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Chimp Hafıza Oyunu Atölyesi 🐒</h1>
+        <p>Bu sayfada sadece şempanze hafıza oyununun (Chimp Test) p5.js ile inşasına odaklanıyoruz. Aşağıdaki örnekler, oyunu sıfırdan kurarken gereken kavramları küçük adımlarla tanıtır.</p>
+
+        <h2>Adımlar</h2>
+        <p>Önce kareler ve sayıları çizmeyi öğreneceğiz, ardından çakışma kontrolü, çakışmasız yerleşim, grid yaklaşımı, oyun döngüsü, zamanlama ve en sonda seviye+skora geçeceğiz.</p>
+
+        <div class="example">
+            <h3>CH1: Rastgele Kareler (Koordinatlar)</h3>
+            <p>Tuvalde <code>n</code> adet rastgele kare yerleştirir. Kareler tuval dışına taşmaz.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-ch1">function setup() {
+  createCanvas(400, 400);
+  background(240);
+  stroke(20);
+  noFill();
+
+  let n = 10;
+  let s = 40;
+  for (let i = 0; i < n; i++) {
+    let x = random(0, width - s);
+    let y = random(0, height - s);
+    rect(x, y, s, s);
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-ch1"></div>
+            </div>
+            <button class="run-button" data-target="code-ch1" data-canvas="canvas-ch1">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>n</code> ve <code>s</code> değerlerini değiştirin.</li>
+                    <li>Kareleri dolu yapın: <code>noStroke(); fill(30,150,200,120);</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>CH2: Karelerin İçine Numara Yazdırma</h3>
+            <p>Kare merkezine sıralı sayılar yazdırır. Nasıl ortalanıyor?</p>
+            <ul>
+                <li><b>textAlign(CENTER, CENTER)</b>: Metnin yatay ve dikey referans noktasını kare <b>merkezine</b> göre alır.</li>
+                <li><b>textSize(s * 0.5)</b>: Yazı boyutunu kare boyutunun yarısı kadar ayarlar.</li>
+                <li><b>text(label, x + s/2, y + s/2)</b>: Kare sol-üst köşe koordinatı <code>(x,y)</code> olduğundan, orta nokta <code>(x + s/2, y + s/2)</code>.</li>
+            </ul>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-ch2">function setup() {
+  createCanvas(400, 400);
+  background(250);
+  stroke(30);
+  fill(255);
+  textAlign(CENTER, CENTER);
+
+  let n = 8;
+  let s = 50;
+  textSize(s * 0.5);
+  for (let i = 0; i < n; i++) {
+    let x = random(0, width - s);
+    let y = random(0, height - s);
+    rect(x, y, s, s);
+    fill(20);
+    text(i + 1, x + s / 2, y + s / 2);
+    fill(255);
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-ch2"></div>
+            </div>
+            <button class="run-button" data-target="code-ch2" data-canvas="canvas-ch2">🚀 Çalıştır / Değiştir ve Gör</button>
+        </div>
+
+        <div class="example">
+            <h3>CH3: Çakışma (Collision) Test Fonksiyonu</h3>
+            <p>İki karenin çakışıp çakışmadığını test eder. Her çalıştırmada kareler <b>rastgele</b> seçilir; sonuç <b>tuvalin üzerine</b> yazdırılır.</p>
+            <ul>
+                <li><b>Fonksiyon Nedir?</b> Tekrar kullanılabilir bir kod bloğu. Adı vardır, <b>parametreler</b> alır ve genellikle bir <b>değer döndürür</b>. Örn: <code>function f(x, y) { return x + y; }</code></li>
+                <li><b>Parametreler</b>: <code>rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh)</code> içindeki <code>a*</code> A dikdörtgenini, <code>b*</code> B dikdörtgenini tanımlar.</li>
+                <li><b>Matematik</b> (çakışmama durumları):
+                    <ul>
+                        <li>A sağ kenarı ≤ B sol kenarı: <code>ax + aw ≤ bx</code></li>
+                        <li>A sol kenarı ≥ B sağ kenarı: <code>ax ≥ bx + bw</code></li>
+                        <li>A alt kenarı ≤ B üst kenarı: <code>ay + ah ≤ by</code></li>
+                        <li>A üst kenarı ≥ B alt kenarı: <code>ay ≥ by + bh</code></li>
+                    </ul>
+                    Bu dört durumdan <b>herhangi biri doğruysa</b> dikdörtgenler <b>çakışmıyor</b> demektir. Fonksiyonda bunların <b>DEĞİL</b>'i alınır (<code>!</code>) ve <b>çakışma</b> sonucu bulunur.
+                </li>
+            </ul>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-ch3">function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  return !(ax + aw <= bx || bx + bw <= ax || ay + ah <= by || by + bh <= ay);
+}
+
+function setup() {
+  createCanvas(400, 300);
+  background(240);
+  noFill();
+  strokeWeight(2);
+
+  // Rastgele iki dikdörtgen
+  let a = { x: random(20, 220), y: random(20, 160), w: random(60, 140), h: random(40, 120) };
+  let b = { x: random(20, 220), y: random(20, 160), w: random(60, 140), h: random(40, 120) };
+
+  // Görsel
+  stroke(20, 150, 20);
+  rect(a.x, a.y, a.w, a.h);
+  stroke(200, 40, 40);
+  rect(b.x, b.y, b.w, b.h);
+
+  // Sonuç
+  let overlap = rectsOverlap(a.x, a.y, a.w, a.h, b.x, b.y, b.w, b.h);
+  noStroke(); fill(10);
+  textAlign(LEFT, TOP); textSize(16);
+  text("Çakışma: " + (overlap ? "EVET" : "HAYIR"), 10, 10);
+  noLoop();
+}
+
+function draw() {}
+</textarea>
+                <div class="canvas-container" id="canvas-ch3"></div>
+            </div>
+            <button class="run-button" data-target="code-ch3" data-canvas="canvas-ch3">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li>Boyut aralıklarını değiştirip çakışma olasılığını artırın/azaltın.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>CH4: Çakışmasız Rastgele Kare Üretimi (Dizi + Kontrol)</h3>
+            <p>Her yeni kareyi, önceki karelerle çakışmıyorsa ekle; aksi halde yeni koordinat dene.</p>
+            <ul>
+                <li><b>Dizi (Array)</b>: Birden fazla öğeyi sırayla tutan yapı. Örn: <code>let sayilar = [10, 20, 30];</code> — erişim: <code>sayilar[0]</code>.</li>
+                <li><b>push()</b>: Dizi sonuna öğe ekler: <code>sayilar.push(40)</code>.</li>
+                <li><b>Fonksiyon</b>: Tekrar kullanılabilir kod bloğu. Örn: <code>function kare(x){ return x*x; }</code></li>
+                <li><b>Çakışma matematiği</b>: İki dikdörtgen <code>A(ax,ay,aw,ah)</code>, <code>B(bx,by,bw,bh)</code> için çakışmama durumları: A sağ kenarı ≤ B sol kenarı, A sol kenarı ≥ B sağ kenarı, A alt kenarı ≤ B üst kenarı, A üst kenarı ≥ B alt kenarı. Bunlardan biri bile doğruysa <b>çakışma yok</b>. Değili alınırsa <b>çakışma var</b> testi elde edilir.</li>
+            </ul>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-ch4">// Dikdörtgen çakışma testi: çakışmama durumlarının DEĞİL'i
+function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  return !(ax + aw <= bx || bx + bw <= ax || ay + ah <= by || by + bh <= ay);
+}
+
+// ÇAKIŞMASIZ yerleşim üreten fonksiyon
+function generateNonOverlapping(count, size, maxTry) {
+  let rects = [];
+  let tries = 0;
+  while (rects.length < count && tries < maxTry) {
+    tries++;
+    let x = random(0, width - size);
+    let y = random(0, height - size);
+    let ok = true;
+    for (const r of rects) {
+      if (rectsOverlap(x, y, size, size, r.x, r.y, r.w, r.h)) { ok = false; break; }
+    }
+    if (ok) rects.push({ x, y, w: size, h: size });
+  }
+  return rects;
+}
+
+function setup() {
+  createCanvas(400, 400);
+  background(250);
+  textAlign(CENTER, CENTER);
+  let n = 10, s = 40;
+  textSize(s * 0.5);
+  let rects = generateNonOverlapping(n, s, 10000);
+  stroke(30);
+  fill(255);
+  for (let i = 0; i < rects.length; i++) {
+    let r = rects[i];
+    rect(r.x, r.y, r.w, r.h);
+    fill(20);
+    text(i + 1, r.x + r.w / 2, r.y + r.h / 2);
+    fill(255);
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-ch4"></div>
+            </div>
+            <button class="run-button" data-target="code-ch4" data-canvas="canvas-ch4">🚀 Çalıştır / Değiştir ve Gör</button>
+            <div class="challenge">
+                <h4>🚀 Değiştir ve Gör</h4>
+                <ul>
+                    <li><code>n</code> ve <code>s</code> ile oyna; başarısız yerleştirme için <code>maxTry</code>'ı artır.</li>
+                    <li>Kodun başına kendi <code>kare(x)</code> fonksiyonunuzu ekleyip çağırmayı deneyin.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h3>CH5: Grid Tabanlı Yaklaşım (Eşsiz Hücre Seçimi)</h3>
+            <p>Tuvali hücrelere böler; <code>k</code> adet farklı hücreyi seçip kareleri yerleştirir. <code>shuffle</code> kullanır.</p>
+            <ul>
+                <li><b>push()</b>: Dizi sonuna öğe ekler. Hücre indekslerini toplarken kullanırız.</li>
+                <li><b>shuffle(dizi, true)</b>: Diziyi yerinde karıştırır ve rasgele bir sıra elde etmemizi sağlar.</li>
+                <li><b>cell - 12</b>: Karelerin kenarlardan içeri 6px boşlukla (padding) çizilmesi için genişlikten 12 çıkarılır (sol 6 + sağ 6).</li>
+            </ul>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-ch5">function setup() {
+  createCanvas(400, 400);
+  background(245);
+  textAlign(CENTER, CENTER);
+  let cell = 60;
+  let cols = floor(width / cell);
+  let rows = floor(height / cell);
+  let total = cols * rows;
+  let k = 8; // seçilecek kare sayısı
+  textSize(cell * 0.4);
+
+  let indices = [];
+  for (let i = 0; i < total; i++) indices.push(i);
+  shuffle(indices, true);
+  let chosen = indices.slice(0, k);
+
+  stroke(40);
+  fill(255);
+  for (let i = 0; i < chosen.length; i++) {
+    let id = chosen[i];
+    let cx = id % cols;
+    let cy = floor(id / cols);
+    let x = cx * cell + (cell - cell) / 2;
+    let y = cy * cell + (cell - cell) / 2;
+    rect(cx * cell + 6, cy * cell + 6, cell - 12, cell - 12);
+    fill(20);
+    text(i + 1, cx * cell + cell / 2, cy * cell + cell / 2);
+    fill(255);
+  }
+}
+
+function draw() { noLoop(); }
+</textarea>
+                <div class="canvas-container" id="canvas-ch5"></div>
+            </div>
+            <button class="run-button" data-target="code-ch5" data-canvas="canvas-ch5">🚀 Çalıştır / Değiştir ve Gör</button>
+        </div>
+
+        <div class="example">
+            <h3>CH6: Oyun v1 (Rastgele Koordinatlar, Çakışmasız)</h3>
+            <p>Sayılara 5 saniye bakılır; sonra kareler gizlenir. Doğru sırayla tıklayın.</p>
+            <ul>
+                <li><b>millis()</b>: Sketch başladığından beri geçen milisaniye sayısıdır. <code>startMs = millis()</code> ile başlangıcı kaydeder, <code>millis() - startMs &gt; revealMs</code> ile süre doldu mu kontrol ederiz.</li>
+            </ul>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-ch6">let items = [];
+let count = 5;
+let sizeS = 56;
+let state = "show"; // show, guess, win, lose
+let startMs = 0;
+let revealMs = 5000;
+let expected = 1;
+let score = 0;
+
+function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  return !(ax + aw <= bx || bx + bw <= ax || ay + ah <= by || by + bh <= ay);
+}
+
+function generateNonOverlapping(count, size, maxTry) {
+  let rects = [];
+  let tries = 0;
+  while (rects.length < count && tries < maxTry) {
+    tries++;
+    let x = random(0, width - size);
+    let y = random(0, height - size);
+    let ok = true;
+    for (const r of rects) {
+      if (rectsOverlap(x, y, size, size, r.x, r.y, r.w, r.h)) { ok = false; break; }
+    }
+    if (ok) rects.push({ x, y, w: size, h: size });
+  }
+  return rects;
+}
+
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  textSize(22);
+  resetGame();
+}
+
+function resetGame() {
+  items = [];
+  let rects = generateNonOverlapping(count, sizeS, 10000);
+  for (let i = 0; i < rects.length; i++) {
+    let r = rects[i];
+    items.push({ x: r.x, y: r.y, w: r.w, h: r.h, label: i + 1, clicked: false });
+  }
+  state = "show";
+  expected = 1;
+  startMs = millis();
+}
+
+function draw() {
+  background(250);
+  noFill();
+  stroke(30);
+
+  if (state === "show") {
+    for (const it of items) {
+      rect(it.x, it.y, it.w, it.h);
+      fill(20);
+      text(it.label, it.x + it.w / 2, it.y + it.h / 2);
+      fill(255);
+    }
+    if (millis() - startMs > revealMs) state = "guess";
+  } else if (state === "guess") {
+    for (const it of items) {
+      rect(it.x, it.y, it.w, it.h);
+      if (it.clicked) { fill(20); text(it.label, it.x + it.w / 2, it.y + it.h / 2); fill(255); }
+    }
+  } else if (state === "win") {
+    fill(20); noStroke(); textSize(28); text("Kazandınız! Skor: " + score, width/2, height/2); textSize(22); fill(255);
+  } else if (state === "lose") {
+    fill(20); noStroke(); textSize(28); text("Oyun Bitti! Skor: " + score, width/2, height/2); textSize(22); fill(255);
+  }
+
+  // Üst bilgi
+  noStroke(); fill(0,80); textSize(14);
+  text("Beklenen: " + expected + (state==="show"?" (GÖSTERİM)":""), width/2, 16);
+  fill(255);
+}
+
+function mousePressed() {
+  if (state !== "guess") return;
+  for (const it of items) {
+    if (!it.clicked && mouseX >= it.x && mouseX <= it.x + it.w && mouseY >= it.y && mouseY <= it.y + it.h) {
+      if (it.label === expected) {
+        it.clicked = true;
+        score += 10;
+        expected++;
+        if (expected > count) { score += 100; state = "win"; }
+      } else {
+        state = "lose";
+      }
+      break;
+    }
+  }
+}
+</textarea>
+                <div class="canvas-container" id="canvas-ch6"></div>
+            </div>
+            <button class="run-button" data-target="code-ch6" data-canvas="canvas-ch6">🚀 Çalıştır / Değiştir ve Gör</button>
+        </div>
+
+
+
+        
+
+        <div class="example">
+            <h3>CH7: Oyun v2 (Grid Yaklaşımı)</h3>
+            <p>Grid hücrelerinden eşsiz seçim yapar; aynı oyun akışı.</p>
+            <div class="interactive-area">
+                <textarea class="code-editor" id="code-ch8">let items = [];
+let cell = 64;
+let cols, rows, total;
+let k = 6; // kare sayısı
+let state = "show"; // show, guess, win, lose
+let startMs = 0;
+let revealMs = 5000;
+let expected = 1;
+
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  textSize(22);
+  cols = floor(width / cell);
+  rows = floor(height / cell);
+  total = cols * rows;
+  initLevel();
+}
+
+function initLevel() {
+  items = [];
+  let ids = [];
+  for (let i = 0; i < total; i++) ids.push(i);
+  shuffle(ids, true);
+  let chosen = ids.slice(0, k).sort((a, b) => a - b);
+  for (let i = 0; i < chosen.length; i++) {
+    let id = chosen[i];
+    let cx = id % cols;
+    let cy = floor(id / cols);
+    let x = cx * cell + 8;
+    let y = cy * cell + 8;
+    let s = cell - 16;
+    items.push({ x, y, w: s, h: s, label: i + 1, clicked: false });
+  }
+  state = "show";
+  expected = 1;
+  startMs = millis();
+}
+
+function draw() {
+  background(245);
+  noFill(); stroke(30);
+
+  if (state === "show") {
+    for (const it of items) { rect(it.x, it.y, it.w, it.h); fill(20); text(it.label, it.x + it.w/2, it.y + it.h/2); fill(255); }
+    if (millis() - startMs > revealMs) state = "guess";
+  } else if (state === "guess") {
+    for (const it of items) { rect(it.x, it.y, it.w, it.h); if (it.clicked) { fill(20); text(it.label, it.x + it.w/2, it.y + it.h/2); fill(255);} }
+  } else if (state === "win") {
+    noStroke(); fill(20); textSize(28); text("Kazandınız!", width/2, height/2); textSize(22); fill(255);
+  } else if (state === "lose") {
+    noStroke(); fill(20); textSize(28); text("Oyun Bitti!", width/2, height/2); textSize(22); fill(255);
+  }
+
+  noStroke(); fill(0,80); textSize(14); text("Beklenen: " + expected + (state==="show"?" (GÖSTERİM)":""), width/2, 16); fill(255);
+}
+
+function mousePressed() {
+  if (state !== "guess") return;
+  for (const it of items) {
+    if (!it.clicked && mouseX >= it.x && mouseX <= it.x + it.w && mouseY >= it.y && mouseY <= it.y + it.h) {
+      if (it.label === expected) { it.clicked = true; expected++; if (expected > k) state = "win"; }
+      else { state = "lose"; }
+      break;
+    }
+  }
+}
+</textarea>
+                <div class="canvas-container" id="canvas-ch8"></div>
+            </div>
+            <button class="run-button" data-target="code-ch8" data-canvas="canvas-ch8">🚀 Çalıştır / Değiştir ve Gör</button>
+        </div>
+
+        <div class="example">
+          <h3>CH8: Ayrık HUD + Oyun Alanı (Çakışmasın)</h3>
+          <p>Bilgi alanını (HUD) üstte sabit bir şerit olarak ayırır, oyun tahtasını altta çizeriz. Böylece metinler karelerle çakışmaz.</p>
+          <div class="interactive-area">
+              <textarea class="code-editor" id="code-ch9">let cell = 64;
+let hudH = 56; // üst bilgi alanı yüksekliği
+let cols, rows;
+let level = 1;
+let score = 0;
+let state = "show"; // show, guess, win, lose
+let revealMs = 4000;
+let startMs = 0;
+let expected = 1;
+let items = [];
+
+function setup() {
+createCanvas(400, 400);
+textAlign(CENTER, CENTER);
+cols = floor(width / cell);
+rows = floor((height - hudH) / cell); // sadece board alanı için
+startLevel();
+}
+
+function startLevel() {
+items = [];
+let k = 3 + (level - 1);
+// eşsiz hücre seçimi
+let ids = [];
+for (let i = 0; i < cols * rows; i++) ids.push(i);
+shuffle(ids, true);
+let chosen = ids.slice(0, k);
+chosen.sort((a, b) => a - b);
+
+for (let i = 0; i < chosen.length; i++) {
+  let id = chosen[i];
+  let cx = id % cols;
+  let cy = floor(id / cols);
+  // board alanı y-ofseti: hudH
+  let pad = 8;
+  let x = cx * cell + pad;
+  let y = hudH + cy * cell + pad;
+  let s = cell - pad * 2;
+  items.push({ x, y, w: s, h: s, label: i + 1, clicked: false });
+}
+expected = 1;
+state = "show";
+startMs = millis();
+}
+
+function drawHUD() {
+noStroke();
+fill(245);
+rect(0, 0, width, hudH);
+fill(20);
+textSize(14);
+text("Seviye: " + level + "  Skor: " + score + "  Beklenen: " + expected + (state==="show"?" (GÖSTERİM)":""), width/2, hudH/2);
+}
+
+function draw() {
+background(255);
+drawHUD();
+
+// Board alanı
+stroke(30); noFill();
+if (state === "show") {
+  for (const it of items) { rect(it.x, it.y, it.w, it.h); fill(20); textSize(22); text(it.label, it.x + it.w/2, it.y + it.h/2); fill(255); }
+  if (millis() - startMs > revealMs) state = "guess";
+} else if (state === "guess") {
+  for (const it of items) { rect(it.x, it.y, it.w, it.h); if (it.clicked) { fill(20); textSize(22); text(it.label, it.x + it.w/2, it.y + it.h/2); fill(255);} }
+} else if (state === "win") {
+  noStroke(); fill(20); textSize(20); text("Seviye tamam! SPACE ile devam.", width/2, hudH + (height-hudH)/2);
+} else if (state === "lose") {
+  noStroke(); fill(20); textSize(20); text("Hatalı tık! R ile yeniden dene.", width/2, hudH + (height-hudH)/2);
+}
+}
+
+function mousePressed() {
+if (state !== "guess") return;
+for (const it of items) {
+  if (!it.clicked && mouseX >= it.x && mouseX <= it.x + it.w && mouseY >= it.y && mouseY <= it.y + it.h) {
+    if (it.label === expected) {
+      it.clicked = true;
+      score += 10;
+      expected++;
+      if (expected > items.length) { score += 100; state = "win"; }
+    } else {
+      state = "lose";
+    }
+    break;
+  }
+}
+}
+
+function keyPressed() {
+if (state === "win" && (key === ' ' || keyCode === 32)) { level++; startLevel(); }
+if (key === 'r' || key === 'R') { level = 1; score = 0; startLevel(); }
+}
+</textarea>
+              <div class="canvas-container" id="canvas-ch9"></div>
+          </div>
+          <button class="run-button" data-target="code-ch9" data-canvas="canvas-ch9">🚀 Çalıştır / Değiştir ve Gör</button>
+      </div>
+
+
+    </div>
+
+    <script>
+        function runSketch(code, canvasId) {
+            const container = document.getElementById(canvasId);
+            container.innerHTML = ""; 
+            const iframe = document.createElement('iframe');
+            
+            const p5LibraryUrl = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js';
+            const htmlContent = `
+                <html>
+                    <head>
+                        <script src="${p5LibraryUrl}"><\/script>
+                        <style> body { margin: 0; overflow: hidden; } </style>
+                    </head>
+                    <body>
+                        <script>
+                            try {
+                                ${code}
+                            } catch (e) {
+                                console.error(e);
+                                function setup() {
+                                    createCanvas(400, 400);
+                                    background(255, 200, 200);
+                                    fill(0);
+                                    noStroke();
+                                    textAlign(LEFT, TOP);
+                                    text("Kodunuzda bir hata var:\\n\\n" + e.message, 10, 10);
+                                    noLoop();
+                                }
+                            }
+                        <\/script>
+                    </body>
+                </html>
+            `;
+
+            container.appendChild(iframe);
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(htmlContent);
+            iframe.contentWindow.document.close();
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('.run-button').forEach(button => {
+                const targetId = button.dataset.target;
+                const canvasId = button.dataset.canvas;
+                
+                button.addEventListener('click', () => {
+                    const code = document.getElementById(targetId).value;
+                    runSketch(code, canvasId);
+                });
+
+                // Sayfa ilk yüklendiğinde tüm örnekleri otomatik olarak çalıştır
+                const initialCode = document.getElementById(targetId).value;
+                runSketch(initialCode, canvasId);
+            });
+        });
+    </script>
+
+</body>
+</html>
