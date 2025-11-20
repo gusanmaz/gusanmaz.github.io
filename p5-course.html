@@ -1,0 +1,2681 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>p5.js Temel Eğitimi - JavaScript Atölyesi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/tomorrow-night-eighties.min.css">
+    <style>
+        :root { --bg: #1e1e1e; --sidebar: #252526; --accent: #61dafb; --text: #d4d4d4; --border: #3e3e42; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+        /* SOL PANEL */
+        #sidebar { width: 280px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .brand { padding: 20px; font-size: 1.1rem; font-weight: bold; border-bottom: 1px solid var(--border); color: var(--accent); }
+        .topic-list { overflow-y: auto; flex: 1; list-style: none; padding: 0; margin: 0; }
+        .topic-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #333; transition: 0.2s; font-size: 0.9rem; }
+        .topic-item:hover { background: #333; }
+        .topic-item.active { border-left: 4px solid var(--accent); background: #2d2d2d; color: white; }
+
+        /* ORTA PANEL (İÇERİK & EDİTÖR) */
+        #main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        /* Ders Anlatım Alanı */
+        #lesson-header { padding: 20px; padding-right: 10px; background: #1e1e1e; border-bottom: 1px solid var(--border); height: 180px; min-height: 180px; max-height: 180px; overflow-y: scroll; flex-shrink: 0; }
+        #lesson-header::-webkit-scrollbar { width: 14px; -webkit-appearance: none; }
+        #lesson-header::-webkit-scrollbar-track { background-color: #2a2a2a; }
+        #lesson-header::-webkit-scrollbar-thumb { background-color: #666; border-radius: 10px; border: 3px solid #2a2a2a; }
+        #lesson-header::-webkit-scrollbar-thumb:hover { background-color: #888; }
+        h2 { margin: 0 0 10px 0; color: var(--accent); font-size: 1.3rem; }
+        #lessonDesc { font-size: 0.9rem; line-height: 1.6; color: #b0b0b0; }
+        #lessonDesc strong { color: var(--accent); font-weight: 600; }
+        p, li { font-size: 0.95rem; line-height: 1.5; color: #b0b0b0; }
+        code { background: #333; padding: 2px 5px; border-radius: 3px; color: #ce9178; font-family: monospace; font-size: 0.85rem; }
+
+        /* Seviye Butonları */
+        .level-tabs { display: flex; background: #252526; padding: 10px 20px 20px 20px; gap: 10px; border-bottom: 1px solid var(--border); overflow-x: scroll; overflow-y: hidden; flex-wrap: nowrap; height: 64px; min-height: 64px; max-height: 64px; flex-shrink: 0; scroll-behavior: smooth; }
+        /* Mavi kalın scrollbar - her zaman görünür */
+        .level-tabs::-webkit-scrollbar { height: 18px; -webkit-appearance: none; }
+        .level-tabs::-webkit-scrollbar-track { background-color: #1a1a1a; }
+        .level-tabs::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 10px; border: 4px solid #1a1a1a; }
+        .level-tabs::-webkit-scrollbar-thumb:hover { background-color: #4fc3f7; }
+        .level-btn { background: #3e3e42; border: none; color: #ccc; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: 0.2s; white-space: nowrap; flex-shrink: 0; }
+        .level-btn:hover { background: #505050; }
+        .level-btn.active { background: var(--accent); color: #000; font-weight: bold; }
+
+        /* Editör Alanı */
+        #editor-wrapper { flex: 1; position: relative; min-height: 0; overflow: hidden; }
+        .CodeMirror { height: 100% !important; font-size: 14px; font-family: 'Consolas', monospace; }
+        .CodeMirror-scroll { overflow-y: scroll !important; }
+        .CodeMirror-scrollbar-filler { background: #1e1e1e !important; }
+        .CodeMirror-vscrollbar::-webkit-scrollbar { width: 12px; }
+        .CodeMirror-vscrollbar::-webkit-scrollbar-track { background: #1a1a1a; }
+        .CodeMirror-vscrollbar::-webkit-scrollbar-thumb { background: #555; border-radius: 6px; }
+        .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover { background: #777; }
+
+        #run-btn { position: absolute; top: 10px; right: 20px; z-index: 10; background: #4caf50; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        #run-btn:hover { background: #43a047; }
+
+        /* SAĞ PANEL (CANVAS) */
+        #preview-area { width: 400px; background: #000; border-left: 1px solid var(--border); position: relative; overflow: scroll; }
+        #preview-area::-webkit-scrollbar { width: 16px; height: 16px; -webkit-appearance: none; }
+        #preview-area::-webkit-scrollbar-track { background-color: #1a1a1a; }
+        #preview-area::-webkit-scrollbar-thumb { background-color: #666; border-radius: 10px; border: 4px solid #1a1a1a; }
+        #preview-area::-webkit-scrollbar-thumb:hover { background-color: #888; }
+        #preview-area::-webkit-scrollbar-corner { background-color: #1a1a1a; }
+        iframe { border: none; width: 100%; height: 100%; }
+        .canvas-label { position: absolute; top: 10px; left: 10px; color: #888; font-size: 0.8rem; pointer-events: none; z-index: 10; background: rgba(0,0,0,0.6); padding: 3px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="brand">p5.js Temel Eğitimi</div>
+        <ul class="topic-list" id="topicList"></ul>
+    </div>
+
+    <div id="main-area">
+        <div id="lesson-header">
+            <h2 id="lessonTitle">Konu Başlığı</h2>
+            <div id="lessonDesc">Konu açıklaması buraya gelecek...</div>
+        </div>
+
+        <div class="level-tabs" id="levelTabs"></div>
+
+        <div id="editor-wrapper">
+            <button id="run-btn" onclick="runCode()">▶ KODU ÇALIŞTIR</button>
+            <textarea id="code-editor"></textarea>
+        </div>
+    </div>
+
+    <div id="preview-area">
+        <span class="canvas-label">ÖNİZLEME (400x400)</span>
+        <iframe id="output-frame"></iframe>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+
+    <script>
+        // --- MÜFREDAT VERİTABANI (WORDLE HEDEFİ) ---
+        const curriculum = [
+            {
+                id: "temeller",
+                title: "0. p5.js Temelleri: Tuval ve Koordinat Sistemi",
+                desc: "<strong>p5.js nedir?</strong> JavaScript ile görsel programlama yapmamızı sağlayan bir kütüphane. Özellikle oyun, animasyon ve interaktif projeler için idealdir.<br><br><strong>Koordinat Sistemi (Çok Önemli!):</strong> Ekranın <strong>sol üst köşesi (0, 0)</strong> noktasıdır. X değerleri sağa doğru, Y değerleri aşağı doğru büyür. Matematikteki koordinat sisteminden farklıdır!<br><br><strong>setup() fonksiyonu:</strong> Sayfa yüklendiğinde sadece bir kez çalışır. Tuval oluşturma gibi başlangıç ayarları burada yapılır.<br><br><strong>draw() fonksiyonu:</strong> setup()'tan sonra sürekli tekrar eder (varsayılan 60 FPS, yani saniyede 60 kez). Animasyonlar bu sayede çalışır.<br><br><strong>Çizim Fonksiyonları:</strong> <code>rect(x, y, genişlik, yükseklik)</code> dikdörtgen, <code>circle(x, y, çap)</code> daire, <code>ellipse(x, y, genişlik, yükseklik)</code> elips, <code>line(x1, y1, x2, y2)</code> çizgi, <code>point(x, y)</code> nokta çizer.<br><br><strong>Renk Fonksiyonları:</strong> <code>fill()</code> şekillerin iç rengi, <code>stroke()</code> kenar çizgisi rengi, <code>noFill()</code> iç renk olmasın, <code>noStroke()</code> kenar çizgisi olmasın, <code>background()</code> arka plan rengi.<br><br><strong>Özel Değişkenler:</strong> <code>width</code> ve <code>height</code> tuval boyutları, <code>mouseX</code> ve <code>mouseY</code> fare koordinatları, <code>frameCount</code> kaç kare çizildiği.<br><br><strong>💡 Deneyler:</strong> background()'u draw() yerine setup()'a yazın—çizimler silinmez! Koordinat (100,100) ile (300,300)'ü karşılaştırın. Renkleri değiştirin, kenarları kaldırın.",
+                levels: [
+                    {
+                        name: "1. Merhaba Tuval",
+                        code: `// setup() fonksiyonu program başladığında BİR KEZ çalışır
+function setup() {
+  // 400x400 piksel boyutunda bir tuval oluştur
+  createCanvas(400, 400);
+  // 💡 Deney: (600, 400) yapın, dikdörtgen tuval olur!
+}
+
+// draw() fonksiyonu sürekli tekrar eder (saniyede 60 kez)
+function draw() {
+  // Arkaplan rengi (0-255 arası gri ton)
+  // 0: Siyah, 255: Beyaz, 128: Orta gri
+  background(220);
+  // 💡 Deney: 0, 128, 255 deneyin! RGB için: background(255, 0, 0)
+
+  // Bir daire çiz: circle(merkezX, merkezY, çap)
+  circle(200, 200, 100);
+  // 💡 Deney: Koordinatları değiştirin! (100,100) veya (300,300)
+}`
+                    },
+                    {
+                        name: "2. Koordinat Sistemi",
+                        code: `function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(50);
+  
+  // ÖNEMLİ: Koordinat sistemi sol üst köşeden başlar!
+  // (0, 0) = Sol üst köşe
+  // X değerleri SAĞA doğru artar
+  // Y değerleri AŞAĞIYA doğru artar
+  
+  // Sol üst köşe (0, 0) - Kırmızı kare
+  fill(255, 0, 0);
+  rect(0, 0, 50, 50);
+  fill(255);
+  textSize(14);
+  text("(0, 0)", 5, 70);
+  
+  // Sağ alt köşe (350, 350) - Mavi kare
+  fill(0, 0, 255);
+  rect(350, 350, 50, 50);
+  fill(255);
+  text("(350, 350)", 325, 340);
+  
+  // Tam orta (200, 200) - Yeşil daire
+  fill(0, 255, 0);
+  circle(200, 200, 50);
+  fill(255);
+  text("(200, 200)", 165, 175);
+  
+  // Merkez çizgileri
+  stroke(255, 255, 0);
+  line(200, 0, 200, 400); // Dikey
+  line(0, 200, 400, 200); // Yatay
+  
+  // 💡 DENEYİN: Koordinatları değiştirin!
+  // rect(100, 100, 50, 50) nereye çizer?
+  // circle(300, 100, 60) nerede olur?
+}`
+                    },
+                    {
+                        name: "3. Renkler ve Şeffaflık",
+                        code: `function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(30);
+  noStroke(); // Kenar çizgisi olmasın
+  
+  // RGB Renk Modeli: fill(Red, Green, Blue)
+  // Her değer 0-255 arası
+  fill(255, 0, 0); // Kırmızı (R=255, G=0, B=0)
+  circle(150, 200, 150);
+  
+  // RGBA: Son parametre Alpha (şeffaflık)
+  // 0 = tamamen saydam, 255 = tamamen opak
+  fill(0, 0, 255, 150); // Yarı saydam mavi
+  circle(250, 200, 150);
+  
+  // Çakıştıkları yerde mor renk oluşur!
+  // Kırmızı + Mavi = Mor (şeffaflık sayesinde)
+  
+  // 💡 DENEYİN:
+  // fill(0, 255, 0) yeşil yapar
+  // fill(255, 255, 0) sarı yapar (kırmızı+yeşil)
+  // fill(255, 255, 255) beyaz
+  // Alpha değerini 50, 100, 200 yapın, farkı görün!
+}`
+                    },
+                    {
+                        name: "4. Kenar Etiketleri",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER);
+  textSize(16);
+}
+
+function draw() {
+  background(245);
+  stroke(120);
+  line(0, height/2, width, height/2);
+  line(width/2, 0, width/2, height);
+  
+  noStroke();
+  fill(20);
+  text("Üst Kenar", width/2, 30);
+  text("Alt Kenar", width/2, height - 20);
+  text("Sol", 40, height/2 - 10);
+  text("Sağ", width - 40, height/2 + 20);
+}`
+                    },
+                    {
+                        name: "5. mousePressed ve keyPressed",
+                        code: `let mesaj = "Tıkla veya tuşa bas!";
+let tiklamaSayisi = 0;
+let sonTus = "";
+
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  textSize(18);
+}
+
+function draw() {
+  background(30);
+  fill(255);
+  
+  text(mesaj, width/2, 100);
+  text("Tıklama Sayısı: " + tiklamaSayisi, width/2, 200);
+  text("Son Tuş: " + sonTus, width/2, 250);
+  
+  // mouseX ve mouseY her zaman güncel
+  fill(255, 200, 0);
+  circle(mouseX, mouseY, 30);
+}
+
+// Fare tıklandığında bir kez çalışır
+function mousePressed() {
+  tiklamaSayisi++;
+  mesaj = "Mouse tıklandı!";
+}
+
+// Klavye tuşuna basıldığında bir kez çalışır
+function keyPressed() {
+  sonTus = key; // Basılan tuş karakteri
+  mesaj = "Tuş basıldı: " + key;
+}`
+                    },
+                    {
+                        name: "6. Çizim Fonksiyonları",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  background(240);
+  noLoop(); // draw sadece bir kez çalışır
+}
+
+function draw() {
+  // point(x, y) - Nokta
+  stroke(255, 0, 0);
+  strokeWeight(5);
+  for (let i = 0; i < 50; i++) {
+    point(random(width), random(50));
+  }
+  
+  // line(x1, y1, x2, y2) - Çizgi
+  stroke(0, 0, 255);
+  strokeWeight(2);
+  line(50, 100, 350, 100);
+  line(200, 80, 200, 120);
+  
+  // rect(x, y, w, h) - Dikdörtgen
+  fill(255, 200, 0);
+  stroke(0);
+  strokeWeight(1);
+  rect(50, 150, 100, 60);
+  
+  // circle(x, y, çap) - Daire
+  fill(0, 255, 0);
+  circle(250, 180, 60);
+  
+  // ellipse(x, y, w, h) - Elips
+  fill(255, 0, 255);
+  ellipse(200, 300, 150, 80);
+  
+  // Etiketler
+  fill(0);
+  textSize(12);
+  text("point", 50, 60);
+  text("line", 200, 140);
+  text("rect", 100, 230);
+  text("circle", 250, 230);
+  text("ellipse", 200, 360);
+}`
+                    },
+                    {
+                        name: "7. width, height, frameCount",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  textSize(16);
+}
+
+function draw() {
+  background(50);
+  fill(255);
+  
+  // width ve height: tuval boyutları
+  text("Tuval Genişliği (width): " + width, 20, 40);
+  text("Tuval Yüksekliği (height): " + height, 20, 70);
+  
+  // frameCount: toplam kare sayısı (draw kaç kez çalıştı)
+  text("Kare Sayısı (frameCount): " + frameCount, 20, 110);
+  
+  // 60 FPS varsayımıyla saniye hesabı
+  let saniye = floor(frameCount / 60);
+  text("Yaklaşık Saniye: " + saniye, 20, 140);
+  
+  // mouseX ve mouseY
+  text("Fare X (mouseX): " + mouseX, 20, 180);
+  text("Fare Y (mouseY): " + mouseY, 20, 210);
+  
+  // Ortaya çizgi çek (width/2 kullanarak)
+  stroke(255, 255, 0);
+  line(width/2, 0, width/2, height);
+  line(0, height/2, width, height/2);
+  
+  // Merkeze daire
+  fill(255, 0, 100);
+  noStroke();
+  circle(width/2, height/2, 50);
+}`
+                    },
+                    {
+                        name: "8. Text Fonksiyonları",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop(); // draw sadece bir kez çalışır
+}
+
+function draw() {
+  background(240);
+  
+  // textSize(sayı): Yazı boyutu belirler
+  textSize(32);
+  fill(0);
+  text("Büyük Yazı", 20, 50);
+  
+  textSize(16);
+  text("Orta boyut yazı", 20, 90);
+  
+  // textAlign(yatay, dikey): Yazı hizalama
+  // Yatay: LEFT, CENTER, RIGHT
+  // Dikey: TOP, CENTER, BOTTOM, BASELINE
+  textAlign(CENTER, CENTER);
+  textSize(24);
+  fill(200, 0, 0);
+  text("Ortalanmış", width/2, 150);
+  
+  textAlign(RIGHT);
+  fill(0, 0, 200);
+  text("Sağa hizalı", width - 20, 200);
+  
+  // textFont(): Yazı tipini değiştirir
+  textAlign(LEFT);
+  textSize(20);
+  fill(0, 150, 0);
+  textFont('Georgia');
+  text("Georgia fontu", 20, 250);
+  
+  textFont('Courier');
+  text("Courier fontu (monospace)", 20, 280);
+  
+  // textStyle(): NORMAL, ITALIC, BOLD
+  textFont('Arial');
+  textStyle(BOLD);
+  text("Kalın yazı", 20, 320);
+  
+  textStyle(ITALIC);
+  text("İtalik yazı", 20, 350);
+}`
+                    },
+                    {
+                        name: "9. Renk Modelleri",
+                        code: `function setup() {
+  createCanvas(400, 450);
+  noLoop();
+  textSize(14);
+  textAlign(LEFT);
+}
+
+function draw() {
+  background(255);
+  fill(0);
+  text("RENK MODELLERİ", 20, 30);
+  
+  // 1. GRAYSCALE (Gri Tonları): Tek sayı
+  fill(0); // Siyah
+  rect(20, 50, 50, 50);
+  fill(128); // Orta gri
+  rect(80, 50, 50, 50);
+  fill(255); // Beyaz
+  stroke(0);
+  rect(140, 50, 50, 50);
+  noStroke();
+  
+  fill(0);
+  text("Grayscale: fill(0), fill(128), fill(255)", 20, 120);
+  
+  // 2. RGB (Red, Green, Blue): Üç sayı
+  fill(255, 0, 0); // Kırmızı
+  rect(20, 150, 50, 50);
+  fill(0, 255, 0); // Yeşil
+  rect(80, 150, 50, 50);
+  fill(0, 0, 255); // Mavi
+  rect(140, 150, 50, 50);
+  fill(255, 255, 0); // Sarı (kırmızı + yeşil)
+  rect(200, 150, 50, 50);
+  
+  fill(0);
+  text("RGB: fill(r, g, b) - Her biri 0-255 arası", 20, 220);
+  
+  // 3. RGBA (RGB + Alpha/Şeffaflık): Dört sayı
+  fill(255, 0, 0, 255); // Tam opak kırmızı
+  rect(20, 250, 50, 50);
+  fill(255, 0, 0, 150); // Yarı saydam
+  rect(80, 250, 50, 50);
+  fill(255, 0, 0, 50); // Çok saydam
+  rect(140, 250, 50, 50);
+  
+  fill(0);
+  text("RGBA: fill(r, g, b, alpha) - Alpha 0-255", 20, 320);
+  
+  // 4. STRING (Metin renk isimleri)
+  fill('red');
+  rect(20, 350, 50, 50);
+  fill('blue');
+  rect(80, 350, 50, 50);
+  fill('purple');
+  rect(140, 350, 50, 50);
+  
+  fill(0);
+  text("String: fill('red'), fill('blue'), fill('purple')", 20, 420);
+}`
+                    },
+                    {
+                        name: "10. fill, stroke, noFill, noStroke",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop();
+}
+
+function draw() {
+  background(220);
+  
+  // fill(): İç dolgu rengi belirler
+  fill(255, 0, 0);
+  stroke(0);
+  strokeWeight(2);
+  rect(50, 50, 80, 80);
+  
+  textSize(12);
+  fill(0);
+  noStroke();
+  text("fill + stroke", 50, 145);
+  
+  // noFill(): İç dolgu olmasın (sadece kenar)
+  noFill();
+  stroke(0, 0, 255);
+  strokeWeight(3);
+  rect(180, 50, 80, 80);
+  
+  fill(0);
+  noStroke();
+  text("noFill + stroke", 180, 145);
+  
+  // noStroke(): Kenar çizgisi olmasın (sadece dolgu)
+  fill(0, 255, 0);
+  noStroke();
+  rect(310, 50, 80, 80);
+  text("fill + noStroke", 310, 145);
+  
+  // strokeWeight(): Kenar kalınlığı
+  stroke(255, 0, 0);
+  strokeWeight(1);
+  line(50, 200, 150, 200);
+  
+  strokeWeight(5);
+  line(50, 230, 150, 230);
+  
+  strokeWeight(10);
+  line(50, 270, 150, 270);
+  
+  fill(0);
+  noStroke();
+  textSize(14);
+  text("strokeWeight(1, 5, 10)", 50, 300);
+}`
+                    },
+                    {
+                        name: "11. noLoop ve frameRate",
+                        code: `let sayac = 0;
+
+function setup() {
+  createCanvas(400, 300);
+  textAlign(CENTER, CENTER);
+  textSize(20);
+  
+  // frameRate(n): Saniyede kaç kare (varsayılan 60)
+  frameRate(2); // Yavaşlatalım (saniyede 2 kare)
+}
+
+function draw() {
+  background(220);
+  
+  sayac++;
+  fill(0);
+  text("Sayaç: " + sayac, width/2, 100);
+  text("frameRate(2) ile yavaşlatıldı", width/2, 140);
+  
+  // Animasyonlu daire
+  let x = (sayac * 10) % width;
+  fill(255, 0, 0);
+  circle(x, 200, 40);
+  
+  fill(100);
+  textSize(14);
+  text("Boşluk tuşuna basınca duraklar", width/2, 260);
+}
+
+function keyPressed() {
+  if (key === ' ') {
+    // noLoop(): draw() durur (animasyon donuyor)
+    noLoop();
+  } else if (key === 'r') {
+    // loop(): draw() tekrar başlar
+    loop();
+  }
+}`
+                    }
+                ]
+            },
+            {
+                id: "degiskenler",
+                title: "1. Değişkenler ve Veri Türleri",
+                desc: "<strong>Değişken Nedir?</strong> Bilgisayarın hafızasında bilgi saklamak için kullandığımız isimli kutular. Oyunda puanı, oyuncunun konumunu, bir kelimenin harflerini tutmak için değişkenler kullanırız.<br><br><strong>Tanımlama Yolları:</strong> <code>let puan = 10;</code> değiştirilebilir değişken (genellikle tercih edilir). <code>const PI = 3.14;</code> sabit, program boyunca değiştirilemez. <code>var</code> eski yöntem, artık pek kullanılmıyor. Hiçbir anahtar kelime kullanmadan (<code>x = 5;</code>) tanımlama yapılabilir ama kesinlikle önerilmez!<br><br><strong>JavaScript'te Veri Türleri:</strong> JavaScript dinamik türlü bir dildir, yani değişkenin türünü önceden söylemeyiz. <code>number</code> türü hem tam sayıları (42) hem ondalıklı sayıları (3.14) kapsar—C++ veya Java'daki gibi int/float ayrımı yoktur. <code>string</code> metin verileri ('merhaba' veya \"dünya\"). <code>boolean</code> mantıksal değerler (true/false). <code>array</code> birden fazla değer içeren listeler [1, 2, 3]. <code>object</code> ilişkili verileri tutan yapılar {ad: 'Ali', yas: 20}.<br><br><strong>Kapsam (Scope):</strong> Global değişkenler fonksiyonların dışında tanımlanır ve her yerden görülebilir. Local (yerel) değişkenler fonksiyon veya blok içinde tanımlanır, sadece o alanda geçerlidir.<br><br><strong>İsimlendirme Kuralları:</strong> Harf, alt çizgi (_) veya dolar işareti ($) ile başlamalı. Sayı ile başlayamaz. Değişkenler için <code>camelCase</code> kullanılır (ilk harf küçük, sonraki kelimeler büyük: oyuncuAdi, toplamPuan). Class isimleri için <code>PascalCase</code> kullanılır (her kelime büyük: WordleKutusu, OyuncuKarti). Türkçe karakter kullanmayın. Anlamlı isimler seçin.<br><br><strong>💡 Deneyler:</strong> const tanımlı bir değişkeni değiştirmeye çalışın (hata verecek). Global değişkeni bir fonksiyondan değiştirip başka fonksiyondan okuyun. Local değişkene fonksiyon dışından erişmeyi deneyin (hata alacaksınız).",
+                levels: [
+                    {
+                        name: "1. Mouse Takibi",
+                        code: `function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  // background'u draw içinde yazarsak her karede temizlenir
+  // Böylece hareket illüzyonu oluşur
+  background(220);
+  
+  fill(255, 0, 100);
+  // mouseX ve mouseY değişkenlerini kullan
+  circle(mouseX, mouseY, 50);
+}`
+                    },
+                    {
+                        name: "2. Çizim Fırçası",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  background(0); // Arkaplanı sadece başta boya
+}
+
+function draw() {
+  // Arkaplanı temizlemediğimiz için iz kalır
+  noStroke();
+  fill(255, 255, 0, 50); // Yarı saydam sarı
+  circle(mouseX, mouseY, 20);
+}`
+                    },
+                    {
+                        name: "3. Kendi Değişkenimiz",
+                        code: `let boy = 100; // Değişken tanımla
+
+function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(220);
+  rect(150, 150, 100, boy);
+  
+  // Değişkeni her karede değiştir (Animasyon)
+  boy = boy + 1;
+  
+  // Çok uzarsa sıfırla (Basit bir reset mantığı)
+  if (boy > 200) {
+    boy = 50;
+  }
+}`
+                    },
+                    {
+                        name: "4. Skor Sayacı",
+                        code: `let skor = 0;
+
+function setup() {
+  createCanvas(400, 400);
+  textSize(32);
+  textAlign(LEFT, TOP);
+}
+
+function draw() {
+  background(30);
+  fill(255);
+  text("Skor: " + skor, 30, 30);
+  text("Her tıklama 1 puan", 30, 80);
+}
+
+function mousePressed() {
+  // Kullanıcı etkileşimiyle değişken güncelle
+  skor = skor + 1;
+}`
+                    },
+                    {
+                        name: "5. let vs const",
+                        code: `// const: Değeri değiştirilemez (sabit)
+const TUVAL_BOYU = 400;
+const RENK = 'mavi';
+
+// let: Değeri değiştirilebilir
+let sayac = 0;
+
+function setup() {
+  createCanvas(TUVAL_BOYU, TUVAL_BOYU);
+  textSize(18);
+  textAlign(CENTER);
+}
+
+function draw() {
+  background(220);
+  
+  fill(0);
+  text("const TUVAL_BOYU: " + TUVAL_BOYU, width/2, 50);
+  text("const RENK: " + RENK, width/2, 80);
+  text("let sayac: " + sayac, width/2, 130);
+  
+  // sayac değiştirilebilir
+  sayac = sayac + 1;
+  
+  // TUVAL_BOYU = 500; // HATA! const değiştirilemez
+  
+  fill(100);
+  textSize(14);
+  text("const'ları değiştirmeye çalışırsanız hata alırsınız", width/2, 350);
+}`
+                    },
+                    {
+                        name: "6. Global vs Local Scope",
+                        code: `// Global değişken (her yerden erişilebilir)
+let globalSayi = 100;
+
+function setup() {
+  createCanvas(400, 400);
+  textSize(16);
+  textAlign(CENTER);
+}
+
+function draw() {
+  background(220);
+  
+  // Local değişken (sadece draw içinde geçerli)
+  let localSayi = 50;
+  
+  fill(0);
+  text("Global Sayı: " + globalSayi, width/2, 100);
+  text("Local Sayı (draw içi): " + localSayi, width/2, 130);
+  
+  // fonksiyonTest() çağır
+  fonksiyonTest();
+  
+  fill(200, 0, 0);
+  textSize(14);
+  text("localSayi sadece draw() içinde tanımlı!", width/2, 300);
+}
+
+function fonksiyonTest() {
+  // Global değişkene erişebiliriz
+  globalSayi = globalSayi + 1;
+  
+  // localSayi'ye ERİŞEMEYİZ (draw içinde tanımlı)
+  // text(localSayi, 100, 100); // HATA verir!
+  
+  fill(0, 100, 0);
+  text("fonksiyonTest globalSayi'yı görebilir: " + globalSayi, width/2, 200);
+}`
+                    },
+                    {
+                        name: "7. Veri Türleri",
+                        code: `function setup() {
+  createCanvas(400, 450);
+  textAlign(LEFT);
+  textSize(16);
+  noLoop();
+}
+
+function draw() {
+  background(240);
+  
+  // Number (int ve float ayrımı yok)
+  let tamSayi = 42;
+  let ondalik = 3.14;
+  
+  // String (metin)
+  let isim = "Ahmet";
+  let soyad = 'Yılmaz';
+  
+  // Boolean (mantıksal)
+  let aktif = true;
+  let kapali = false;
+  
+  // Array (dizi)
+  let renkler = ["kırmızı", "yeşil", "mavi"];
+  
+  // Object (nesne)
+  let kisi = { ad: "Ali", yas: 25 };
+  
+  fill(0);
+  let y = 40;
+  text("JAVASCRIPT VERİ TÜRLERİ:", 20, y);
+  y += 40;
+  
+  text("Number: " + tamSayi + " ve " + ondalik, 20, y); y += 30;
+  text("String: " + isim + " " + soyad, 20, y); y += 30;
+  text("Boolean: " + aktif + " ve " + kapali, 20, y); y += 30;
+  text("Array: " + renkler, 20, y); y += 30;
+  text("Object: ad=" + kisi.ad + ", yas=" + kisi.yas, 20, y); y += 50;
+  
+  fill(100, 0, 0);
+  textSize(14);
+  text("JS dinamik türlüdür: tür belirtmeyiz!", 20, y); y += 20;
+  text("C++/Java'da: int x = 5; float y = 3.14;", 20, y);
+}`
+                    }
+                ]
+            },
+            {
+                id: "kosullar",
+                title: "2. Karar Yapıları ve Operatörler",
+                desc: "<strong>if/else Nedir?</strong> Programın karar vermesini sağlar. \"Eğer fare sağdaysa mavi yap, değilse kırmızı yap\" gibi. <code>if (koşul) { }</code> bloğu koşul doğruysa çalışır. <code>else { }</code> bloğu koşul yanlışsa çalışır. <code>else if (başka koşul) { }</code> ile birden fazla durumu test ederiz.<br><br><strong>Karşılaştırma Operatörleri:</strong> İki değeri karşılaştırır. <code>&gt;</code> büyük mü, <code>&lt;</code> küçük mü, <code>&gt;=</code> büyük veya eşit mi, <code>&lt;=</code> küçük veya eşit mi, <code>==</code> eşit mi (tür dönüşümü yapar, 5 == '5' true), <code>===</code> kesinlikle eşit mi (hem değer hem tür aynı olmalı, 5 === '5' false—bunu kullanın!), <code>!=</code> eşit değil, <code>!==</code> kesinlikle eşit değil.<br><br><strong>Mantıksal Operatörler:</strong> Koşulları birleştirir. <code>&&</code> VE operatörü (her iki koşul da doğru olmalı), <code>||</code> VEYA operatörü (en az biri doğru olmalı), <code>!</code> DEĞİL operatörü (koşulun tersini alır).<br><br><strong>Aritmetik Operatörler:</strong> Matematiksel işlemler. <code>+</code> topla, <code>-</code> çıkar, <code>*</code> çarp, <code>/</code> böl, <code>%</code> kalan (modüler aritmetik), <code>++</code> bir arttır, <code>--</code> bir azalt.<br><br><strong>Atama Operatörleri:</strong> Değişkene değer atar. <code>=</code> ata, <code>+=</code> ekleyerek ata (x += 5 aslında x = x + 5 demek), <code>-=</code> çıkararak ata, <code>*=</code> çarparak ata, benzer şekilde /= ve %=.<br><br><strong>İç İçe if (Nested):</strong> Bir if bloğunun içine başka if yazabilirsiniz. Karmaşık durumlar için kullanılır.<br><br><strong>💡 Deneyler:</strong> == ile === farkını console'da test edin. && yerine || koyun, davranış nasıl değişiyor? İç içe if ile 4 kadran kontrolü yapın.",
+                levels: [
+                    {
+                        name: "1. Sağ mı Sol mu?",
+                        code: `function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  line(200, 0, 200, 400); // Orta çizgi
+  
+  // if (koşul) { doğru ise bu blok çalışır }
+  // else { yanlış ise bu blok çalışır }
+  
+  // mouseX > 200 : Karşılaştırma operatörü
+  if (mouseX > 200) {
+    background(0, 0, 255); // Mavi (sağ taraf)
+  } else {
+    background(255, 0, 0); // Kırmızı (sol taraf)
+  }
+  
+  // 💡 Deney: mouseY > 200 yapın, üst/alt kontrol edin!
+  // 💡 Deney: > yerine < kullanın, renkler yer değiştirir!
+}`
+                    },
+                    {
+                        name: "2. Buton Yapımı",
+                        code: `function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(220);
+  
+  // && (VE operatörü): TÜM koşullar true olmalı
+  // Fare hem X hem Y sınırları içinde mi?
+  if (mouseX > 100 && mouseX < 300 && mouseY > 100 && mouseY < 300) {
+    fill(0, 255, 0); // İçerideyse yeşil
+  } else {
+    fill(255); // Dışarıdaysa beyaz
+  }
+  
+  rect(100, 100, 200, 200);
+  
+  fill(255, 0, 0);
+  circle(mouseX, mouseY, 20);
+  
+  // 💡 Deney: || (VEYA) kullanın, farklı davranış görün!
+  // 💡 Deney: İkinci bir dikdörtgen ekleyin, ayrı kontrol edin!
+}`
+                    },
+                    {
+                        name: "3. Klavye Işığı",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER);
+  textSize(18);
+}
+
+function draw() {
+  background(30);
+  fill(200);
+  text("Boşluk tuşuna basınca ışık büyür", width/2, 60);
+  
+  if (keyIsDown(32)) { // 32 = Space tuşu
+    fill(0, 200, 0);
+    circle(width/2, height/2, 180);
+  } else {
+    fill(200, 0, 0);
+    circle(width/2, height/2, 80);
+  }
+}`
+                    },
+                    {
+                        name: "4. else if Kullanımı",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER);
+  textSize(20);
+}
+
+function draw() {
+  background(50);
+  fill(255);
+  text("Fareyi hareket ettir", width/2, 30);
+  
+  // Çoklu koşul kontrolü
+  if (mouseX < 133) {
+    background(255, 0, 0); // Sol kısım kırmızı
+    text("SOL BÖLGE", width/2, height/2);
+  } else if (mouseX < 266) {
+    background(255, 255, 0); // Orta sarı
+    text("ORTA BÖLGE", width/2, height/2);
+  } else {
+    background(0, 255, 0); // Sağ yeşil
+    text("SAĞ BÖLGE", width/2, height/2);
+  }
+  
+  // Çizgi ayırıcılar
+  stroke(100);
+  line(133, 0, 133, height);
+  line(266, 0, 266, height);
+}`
+                    },
+                    {
+                        name: "5. Nested If (İç İçe)",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER);
+  textSize(16);
+}
+
+function draw() {
+  background(220);
+  fill(0);
+  text("Fareyi dört kadrana hareket ettir", width/2, 30);
+  
+  // Önce yatay kontrol
+  if (mouseX < width/2) {
+    // Sol taraf
+    if (mouseY < height/2) {
+      // Sol üst
+      fill(255, 0, 0);
+      rect(0, 0, width/2, height/2);
+      fill(255);
+      text("SOL ÜST", width/4, height/4);
+    } else {
+      // Sol alt
+      fill(0, 255, 0);
+      rect(0, height/2, width/2, height/2);
+      fill(0);
+      text("SOL ALT", width/4, 3*height/4);
+    }
+  } else {
+    // Sağ taraf
+    if (mouseY < height/2) {
+      // Sağ üst
+      fill(0, 0, 255);
+      rect(width/2, 0, width/2, height/2);
+      fill(255);
+      text("SAĞ ÜST", 3*width/4, height/4);
+    } else {
+      // Sağ alt
+      fill(255, 255, 0);
+      rect(width/2, height/2, width/2, height/2);
+      fill(0);
+      text("SAĞ ALT", 3*width/4, 3*height/4);
+    }
+  }
+  
+  // Çizgi çiz
+  stroke(0);
+  line(width/2, 0, width/2, height);
+  line(0, height/2, width, height/2);
+}`
+                    },
+                    {
+                        name: "6. Mantıksal Operatörler",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  textSize(18);
+}
+
+function draw() {
+  background(30);
+  
+  // Merkez kare tanımla
+  let x1 = 150, y1 = 150;
+  let x2 = 250, y2 = 250;
+  
+  noFill();
+  stroke(255);
+  rect(x1, y1, x2-x1, y2-y1);
+  
+  // && (VE) operatörü: HEM X HEM Y koşulu
+  if (mouseX > x1 && mouseX < x2 && mouseY > y1 && mouseY < y2) {
+    fill(0, 255, 0);
+    text("İÇERDE!", width/2, 50);
+    fill(0, 255, 0, 100);
+    rect(x1, y1, x2-x1, y2-y1);
+  } else {
+    fill(255, 0, 0);
+    text("DIŞARDA", width/2, 50);
+  }
+  
+  // ! (DEĞİL) operatörü
+  fill(255);
+  if (!(mousePressed)) {
+    text("Tıkla!", width/2, height-40);
+  } else {
+    text("TIKLANDspecial!", width/2, height-40);
+  }
+}`
+                    }
+                ]
+            },
+            {
+                id: "donguler",
+                title: "3. Döngüler (Tekrarlı Yapılar)",
+                desc: "<strong>Döngü Nedir?</strong> Aynı kodu defalarca çalıştırmak için kullanılır. Mesela 10 tane kutu çizmek istiyorsak, aynı kodu 10 kez yazmak yerine döngü kullanırız.<br><br><strong>for Döngüsü:</strong> En çok kullanılan döngü türüdür. Yapısı: <code>for (başlangıç; koşul; artış) { }</code>. Örnek: <code>for (let i = 0; i < 10; i++)</code> şu anlama gelir—i değişkeni 0'dan başla, 10'dan küçük olduğu sürece devam et, her turda i'yi bir arttır.<br><br><strong>while Döngüsü:</strong> Koşul doğru olduğu sürece çalışır. <code>while (koşul) { }</code>. Dikkat: koşul hiç false olmazsa sonsuz döngü oluşur ve tarayıcı donar!<br><br><strong>İç İçe Döngüler:</strong> Bir döngünün içinde başka bir döngü kullanmak. Grid (ızgara) yapılar için kullanılır—dış döngü satırları, iç döngü sütunları gezer.<br><br><strong>💡 Deneyler:</strong> i++ yerine i += 2 yapın, sadece çift sayıları gezer. Döngüyü geriye çevirin: for (let i = 10; i > 0; i--). Sonsuz döngüden kaçının (while döngüsünde artışı unutmayın)!",
+                levels: [
+                    {
+                        name: "1. 10 Tane Kutu",
+                        code: `function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(220);
+  
+  // i 0'dan başlar, 10 olana kadar 1 artar
+  for (let i = 0; i < 10; i++) {
+    // Her kutuyu 40 piksel sağa kaydır
+    rect(i * 40, 150, 30, 80);
+    text(i, i * 40 + 10, 140);
+  }
+}`
+                    },
+                    {
+                        name: "2. Basamak Merdiveni",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop();
+}
+
+function draw() {
+  background(230);
+  let basamak = 30;
+  
+  for (let i = 0; i < 8; i++) {
+    let y = height - 60 - i * basamak;
+    fill(180);
+    rect(70, y, 160 + i * 10, basamak - 6);
+    
+    fill(40);
+    textSize(12);
+    text("Adım " + (i + 1), 80, y + 15);
+  }
+}`
+                    },
+                    {
+                        name: "3. Şeritler ve Etiketler",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop();
+  textSize(12);
+}
+
+function draw() {
+  background(10);
+  
+  for (let y = 0; y < height; y += 40) {
+    fill(30 + y * 0.3);
+    rect(0, y, width, 20);
+    
+    fill(220);
+    text("satır " + y, 10, y + 15);
+  }
+}`
+                    },
+                    {
+                        name: "4. while Döngüsü",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop();
+}
+
+function draw() {
+  background(220);
+  
+  // for döngüsü ile
+  fill(255, 0, 0);
+  textSize(14);
+  text("for döngüsü:", 20, 30);
+  
+  let x1 = 20;
+  for (let i = 0; i < 5; i++) {
+    rect(x1, 50, 30, 30);
+    x1 += 40;
+  }
+  
+  // while döngüsü ile (aynı sonuç)
+  fill(0, 0, 255);
+  text("while döngüsü:", 20, 140);
+  
+  let x2 = 20;
+  let j = 0;
+  while (j < 5) {
+    rect(x2, 160, 30, 30);
+    x2 += 40;
+    j++; // Artışı unutmayın! Yoksa sonsuz döngü!
+  }
+  
+  fill(0);
+  textSize(12);
+  text("while: koşul true olduğu sürece çalışır", 20, 250);
+  text("Dikkat: Koşul hep true kalırsa sonsuz döngü!", 20, 270);
+}`
+                    }
+                ]
+            },
+            {
+                id: "moduler",
+                title: "4. Modüler Aritmetik (%)",
+                desc: "<strong>Mod (%) Operatörü Nedir?</strong> Bölme işleminde kalan sayıyı verir. Matematik derslerinden hatırlarsınız: 7'yi 3'e bölerseniz 2 kalır 1. İşte o 1 mod değeridir: <code>7 % 3 = 1</code>.<br><br><strong>Pratikte Kullanımı:</strong> Bir sayının tek mi çift mi olduğunu anlamak için <code>n % 2 == 0</code> kontrol edilir (çift sayılar 2'ye tam bölünür, kalan 0). Döngüsel animasyonlarda sayıları belirli bir aralıkta tutmak için kullanılır—mesela 0-9 arası sürekli dönmesi gereken bir sayaç: <code>sayac % 10</code>. Alternatif desenler oluşturmak için ideal (satranç tahtası gibi).<br><br><strong>💡 Deneyler:</strong> Farklı mod değerleri test edin: % 3, % 4, % 5. frameCount % 60 ile saniye sayacı yapın (60 FPS'de 60 kare = 1 saniye). Renk değişimlerinde kullanın.",
+                levels: [
+                    {
+                        name: "1. Renk Deseni (Tek / Çift)",
+                        code: `function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(220);
+  let w = 40;
+  
+  for (let i = 0; i < 10; i++) {
+    if (i % 2 === 0) {
+      fill(0);
+    } else {
+      fill(255);
+    }
+    rect(i * w, 180, w, w);
+  }
+}`
+                    },
+                    {
+                        name: "2. Sonsuz Kaydırma",
+                        code: `let x = 0;
+
+function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(50);
+  fill(255, 200, 0);
+  circle(x, 200, 50);
+  
+  x = x + 2;
+  // x değeri width'i geçerse başa sar
+  x = x % width;
+}`
+                    },
+                    {
+                        name: "3. Trafik Işığı Döngüsü",
+                        code: `let sayac = 0;
+
+function setup() {
+  createCanvas(400, 400);
+  frameRate(1); // Yavaşlatmak için saniyede 1 kare
+}
+
+function draw() {
+  background(30);
+  sayac = sayac + 1;
+  let durum = sayac % 3; // 0,1,2 tekrar eder
+  
+  fill(100);
+  rect(150, 50, 100, 300);
+  
+  fill(durum === 0 ? color(255, 0, 0) : 50);
+  circle(200, 120, 60);
+  
+  fill(durum === 1 ? color(255, 255, 0) : 50);
+  circle(200, 200, 60);
+  
+  fill(durum === 2 ? color(0, 255, 0) : 50);
+  circle(200, 280, 60);
+}`
+                    },
+                    {
+                        name: "4. Ritim Işıkları",
+                        code: `let tik = 0;
+
+function setup() {
+  createCanvas(400, 200);
+  frameRate(2); // frameRate de ileri sayılır, burada saniyede 2 adım olarak kullandık.
+}
+
+function draw() {
+  background(15);
+  tik = tik + 1;
+  let aktif = tik % 4; // 0,1,2,3
+  
+  for (let i = 0; i < 4; i++) {
+    if (i === aktif) {
+      fill(0, 255, 0);
+    } else {
+      fill(60);
+    }
+    circle(70 + i * 80, 100, 50);
+  }
+}`
+                    }
+                ]
+            },
+            {
+                id: "gridler",
+                title: "5. İç İçe Döngüler ve Gridler",
+                desc: "<strong>İç İçe Döngü Mantığı:</strong> Bir döngünün içinde başka bir döngü çalıştırmak. Izgara (grid) yapılar oluşturmak için kullanılır. Dış döngü satırları (y), iç döngü sütunları (x) gezer: <code>for (let y = 0; ...) { for (let x = 0; ...) { } }</code>.<br><br><strong>Grid Koordinatları:</strong> Her hücrenin ekrandaki pozisyonu şöyle hesaplanır: <code>posX = x * hücreGenişliği</code>, <code>posY = y * hücreYüksekliği</code>. Böylece hücreler yan yana ve alt alta dizilir.<br><br><strong>map() Fonksiyonu:</strong> Bir aralıktaki değeri başka bir aralığa dönüştürür. Çok kullanışlıdır! <code>map(değer, eskiMin, eskiMax, yeniMin, yeniMax)</code>. Örnek: <code>map(50, 0, 100, 0, 255)</code> → 127.5 çıkar. 0-100 aralığındaki 50, 0-255 aralığında 127.5'e karşılık gelir.<br><br><strong>💡 Deneyler:</strong> Hücre boyutunu değiştirip daha sık veya seyrek grid yapın. (x + y) % 3 ile üç renkli desen oluşturun. mouseX/mouseY ile renkleri dinamik yapın.",
+                levels: [
+                    {
+                        name: "1. Basit Grid",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop();
+}
+
+function draw() {
+  background(255);
+  let kutu = 50;
+  
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      fill(200);
+      rect(x * kutu, y * kutu, kutu, kutu);
+      
+      fill(0);
+      textSize(10);
+      text(x + "," + y, x * kutu + 15, y * kutu + 30);
+    }
+  }
+}`
+                    },
+                    {
+                        name: "2. Renkli Mozaik",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop();
+}
+
+function draw() {
+  let kutu = 40;
+  
+  for (let y = 0; y < 10; y++) {
+    for (let x = 0; x < 10; x++) {
+      // random(min, max) fonksiyonu rastgele sayı üretir
+      let r = random(255);
+      let g = random(255);
+      let b = random(255);
+      
+      fill(r, g, b);
+      rect(x * kutu, y * kutu, kutu, kutu);
+    }
+  }
+}`
+                    },
+                    {
+                        name: "3. Satranç Tahtası",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop();
+}
+
+function draw() {
+  let w = 50;
+  
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      if ((x + y) % 2 === 0) {
+        fill(255);
+      } else {
+        fill(0);
+      }
+      rect(x * w, y * w, w, w);
+    }
+  }
+}`
+                    },
+                    {
+                        name: "4. Mesafe Gridi",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noStroke();
+}
+
+function draw() {
+  background(0);
+  let w = 20;
+  
+  for (let y = 0; y < 20; y++) {
+    for (let x = 0; x < 20; x++) {
+      let posX = x * w;
+      let posY = y * w;
+      
+      // Manuel uzaklık hesabı
+      let dx = mouseX - posX;
+      let dy = mouseY - posY;
+      let d = Math.sqrt(dx * dx + dy * dy);
+      
+      // map(değer, eskiMin, eskiMax, yeniMin, yeniMax)
+      // Fonksiyon değeri farklı aralığa taşır
+      let size = map(d, 0, 400, w, 4);
+      
+      fill(255, 0, 100);
+      circle(posX + w/2, posY + w/2, size);
+    }
+  }
+}`
+                    },
+                    {
+                        name: "5. 10print Deseni",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  background(0);
+  stroke(255);
+  strokeWeight(2);
+  noLoop();
+}
+
+function draw() {
+  let w = 20;
+  
+  for (let y = 0; y < height/w; y++) {
+    for (let x = 0; x < width/w; x++) {
+      let posX = x * w;
+      let posY = y * w;
+      
+      if (random(1) > 0.5) {
+        line(posX, posY, posX + w, posY + w);
+      } else {
+        line(posX + w, posY, posX, posY + w);
+      }
+    }
+  }
+}`
+                    },
+                    {
+                        name: "6. Gradient Grid",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noStroke();
+}
+
+function draw() {
+  let cols = 20;
+  let rows = 20;
+  let w = width / cols;
+  let h = height / rows;
+  
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      let r = map(x, 0, cols, 0, 255);
+      let b = map(y, 0, rows, 0, 255);
+      fill(r, 0, b);
+      rect(x * w, y * w, w, h);
+    }
+  }
+}`
+                    },
+                    {
+                        name: "7. Wordle Taslağı",
+                        code: `function setup() {
+  createCanvas(400, 500);
+  noLoop();
+  textAlign(CENTER, CENTER);
+  textSize(24);
+}
+
+function draw() {
+  background(25);
+  let kutu = 60;
+  let bosluk = 8;
+  
+  for (let y = 0; y < 6; y++) {
+    for (let x = 0; x < 5; x++) {
+      let px = 50 + x * (kutu + bosluk);
+      let py = 50 + y * (kutu + bosluk);
+      
+      fill(40);
+      stroke(100);
+      rect(px, py, kutu, kutu, 6);
+      
+      fill(180);
+      text("-", px + kutu/2, py + kutu/2);
+    }
+  }
+}`
+                    }
+                ]
+            },
+            {
+                id: "diziler",
+                title: "6. Diziler (Arrays)",
+                desc: "<strong>Dizi Nedir?</strong> Birden fazla değeri tek bir değişken altında toplar. Mesela bir sınıftaki tüm öğrenci isimlerini veya oyundaki tüm düşmanların konumlarını dizide saklarız: <code>let meyveler = ['elma', 'armut', 'muz'];</code><br><br><strong>İndex (Dizin):</strong> Dizideki her elemanın bir sıra numarası vardır ve bu numara 0'dan başlar! <code>meyveler[0]</code> → 'elma', <code>meyveler[1]</code> → 'armut', <code>meyveler[2]</code> → 'muz'.<br><br><strong>Uzunluk:</strong> <code>dizi.length</code> dizide kaç eleman olduğunu söyler. Döngülerde hardcoded sayı (mesela 5) yerine <code>dizi.length</code> kullanmalıyız—çünkü dizinin boyutu değişebilir!<br><br><strong>Dizi Metodları:</strong> <code>push(eleman)</code> dizinin sonuna eleman ekler. <code>pop()</code> dizinin son elemanını çıkarır ve döndürür. <code>shift()</code> dizinin ilk elemanını çıkarır. <code>unshift(eleman)</code> dizinin başına eleman ekler. Bu metodlar diziyi dinamik olarak değiştirir.<br><br><strong>Döngüyle Gezme:</strong> <code>for (let i = 0; i < dizi.length; i++)</code> ile tüm elemanları tek tek ziyaret ederiz. Neden i < 5 değil de i < dizi.length? Çünkü diziye eleman eklenip çıkarıldığında otomatik uyum sağlar!<br><br><strong>💡 Deneyler:</strong> push() ile diziye 10 eleman ekleyin, sonra pop() ile birkaçını çıkarın. Dizi uzunluğunu if kontrolü ile sınırlayın (50 elemandan fazla olmasın). İki boyutlu dizi deneyin: let grid = [[1,2], [3,4]]. Sütun grafiği örneğinde dizi içeriğini değiştirin, grafik otomatik güncellenir!",
+                levels: [
+                    {
+                        name: "1. Dizi Temelleri",
+                        code: `// Dizi tanımlama: köşeli parantez içinde elemanlar
+let meyveler = ["Elma", "Armut", "Muz", "Kiraz"];
+
+function setup() {
+  createCanvas(400, 400);
+  textSize(20);
+  textAlign(LEFT);
+}
+
+function draw() {
+  background(240);
+  fill(0);
+  
+  // Dizinin uzunluğu (kaç eleman var?)
+  text("Dizi Uzunluğu: " + meyveler.length, 20, 30);
+  
+  // i < 4 YAZMIYORUZ! Çünkü dizi boyutu değişebilir
+  // i < meyveler.length kullanıyoruz (dinamik!)
+  for (let i = 0; i < meyveler.length; i++) {
+    // Dizin (index) 0'dan başlar
+    text("[" + i + "] = " + meyveler[i], 50, 80 + i * 40);
+    
+    // Her meyveye renk ver
+    if (i === 0) fill(255, 0, 0);
+    if (i === 1) fill(0, 255, 0);
+    if (i === 2) fill(255, 255, 0);
+    if (i === 3) fill(200, 0, 0);
+    circle(230, 70 + i * 40, 25);
+    fill(0);
+  }
+  
+  textSize(14);
+  fill(100);
+  text("💡 Deneyin: Console'da meyveler dizisini", 20, 350);
+  text("değiştirin, grafik otomatik uyum sağlar!", 20, 370);
+}`
+                    },
+                    {
+                        name: "2. push, pop - Manuel Yöntem",
+                        code: `// push() kullanmadan dizi oluşturma (zor yol)
+let sayilar = [10, 20, 30];
+
+function setup() {
+  createCanvas(400, 350);
+  textSize(16);
+  textAlign(LEFT);
+  noLoop();
+}
+
+function draw() {
+  background(220);
+  fill(0);
+  
+  text("BAŞLANGIÇTAKİ DİZİ:", 20, 30);
+  text(sayilar.join(", "), 20, 55);
+  
+  // Manuel yöntem: Yeni dizi oluştur, eski + yeni
+  // (push() kullanmadan, eğitim amaçlı)
+  let yeniDizi = [sayilar[0], sayilar[1], sayilar[2], 40];
+  
+  text("MANUEL EKLEME (zor!):", 20, 100);
+  text(yeniDizi.join(", "), 20, 125);
+  
+  fill(200, 0, 0);
+  text("Bu yöntem hem uzun hem hata yapmaya açık!", 20, 170);
+  text("Dizinin boyutunu bilmeliyiz (3 eleman)", 20, 190);
+  
+  fill(0, 150, 0);
+  textSize(14);
+  text("Daha iyi bir yol var: push() metodu!", 20, 240);
+  text("Bir sonraki örnekte göreceğiz...", 20, 260);
+}`
+                    },
+                    {
+                        name: "3. push, pop - Kolay Yöntem",
+                        code: `let sayilar = [10, 20, 30];
+
+function setup() {
+  createCanvas(400, 400);
+  textSize(16);
+  textAlign(LEFT, TOP);
+}
+
+function draw() {
+  background(240);
+  fill(0);
+  
+  text("DİZİ: " + sayilar.join(", "), 20, 20);
+  text("Uzunluk: " + sayilar.length, 20, 50);
+  
+  fill(0, 100, 200);
+  textSize(14);
+  text("'A' tuşu: push(rastgele) - sona ekle", 20, 100);
+  text("'S' tuşu: pop() - sondan çıkar", 20, 125);
+  text("'D' tuşu: unshift(0) - başa ekle", 20, 150);
+  text("'F' tuşu: shift() - baştan çıkar", 20, 175);
+  
+  // Diziyi görselleştir
+  fill(0);
+  textSize(18);
+  for (let i = 0; i < sayilar.length; i++) {
+    let x = 30 + i * 50;
+    fill(100, 200, 100);
+    rect(x, 230, 45, 45);
+    fill(0);
+    textAlign(CENTER, CENTER);
+    text(sayilar[i], x + 22, 252);
+    textAlign(LEFT, TOP);
+  }
+}
+
+function keyPressed() {
+  if (key === 'a' || key === 'A') {
+    sayilar.push(floor(random(1, 100))); // Sonuna ekle
+  }
+  if (key === 's' || key === 'S') {
+    sayilar.pop(); // Sondan çıkar
+  }
+  if (key === 'd' || key === 'D') {
+    sayilar.unshift(0); // Başa ekle
+  }
+  if (key === 'f' || key === 'F') {
+    sayilar.shift(); // Baştan çıkar
+  }
+}`
+                    },
+                    {
+                        name: "4. Sütun Grafiği",
+                        code: `// 💡 DENEYİN: Bu diziyi değiştirin!
+// Eleman ekleyin/çıkarın veya değerleri değiştirin
+let veriler = [40, 70, 120, 200, 150, 90, 180, 220];
+
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER);
+}
+
+function draw() {
+  background(50);
+  
+  // Neden width / 8 DEĞİL de width / veriler.length?
+  // Çünkü diziye eleman eklersek otomatik ayarlanır!
+  let w = width / veriler.length;
+  
+  // Neden i < 8 DEĞİL de i < veriler.length?
+  // Yine aynı sebep: dizi boyutu değişebilir!
+  for (let i = 0; i < veriler.length; i++) {
+    let h = veriler[i];
+    
+    // Renk değeri yüksekliğe göre değişir
+    fill(h, 100, 255 - h);
+    rect(i * w, height - h, w - 5, h);
+    
+    fill(255);
+    textSize(12);
+    text(h, i * w + w/2, height - h - 10);
+  }
+  
+  // Açıklama
+  fill(255, 255, 0);
+  textSize(14);
+  text("💡 Kod içinde 'veriler' dizisini değiştirin!", width/2, 30);
+  text("Eleman sayısı değişse bile grafik çalışır", width/2, 50);
+}`
+                    },
+                    {
+                        name: "5. Yılan İzi (push + shift)",
+                        code: `// Farenin geçmiş konumlarını sakla
+let xPos = []; // Başlangıçta boş dizi
+let yPos = [];
+
+function setup() {
+  createCanvas(400, 400);
+  noStroke();
+}
+
+function draw() {
+  background(0);
+  
+  // Her karede mevcut fare konumunu diziye ekle
+  xPos.push(mouseX); // Sonuna ekle
+  yPos.push(mouseY);
+  
+  // Dizi çok uzarsa (50'den fazla) eski konumları sil
+  if (xPos.length > 50) {
+    xPos.shift(); // Baştan çıkar
+    yPos.shift();
+  }
+  
+  // Tüm konumları çiz (en eskiden yeniye)
+  for (let i = 0; i < xPos.length; i++) {
+    // Eski konumlar soluk, yeni konumlar parlak
+    let alpha = map(i, 0, 50, 0, 255);
+    let size = map(i, 0, 50, 5, 50);
+    
+    fill(255, 0, 100, alpha);
+    circle(xPos[i], yPos[i], size);
+  }
+  
+  // 💡 push() ve shift() sayesinde
+  // dizi sürekli güncelleniyor!
+}`
+                    },
+                    {
+                        name: "6. Kelime Bankası",
+                        code: `// 💡 DENEYİN: Kelime ekleyin veya çıkarın!
+let kelimeler = ["KOD", "OYUN", "RENK", "HARF", "UZAY"];
+let aktif = "";
+
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  secYeniKelime();
+}
+
+function draw() {
+  background(25);
+  fill(255);
+  text("Kelime: " + aktif, width/2, height/2);
+  
+  textSize(16);
+  text("Tıklayınca yeni kelime seçer", width/2, height/2 + 50);
+  
+  fill(100, 200, 100);
+  textSize(14);
+  text("Toplam " + kelimeler.length + " kelime var", width/2, height - 40);
+}
+
+function mousePressed() {
+  secYeniKelime();
+}
+
+function secYeniKelime() {
+  // random(kelimeler.length) → 0 ile length arası rastgele
+  // floor() → tam sayıya yuvarla
+  // Neden random(5) değil? Dizi boyutu değişebilir!
+  let index = floor(random(kelimeler.length));
+  aktif = kelimeler[index];
+}`
+                    },
+                    {
+                        name: "5. Tıklanabilir Grid - Renk Geçişi",
+                        code: `// 💡 DENEYİN: SATIR ve SUTUN değerlerini değiştirin!
+const SATIR = 8;
+const SUTUN = 8;
+const KUTU = 45;
+
+// Her karenin renk değerini tutan dizi
+// Neden SATIR * SUTUN? → 2D grid'i 1D dizide saklıyoruz
+let renkler = [];
+
+function setup() {
+  createCanvas(400, 400);
+  
+  // Tüm kareleri 0 ile başlat
+  // push() metodu kullanıyoruz!
+  for (let i = 0; i < SATIR * SUTUN; i++) {
+    renkler.push(0);
+  }
+}
+
+function draw() {
+  background(30);
+  
+  // İç içe döngü ile gridi çiz
+  for (let y = 0; y < SATIR; y++) {
+    for (let x = 0; x < SUTUN; x++) {
+      // 2D koordinatı 1D index'e çevir
+      // index = satır * toplam_sütun + sütun
+      let index = y * SUTUN + x;
+      let posX = x * KUTU + 20;
+      let posY = y * KUTU + 20;
+      
+      // Diziden renk al ve çiz
+      fill(renkler[index], 100, 255 - renkler[index]);
+      stroke(80);
+      rect(posX, posY, KUTU - 2, KUTU - 2);
+    }
+  }
+  
+  fill(255, 255, 0);
+  textSize(14);
+  text("Karelere tıklayın, renkler değişsin!", 20, height - 20);
+}
+
+function mousePressed() {
+  // Fare hangi karede?
+  let x = floor((mouseX - 20) / KUTU);
+  let y = floor((mouseY - 20) / KUTU);
+  
+  // Sınırlar içinde mi kontrol et
+  if (x >= 0 && x < SUTUN && y >= 0 && y < SATIR) {
+    let index = y * SUTUN + x;
+    // Her tıklamada +30, % 256 ile 0-255 arası tut
+    renkler[index] = (renkler[index] + 30) % 256;
+  }
+}
+
+// 💡 DENEYİN: +30 yerine +50 yapın, daha hızlı değişir!
+// Fareyi sürükleyerek çizim yapın (mouseDragged kullanın)!`
+                    },
+                    {
+                        name: "6. 2 Boyutlu Dizi Örneği",
+                        code: `// 2D dizi: her satır bir dizi
+let grid = [
+  [1, 0, 1, 0, 1],
+  [0, 1, 0, 1, 0],
+  [1, 0, 1, 0, 1],
+  [0, 1, 0, 1, 0],
+  [1, 0, 1, 0, 1]
+];
+
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  textSize(20);
+}
+
+function draw() {
+  background(50);
+  let kutu = 70;
+  
+  // 2D diziyi gez
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      let px = 25 + x * kutu;
+      let py = 25 + y * kutu;
+      
+      // Değere göre renk
+      if (grid[y][x] === 1) {
+        fill(0, 255, 0);
+      } else {
+        fill(255, 0, 0);
+      }
+      
+      rect(px, py, kutu - 5, kutu - 5, 8);
+      
+      fill(255);
+      text(grid[y][x], px + kutu/2 - 2, py + kutu/2 - 2);
+    }
+  }
+}
+
+function mousePressed() {
+  // Tıklanan kareyi tersine çevir
+  let x = floor((mouseX - 25) / 70);
+  let y = floor((mouseY - 25) / 70);
+  
+  if (y >= 0 && y < grid.length && x >= 0 && x < grid[y].length) {
+    grid[y][x] = 1 - grid[y][x]; // 0->1, 1->0
+  }
+}`
+                    }
+                ]
+            },
+            {
+                id: "stringler",
+                title: "7. String İşlemleri",
+                desc: "<strong>String (Metin) Nedir?</strong> Harf, kelime, cümle gibi metin verileridir. Tek tırnak <code>'merhaba'</code> veya çift tırnak <code>\"dünya\"</code> içinde yazılır. Wordle gibi kelime oyunlarının temeli string işlemleridir!<br><br><strong>Birleştirme:</strong> İki string'i birleştirmek için <code>+</code> kullanılır: <code>'Merhaba ' + 'Dünya'</code> → 'Merhaba Dünya'.<br><br><strong>Uzunluk:</strong> <code>kelime.length</code> o stringte kaç karakter olduğunu söyler. 'WORDLE'.length → 6.<br><br><strong>Karakterlere Erişim:</strong> İki yol var: <code>charAt(index)</code> veya <code>[index]</code> notasyonu. İkisi de aynı işi yapar ama [] daha kısa ve modern: <code>'KOD'.charAt(0)</code> → 'K', <code>'KOD'[1]</code> → 'O'. Dizilerdeki gibi indeks 0'dan başlar!<br><br><strong>Önemli Metotlar:</strong> <code>toUpperCase()</code> tüm harfleri büyük yapar, <code>toLowerCase()</code> küçük yapar. <code>includes(harf)</code> o harfin stringte olup olmadığını kontrol eder. <code>slice(başlangıç, bitiş)</code> stringten parça keser. <code>split(ayraç)</code> stringi diziye böler.<br><br><strong>💡 Deneyler:</strong> charAt() ve [] yöntemlerini karşılaştırın. slice(0, 3) ile kelimenin ilk 3 harfini alın. includes() ile harf arama yapın. split('') ile stringi harf dizisine çevirin.",
+                levels: [
+                    {
+                        name: "1. Harfleri Ayır",
+                        code: `let kelime = "oyun";
+
+function setup() {
+  createCanvas(400, 200);
+  textSize(32);
+}
+
+function draw() {
+  background(20);
+  fill(255);
+  
+  for (let i = 0; i < kelime.length; i++) {
+    let harf = kelime.charAt(i); // charAt index'teki harfi verir
+    text(harf, 50 + i * 60, 100);
+  }
+}`
+                    },
+                    {
+                        name: "2. [] Notasyonu ile Erişim",
+                        code: `let kelime = "JAVASCRIPT";
+
+function setup() {
+  createCanvas(400, 300);
+  textSize(20);
+  textAlign(LEFT);
+  noLoop();
+}
+
+function draw() {
+  background(240);
+  fill(0);
+  
+  text("Kelime: " + kelime, 20, 40);
+  text("Uzunluk: " + kelime.length, 20, 70);
+  
+  // charAt() metodu
+  text("charAt(0): " + kelime.charAt(0), 20, 110);
+  text("charAt(4): " + kelime.charAt(4), 20, 140);
+  
+  // [] notasyonu (daha kısa)
+  fill(200, 0, 0);
+  text("kelime[0]: " + kelime[0], 20, 180);
+  text("kelime[4]: " + kelime[4], 20, 210);
+  
+  fill(0, 100, 0);
+  textSize(16);
+  text("İki yöntem de aynı sonucu verir!", 20, 260);
+  text("[] notasyonu daha kısa ve okunabilir.", 20, 280);
+}`
+                    },
+                    {
+                        name: "3. String Döngü ve []",
+                        code: `let metin = "WORDLE";
+
+function setup() {
+  createCanvas(400, 300);
+  textSize(20);
+}
+
+function draw() {
+  background(50);
+  
+  // charAt ile
+  fill(255, 200, 0);
+  text("charAt() ile:", 30, 80);
+  for (let i = 0; i < metin.length; i++) {
+    text(metin.charAt(i), 30 + i * 40, 120);
+  }
+  
+  // [] notasyonu ile (daha kısa!)
+  fill(0, 255, 200);
+  text("[] notasyonu ile:", 30, 180);
+  for (let i = 0; i < metin.length; i++) {
+    text(metin[i], 30 + i * 40, 220);
+  }
+}`
+                    },
+                    {
+                        name: "4. Büyük Harfe Çevir",
+                        code: `let orijinal = "tahmin";
+
+function setup() {
+  createCanvas(400, 200);
+  textSize(28);
+  textAlign(CENTER);
+}
+
+function draw() {
+  background(230);
+  fill(20);
+  text("Orijinal: " + orijinal, width/2, 70);
+  text("BÜYÜK: " + orijinal.toUpperCase(), width/2, 120);
+}`
+                    },
+                    {
+                        name: "5. Harf Sayacı",
+                        code: `let hedef = "RENK";
+let sayilacak = "K";
+
+function setup() {
+  createCanvas(400, 200);
+  textSize(24);
+}
+
+function draw() {
+  background(240);
+  let adet = 0;
+  
+  for (let i = 0; i < hedef.length; i++) {
+    if (hedef.charAt(i) === sayilacak) {
+      adet = adet + 1;
+    }
+  }
+  
+  fill(20);
+  text("Kelime: " + hedef, 30, 60);
+  text(sayilacak + " harfi: " + adet + " adet", 30, 110);
+}`
+                    },
+                    {
+                        name: "6. Konum Kontrolü",
+                        code: `let hedef = "RENK";
+let tahmin = "RANE";
+let sonuc = [];
+
+function setup() {
+  createCanvas(400, 200);
+  textSize(18);
+  noLoop();
+}
+
+function draw() {
+  background(30);
+  sonuc = [];
+  
+  for (let i = 0; i < tahmin.length; i++) {
+    let harf = tahmin.charAt(i);
+    
+    if (harf === hedef.charAt(i)) {
+      sonuc.push("doğru");
+    } else if (hedef.includes(harf)) {
+      sonuc.push("var");
+    } else {
+      sonuc.push("yok");
+    }
+  }
+  
+  fill(255);
+  text("Tahmin: " + tahmin, 40, 70);
+  text("Sonuç: " + sonuc.join(", "), 40, 120);
+}`
+                    }
+                ]
+            },
+            {
+                id: "fonksiyonlar",
+                title: "8. Fonksiyonlar",
+                desc: "<strong>Fonksiyon Nedir?</strong> Belirli bir işi yapan, tekrar tekrar kullanılabilen kod bloklarıdır. Programı düzenli ve okunabilir yapar. Karmaşık işlemleri küçük parçalara böleriz.<br><br><strong>Fonksiyon Tanımlama:</strong> <code>function isim(parametre1, parametre2) { kod burada }</code> şeklinde tanımlanır. İsim fonksiyonun adıdır, parantez içindekiler parametrelerdir.<br><br><strong>Fonksiyon Çağırma:</strong> Fonksiyonu kullanmak için ismini yazıp parantez açarız: <code>isim(argüman1, argüman2);</code>. Böylece fonksiyonun kodu çalışır.<br><br><strong>Parametre ve Argüman Farkı:</strong> Parametre fonksiyon tanımlarken kullandığımız değişken ismidir. Argüman fonksiyonu çağırırken gönderdiğimiz gerçek değerlerdir. Argümanlar parametrelere kopyalanır (pass by value)—yani orijinal değer değişmez.<br><br><strong>return İfadesi:</strong> Fonksiyonun bir sonuç üretip geri döndürmesini sağlar. <code>return sonuc;</code> yazılır. return görüldüğünde fonksiyon hemen biter. return yoksa fonksiyon undefined döner.<br><br><strong>Local (Yerel) Değişkenler:</strong> Fonksiyon içinde tanımlanan değişkenler ve parametreler sadece o fonksiyonun içinde geçerlidir. Dışarıdan erişilemez. Her fonksiyon çağrısında yeni local değişkenler oluşur.<br><br><strong>Scope (Kapsam):</strong> Fonksiyon içi local scope, dışı global scope'tur. Fonksiyon içinden global değişkenlere erişilebilir ama dışarıdan local değişkenlere erişilemez.<br><br><strong>💡 Deneyler:</strong> Parametreli ve parametresiz fonksiyonlar yazın. return kullanan ve kullanmayan fonksiyonları test edin. Local değişkene dışarıdan erişmeyi deneyin (hata alacaksınız). Argümanı fonksiyon içinde değiştirin, orijinalin değişmediğini görün.",
+                levels: [
+                    {
+                        name: "1. Nokta Çiz Fonksiyonu",
+                        code: `function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(0);
+  cizNokta(width/2, height/2, 100);
+  cizNokta(mouseX, mouseY, 30);
+}
+
+function cizNokta(x, y, boyut) {
+  fill(255, 0, 100, 150);
+  noStroke();
+  circle(x, y, boyut);
+}`
+                    },
+                    {
+                        name: "2. Kutu Çizen Fonksiyon",
+                        code: `function setup() {
+  createCanvas(400, 400);
+  noLoop();
+  textAlign(CENTER, CENTER);
+  textSize(24);
+}
+
+function draw() {
+  background(220);
+  cizKutu(50, 80, "A");
+  cizKutu(130, 80, "B");
+  cizKutu(210, 80, "C");
+}
+
+function cizKutu(x, y, harf) {
+  fill(40);
+  rect(x, y, 60, 60, 8);
+  fill(255);
+  text(harf, x + 30, y + 32);
+}`
+                    },
+                    {
+                        name: "3. Wordle Renk Fonksiyonu",
+                        code: `let hedef = "KEDI";
+let tahmin = "KASA";
+
+function setup() {
+  createCanvas(400, 200);
+  textSize(18);
+  noLoop();
+}
+
+function draw() {
+  background(30);
+  let rapor = [];
+  
+  for (let i = 0; i < tahmin.length; i++) {
+    let harf = tahmin.charAt(i);
+    rapor.push(renkBul(harf, i));
+  }
+  
+  fill(255);
+  text("Tahmin: " + tahmin, 30, 80);
+  text("Rapor: " + rapor.join(" - "), 30, 120);
+}
+
+function renkBul(harf, index) {
+  if (harf === hedef.charAt(index)) {
+    return "yeşil";
+  }
+  if (hedef.includes(harf)) {
+    return "sarı";
+  }
+  return "gri";
+}`
+                    },
+                    {
+                        name: "4. Parametre ve Argüman",
+                        code: `function setup() {
+  createCanvas(400, 300);
+  textSize(18);
+  noLoop();
+}
+
+function draw() {
+  background(220);
+  fill(0);
+  
+  // Fonksiyonu çağırırken gönderdiğimiz değerler ARGÜMAN
+  let sonuc1 = topla(5, 3);
+  let sonuc2 = topla(10, 20);
+  let sonuc3 = carpVeTopla(4, 5, 10);
+  
+  text("topla(5, 3) = " + sonuc1, 30, 60);
+  text("topla(10, 20) = " + sonuc2, 30, 90);
+  text("carpVeTopla(4, 5, 10) = " + sonuc3, 30, 120);
+  
+  fill(100, 0, 0);
+  textSize(15);
+  text("Argümanlar parametrelere KOPYALANIR", 30, 200);
+  text("Orijinal değişkenler değişmez!", 30, 220);
+}
+
+// Fonksiyon tanımındaki değişkenler PARAMETRE
+function topla(a, b) {
+  // a ve b local değişkenlerdir
+  return a + b;
+}
+
+function carpVeTopla(x, y, z) {
+  let carpim = x * y; // Local değişken
+  return carpim + z;
+}`
+                    },
+                    {
+                        name: "5. return Kullanımı",
+                        code: `function setup() {
+  createCanvas(400, 350);
+  textSize(16);
+  noLoop();
+}
+
+function draw() {
+  background(240);
+  fill(0);
+  
+  // return DEĞER döndürür
+  let kare1 = kareAl(5);
+  let kare2 = kareAl(10);
+  
+  text("kareAl(5) = " + kare1, 30, 50);
+  text("kareAl(10) = " + kare2, 30, 80);
+  
+  // return yoksa undefined döner
+  let yok = returnYok();
+  text("returnYok() = " + yok, 30, 120);
+  
+  // Koşullu return
+  let mesaj1 = kontrolEt(15);
+  let mesaj2 = kontrolEt(3);
+  
+  fill(0, 100, 0);
+  text(mesaj1, 30, 170);
+  fill(200, 0, 0);
+  text(mesaj2, 30, 200);
+  
+  fill(0);
+  textSize(14);
+  text("return görüldüğünde fonksiyon BİTER!", 30, 280);
+  text("return sonrası kod ÇALIŞMAZ", 30, 300);
+}
+
+function kareAl(sayi) {
+  return sayi * sayi;
+}
+
+function returnYok() {
+  let x = 5 + 5;
+  // return yok, undefined döner
+}
+
+function kontrolEt(sayi) {
+  if (sayi > 10) {
+    return "Sayı büyük: " + sayi;
+  }
+  return "Sayı küçük: " + sayi;
+}`
+                    },
+                    {
+                        name: "6. Local Scope Detaylı",
+                        code: `let globalDegisken = "GLOBAL";
+
+function setup() {
+  createCanvas(400, 350);
+  textSize(15);
+  noLoop();
+}
+
+function draw() {
+  background(220);
+  fill(0);
+  
+  text("Global: " + globalDegisken, 30, 40);
+  
+  let drawLocal = "DRAW LOCAL";
+  text("Draw Local: " + drawLocal, 30, 70);
+  
+  // Fonksiyon çağır
+  fonksiyon1();
+  fonksiyon2(100);
+  
+  fill(150, 0, 0);
+  text("Her fonksiyonun kendi local değişkenleri var!", 30, 280);
+  text("Parametreler de local değişkendir!", 30, 300);
+}
+
+function fonksiyon1() {
+  // Bu fonksiyonun local değişkeni
+  let yerel = "FONK1 LOCAL";
+  
+  // Global'e erişebilir
+  fill(0, 0, 150);
+  text("fonksiyon1 görür: " + globalDegisken, 30, 130);
+  text("fonksiyon1 local: " + yerel, 30, 150);
+  
+  // drawLocal'e ERİŞEMEZ! (başka fonksiyonun local'i)
+  // text(drawLocal, 30, 170); // HATA!
+}
+
+function fonksiyon2(parametre) {
+  // parametre de local bir değişkendir!
+  let sonuc = parametre * 2;
+  
+  fill(0, 150, 0);
+  text("fonksiyon2 parametre: " + parametre, 30, 200);
+  text("fonksiyon2 sonuc: " + sonuc, 30, 220);
+}`
+                    },
+                    {
+                        name: "7. Argüman Kopyalanması",
+                        code: `let orijinalSayi = 10;
+
+function setup() {
+  createCanvas(400, 300);
+  textSize(16);
+  noLoop();
+}
+
+function draw() {
+  background(240);
+  fill(0);
+  
+  text("ORİJİNAL ÖNCE: " + orijinalSayi, 30, 50);
+  
+  // Fonksiyona argüman gönder
+  let donusDegeri = degistir(orijinalSayi);
+  
+  text("DÖNÜŞ DEĞERİ: " + donusDegeri, 30, 90);
+  text("ORİJİNAL SONRA: " + orijinalSayi, 30, 120);
+  
+  fill(200, 0, 0);
+  textSize(14);
+  text("Argüman fonksiyona KOPYALANIR!", 30, 180);
+  text("Fonksiyon içinde değişse de", 30, 200);
+  text("orijinal değişken ETKİLENMEZ!", 30, 220);
+}
+
+function degistir(sayi) {
+  // sayi parametresi bir kopyadır
+  sayi = sayi + 100;
+  return sayi;
+}`
+                    }
+                ]
+            },
+            {
+                id: "objeler",
+                title: "9. Nesneler ve Sınıflar",
+                desc: "<strong>Object (Nesne) Nedir?</strong> İlişkili bilgileri tek bir paket halinde tutmamızı sağlar. Mesela bir arabanın markası, rengi, hızı gibi özellikler bir nesne içinde saklanabilir: <code>let araba = {marka: 'Toyota', renk: 'kirmizi', hiz: 120};</code><br><br><strong>Nesne Özelliklerine Erişim:</strong> <code>araba.marka</code> veya <code>araba['marka']</code> şeklinde erişilir. İlk yöntem daha yaygın kullanılır.<br><br><strong>Metot:</strong> Nesne içindeki fonksiyonlara metot denir. <code>ciz: function() { ... }</code> gibi tanımlanır.<br><br><strong>Class (Sınıf):</strong> Aynı türden birden fazla nesne üretmek için kullandığımız şablondur. <code>class Araba { ... }</code> şeklinde tanımlanır. Class isimleri PascalCase ile yazılır (her kelime büyük harfle başlar).<br><br><strong>Constructor (Yapıcı Metot):</strong> Nesne oluşturulurken otomatik çalışan özel bir metottur. <code>constructor(parametre) { this.özellik = parametre; }</code>. Başlangıç değerlerini buraya yazarız.<br><br><strong>this Anahtar Kelimesi:</strong> Nesnenin kendisini ifade eder. <code>this.x</code> bu nesnenin x özelliği demektir. Constructor ve metotlarda kullanılır.<br><br><strong>new Operatörü:</strong> Sınıftan yeni bir nesne (instance) oluşturur. <code>let araba1 = new Araba('Toyota');</code> şeklinde kullanılır.<br><br><strong>💡 Deneyler:</strong> Kendi class'ınızı yazın (Oyuncu, Dusman, Top gibi). Aynı class'tan 10 farklı nesne oluşturun. Nesneleri bir dizide saklayıp döngüyle çizin.",
+                levels: [
+                    {
+                        name: "1. Tek Kutu Nesnesi",
+                        code: `let kutu = {
+  harf: "A",
+  durum: "dogru",
+  x: 150,
+  y: 150
+};
+
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  textSize(48);
+}
+
+function draw() {
+  background(20);
+  
+  if (kutu.durum === "dogru") {
+    fill(83, 141, 78);
+  } else {
+    fill(58);
+  }
+  rect(kutu.x, kutu.y, 100, 100, 8);
+  
+  fill(255);
+  text(kutu.harf, kutu.x + 50, kutu.y + 55);
+}`
+                    },
+                    {
+                        name: "2. Nesne Dizisi",
+                        code: `let satir = [
+  { harf: "K", durum: "dogru" },
+  { harf: "O", durum: "var" },
+  { harf: "D", durum: "yok" },
+  { harf: "U", durum: "yok" },
+  { harf: "S", durum: "var" }
+];
+
+function setup() {
+  createCanvas(400, 120);
+  textAlign(CENTER, CENTER);
+  textSize(32);
+}
+
+function draw() {
+  background(15);
+  let kutu = 60;
+  
+  for (let i = 0; i < satir.length; i++) {
+    let px = 30 + i * (kutu + 5);
+    
+    if (satir[i].durum === "dogru") fill(83, 141, 78);
+    else if (satir[i].durum === "var") fill(181, 159, 59);
+    else fill(58, 58, 60);
+    
+    rect(px, 30, kutu, kutu, 6);
+    fill(255);
+    text(satir[i].harf, px + kutu/2, 30 + kutu/2);
+  }
+}`
+                    },
+                    {
+                        name: "3. Tahta Nesnesi",
+                        code: `let tahta = {
+  satirlar: [
+    ["K", "O", "D", "E", "R"],
+    [" ", " ", " ", " ", " "],
+    [" ", " ", " ", " ", " "]
+  ],
+  ciz: function() {
+    let kutu = 55;
+    for (let y = 0; y < this.satirlar.length; y++) {
+      for (let x = 0; x < 5; x++) {
+        let px = 40 + x * (kutu + 5);
+        let py = 40 + y * (kutu + 5);
+        fill(35);
+        stroke(90);
+        rect(px, py, kutu, kutu, 6);
+        fill(200);
+        text(this.satirlar[y][x], px + kutu/2, py + kutu/2);
+      }
+    }
+  }
+};
+
+function setup() {
+  createCanvas(400, 300);
+  textAlign(CENTER, CENTER);
+  textSize(26);
+  noLoop();
+}
+
+function draw() {
+  background(10);
+  tahta.ciz();
+}`
+                    },
+                    {
+                        name: "4. Class ve Constructor",
+                        code: `// Class tanımlama - İsim PascalCase (her kelime büyük)
+// Değişkenler camelCase ama Class'lar PascalCase!
+class Daire {
+  // Constructor: Nesne oluşturulurken otomatik çalışır
+  constructor(x, y, boyut, renk) {
+    // this anahtar kelimesi = bu nesne
+    // Gelen parametreleri nesnenin özelliklerine ata
+    this.x = x;
+    this.y = y;
+    this.boyut = boyut;
+    this.renk = renk;
+  }
+  
+  // Metot: Nesnenin fonksiyonu
+  ciz() {
+    fill(this.renk);
+    noStroke();
+    circle(this.x, this.y, this.boyut);
+  }
+  
+  hareket() {
+    // this.x ile bu nesnenin x'ine erişiyoruz
+    this.x = this.x + random(-2, 2);
+    this.y = this.y + random(-2, 2);
+  }
+}
+
+// Nesneleri saklayacak değişkenler (camelCase)
+let daire1;
+let daire2;
+
+function setup() {
+  createCanvas(400, 400);
+  
+  // new operatörü ile class'tan nesne üret
+  daire1 = new Daire(100, 200, 60, color(255, 0, 0));
+  daire2 = new Daire(300, 200, 80, color(0, 255, 0));
+}
+
+function draw() {
+  background(30);
+  
+  // Her nesne kendi özelliklerini ve metotlarını kullanır
+  daire1.hareket();
+  daire1.ciz();
+  
+  daire2.hareket();
+  daire2.ciz();
+}
+
+// 💡 DENEYİN: 5-10 daire oluşturup dizide saklayın!`
+                    },
+                    {
+                        name: "5. Class ile Çoklu Nesneler",
+                        code: `class Top {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.hizX = random(-3, 3);
+    this.hizY = random(-3, 3);
+    this.renk = color(random(255), random(255), random(255));
+  }
+  
+  guncelle() {
+    // Hareket et
+    this.x += this.hizX;
+    this.y += this.hizY;
+    
+    // Kenarlarda sek
+    if (this.x < 15 || this.x > width - 15) {
+      this.hizX *= -1;
+    }
+    if (this.y < 15 || this.y > height - 15) {
+      this.hizY *= -1;
+    }
+  }
+  
+  ciz() {
+    fill(this.renk);
+    noStroke();
+    circle(this.x, this.y, 30);
+  }
+}
+
+// Topları dizide tut
+let toplar = [];
+
+function setup() {
+  createCanvas(400, 400);
+  
+  // 10 top oluştur
+  for (let i = 0; i < 10; i++) {
+    let x = random(30, width - 30);
+    let y = random(30, height - 30);
+    toplar.push(new Top(x, y));
+  }
+}
+
+function draw() {
+  background(20);
+  
+  // Her topu güncelle ve çiz
+  for (let top of toplar) {
+    top.guncelle();
+    top.ciz();
+  }
+}
+
+function mousePressed() {
+  // Tıklandığında yeni top ekle
+  toplar.push(new Top(mouseX, mouseY));
+}`
+                    },
+                    {
+                        name: "6. Class ile Wordle Kutusu",
+                        code: `class WordleKutu {
+  constructor(x, y, harf, durum) {
+    this.x = x;
+    this.y = y;
+    this.harf = harf;
+    this.durum = durum; // "dogru", "var", "yok", "bos"
+    this.boyut = 60;
+  }
+  
+  rengiBelirle() {
+    if (this.durum === "dogru") {
+      return color(83, 141, 78);
+    } else if (this.durum === "var") {
+      return color(181, 159, 59);
+    } else if (this.durum === "yok") {
+      return color(58, 58, 60);
+    } else {
+      return color(30);
+    }
+  }
+  
+  ciz() {
+    // Kutu
+    fill(this.rengiBelirle());
+    stroke(90);
+    strokeWeight(2);
+    rect(this.x, this.y, this.boyut, this.boyut, 6);
+    
+    // Harf
+    if (this.harf !== " ") {
+      fill(255);
+      noStroke();
+      textAlign(CENTER, CENTER);
+      textSize(32);
+      text(this.harf, this.x + this.boyut/2, this.y + this.boyut/2);
+    }
+  }
+  
+  durumDegistir(yeniDurum) {
+    this.durum = yeniDurum;
+  }
+}
+
+// Kutular dizisi
+let kutular = [];
+
+function setup() {
+  createCanvas(400, 150);
+  
+  // 5 kutu oluştur
+  let harfler = ["W", "O", "R", "D", "S"];
+  let durumlar = ["dogru", "var", "yok", "dogru", "var"];
+  
+  for (let i = 0; i < 5; i++) {
+    let x = 30 + i * 70;
+    kutular.push(new WordleKutu(x, 40, harfler[i], durumlar[i]));
+  }
+}
+
+function draw() {
+  background(15);
+  
+  // Tüm kutuları çiz
+  for (let kutu of kutular) {
+    kutu.ciz();
+  }
+}`
+                    }
+                ]
+            },
+            {
+                id: "wordle",
+                title: "10. Wordle Yol Haritası",
+                desc: "Tüm temel konuları öğrendiniz, artık bunları birleştirme zamanı! Bu bölümde Wordle benzeri bir kelime tahmin oyununu adım adım nasıl yapacağımızı gösteriyoruz. Klavye şablonu, tahminleri saklama, harfleri değerlendirme ve mini oyun döngüsü gibi parçaları ayrı ayrı görüp sonunda birleştiriyoruz. Her adımda öğrendiğiniz konular (diziler, stringler, fonksiyonlar, objeler) devreye giriyor. Kodlar sade tutuldu ve yorum satırlarıyla her şey açıklandı.",
+                levels: [
+                    {
+                        name: "1. Klavye Şablonu",
+                        code: `let satirlar = [
+  ["Q","W","E","R","T","Y","U","I","O","P"],
+  ["A","S","D","F","G","H","J","K","L"],
+  ["ENTER","Z","X","C","V","B","N","M","DEL"]
+];
+
+function setup() {
+  createCanvas(450, 220);
+  textAlign(CENTER, CENTER);
+  textSize(18);
+}
+
+function draw() {
+  background(15);
+  for (let y = 0; y < satirlar.length; y++) {
+    for (let x = 0; x < satirlar[y].length; x++) {
+      let label = satirlar[y][x];
+      let w = label.length > 1 ? 70 : 40; // ENTER ve DEL daha geniş
+      let px = 20 + x * 45;
+      let py = 20 + y * 60;
+      
+      fill(58);
+      rect(px, py, w, 50, 6);
+      fill(255);
+      text(label, px + w/2, py + 25);
+    }
+  }
+}`
+                    },
+                    {
+                        name: "2. Tahmin Saklama",
+                        code: `let tahminler = [];
+let aktif = "";
+
+function setup() {
+  createCanvas(400, 400);
+  textSize(32);
+  textAlign(CENTER, CENTER);
+}
+
+function draw() {
+  background(30);
+  fill(200);
+  
+  for (let i = 0; i < tahminler.length; i++) {
+    text(tahminler[i], width/2, 60 + i * 40);
+  }
+  
+  fill(255);
+  text("Aktif: " + aktif, width/2, height - 60);
+}
+
+function keyPressed() {
+  if (keyCode === ENTER && aktif.length === 5) {
+    tahminler.push(aktif);
+    aktif = "";
+  } else if (keyCode === BACKSPACE) {
+    aktif = aktif.slice(0, -1);
+  } else if (aktif.length < 5 && key.match(/[a-z]/i)) {
+    aktif = aktif + key.toUpperCase();
+  }
+}`
+                    },
+                    {
+                        name: "3. Harf Değerlendirme",
+                        code: `let hedef = "KODLU";
+let tahmin = "KOLAY";
+
+function setup() {
+  createCanvas(400, 250);
+  textAlign(CENTER, CENTER);
+  textSize(28);
+  noLoop();
+}
+
+function draw() {
+  background(12);
+  let durumlar = karsilastir(tahmin, hedef);
+  
+  for (let i = 0; i < tahmin.length; i++) {
+    let px = 40 + i * 70;
+    
+    if (durumlar[i] === "dogru") fill(83, 141, 78);
+    else if (durumlar[i] === "var") fill(181, 159, 59);
+    else fill(58, 58, 60);
+    
+    rect(px, 80, 60, 60, 6);
+    fill(255);
+    text(tahmin.charAt(i), px + 30, 110);
+  }
+}
+
+function karsilastir(tahmin, hedef) {
+  let sonuc = [];
+  for (let i = 0; i < tahmin.length; i++) {
+    let harf = tahmin.charAt(i);
+    if (harf === hedef.charAt(i)) {
+      sonuc.push("dogru");
+    } else if (hedef.includes(harf)) {
+      sonuc.push("var");
+    } else {
+      sonuc.push("yok");
+    }
+  }
+  return sonuc;
+}`
+                    },
+                    {
+                        name: "4. Mini Wordle Döngüsü",
+                        code: `let hedef = "RENK";
+let tahta = ["TEPE", "RENK", "", "", "", ""];
+
+function setup() {
+  createCanvas(400, 500);
+  textAlign(CENTER, CENTER);
+  textSize(28);
+  noLoop();
+}
+
+function draw() {
+  background(12);
+  for (let i = 0; i < tahta.length; i++) {
+    let tahmin = tahta[i];
+    let durumlar = tahmin.length === 4 ? kontrol(tahmin) : ["", "", "", ""];
+    
+    for (let j = 0; j < 4; j++) {
+      let px = 70 + j * 70;
+      let py = 50 + i * 70;
+      
+      if (durumlar[j] === "dogru") fill(83, 141, 78);
+      else if (durumlar[j] === "var") fill(181, 159, 59);
+      else if (durumlar[j] === "yok") fill(58, 58, 60);
+      else fill(30);
+      
+      stroke(80);
+      rect(px, py, 60, 60, 6);
+      
+      fill(255);
+      if (tahmin[j]) {
+        text(tahmin[j], px + 30, py + 33);
+      }
+    }
+  }
+}
+
+function kontrol(kelime) {
+  let cevap = [];
+  for (let i = 0; i < kelime.length; i++) {
+    let harf = kelime.charAt(i);
+    if (harf === hedef.charAt(i)) {
+      cevap.push("dogru");
+    } else if (hedef.includes(harf)) {
+      cevap.push("var");
+    } else {
+      cevap.push("yok");
+    }
+  }
+  return cevap;
+}`
+                    }
+                ]
+            }
+        ];
+
+        // --- UYGULAMA MANTIĞI ---
+        const topicList = document.getElementById('topicList');
+        const levelTabs = document.getElementById('levelTabs');
+        const editorTextArea = document.getElementById('code-editor');
+        const outputFrame = document.getElementById('output-frame');
+
+        let currentTopicIndex = 0;
+        let currentLevelIndex = 0;
+
+        // Editör Kurulumu
+        const editor = CodeMirror.fromTextArea(editorTextArea, {
+            mode: "javascript",
+            theme: "tomorrow-night-eighties",
+            lineNumbers: true,
+            autoCloseBrackets: true
+        });
+
+        // Konu Listesini Oluştur
+        curriculum.forEach((topic, index) => {
+            let li = document.createElement('li');
+            li.className = 'topic-item';
+            li.innerHTML = topic.title;
+            li.onclick = () => loadTopic(index);
+            topicList.appendChild(li);
+        });
+
+        function loadTopic(index) {
+            currentTopicIndex = index;
+            currentLevelIndex = 0;
+
+            // UI Güncelle
+            document.querySelectorAll('.topic-item').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+
+            const topic = curriculum[index];
+            document.getElementById('lessonTitle').innerHTML = topic.title;
+            document.getElementById('lessonDesc').innerHTML = topic.desc;
+
+            // Seviye Tablarını Oluştur
+            levelTabs.innerHTML = '';
+            topic.levels.forEach((lvl, i) => {
+                let btn = document.createElement('button');
+                btn.className = 'level-btn';
+                btn.innerText = lvl.name;
+                btn.onclick = () => loadLevel(i);
+                levelTabs.appendChild(btn);
+            });
+
+            loadLevel(0);
+        }
+
+        function loadLevel(index) {
+            currentLevelIndex = index;
+            const level = curriculum[currentTopicIndex].levels[index];
+
+            // Tab Stilini Güncelle
+            document.querySelectorAll('.level-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            editor.setValue(level.code);
+            runCode();
+        }
+
+        function runCode() {
+            const code = editor.getValue();
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"><\/script>
+                    <style>
+                        body { margin: 0; padding: 0; background: #000; overflow: visible; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+                        canvas { display: block; box-shadow: 0 0 20px #333; }
+                    </style>
+                </head>
+                <body>
+                    <script>
+                        try {
+                            ${code}
+                        } catch(err) {
+                            document.body.innerHTML = '<div style="color:red; font-family:sans-serif; padding:20px;">HATA: ' + err.message + '</div>';
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([html], {type: 'text/html'});
+            outputFrame.src = URL.createObjectURL(blob);
+        }
+
+        // Başlangıç
+        loadTopic(0);
+
+    </script>
+</body>
+</html>
