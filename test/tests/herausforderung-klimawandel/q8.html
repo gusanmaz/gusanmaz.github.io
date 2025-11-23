@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herausforderung Klimawandel - Question 8</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .container { display: flex; flex-direction: column; gap: 20px; }
+        .passage-box { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .question-box { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .hidden { display: none; }
+        .split-view { display: flex; flex-direction: row; gap: 20px; }
+        .split-view .passage-box, .split-view .question-box { flex: 1; }
+        button { cursor: pointer; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        button.secondary { background: #6c757d; }
+        button.secondary:hover { background: #545b62; }
+        .options label { display: block; margin: 10px 0; cursor: pointer; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <h1>Herausforderung Klimawandel</h1>
+    
+    <!-- Controls -->
+    <div style="margin-bottom: 20px;">
+        <button id="toggle-btn" class="secondary" onclick="togglePassage()">Show Passage</button>
+    </div>
+
+    <div id="main-container" class="container">
+        <!-- Hidden Passage -->
+        <div id="passage-panel" class="passage-box hidden">
+            <h2>Passage</h2>
+            <div>1990 haben die Staaten erstmals anerkannt, dass der Treibhauseffekt vom Menschen verursacht wird und dass er negative Folgen hat. Damals legten die Vereinten Nationen den ersten Bericht des zwischenstaatlichen Ausschusses für Klimaveränderungen vor, der über die physikalischen Grundlagen des Klimawandels berichtet. Mit der Klimarahmenkonvention von 1992 und dem Kyoto-Protokoll von 1997 haben die Staaten auf politischer Ebene erste wichtige Vereinbarungen getroffen. Mit dem Ergebnis: Um dem Klimawandel zu begegnen, müssen die Treibhausgasemissionen weltweit bis zum Jahr 2050 um mindestens 50 Prozent sinken.<br><br>Oft wird von Treibhausgasen gesprochen. Was sind diese Treibhausgase? Treibhausgase sind gasförmige Stoffe in der Luft, die die Strahlung beeinflussen. Sie können sowohl einen natürlichen als auch einen anthropogenen Ursprung haben, sind also auf menschliche Aktivitäten zurückzuführen. Sie absorbieren einen Teil der vom Boden abgegebenen Infrarotstrahlung, die sonst in das Weltall entweichen würde. Entsprechend ihrer Temperatur emittieren sie Wärmestrahlung, Infrarotstrahlung, die als atmosphärische Gegenstrahlung die Erdoberfläche zusätzlich zum Sonnenlicht erwärmt. Die natürlichen Treibhausgase haben die durchschnittliche Temperatur an der Erdoberfläche um etwa 33 C auf +15 C an.<br><br>Ohne diesen natürlichen Treibhauseffekt hätte die untere Atmosphäre im globalen Mittel nur -18 C , so dass Leben auf der Erde kaum möglich wäre. Ursprünglich hatten diese Gase etwa drei Promille der Masse in der Atmosphäre ausgemacht.<br><br>Welche Gase sind das zum Beispiel?<br>Die Treibhausgase sind im Kyoto-Protokoll von 1977 aufgelistet. Zu den sechs Treibhausgasen gehören Kohlendioxid (CO2), Methan (CH4), Distickstoffoxid (“Lachgas” N2O) Schwefelhexafluorid (SF6) und die Gruppen der teilhalogenierten Fluorkohlenwasserstoffe sowie der perfluorierten Kohlenwasserstoffe. Bei den emittierten Mengen hat CO2 mit Abstand den größten Anteil. Die Treibhausgasemissionen werden meist als CO2-Äquivalente ausgedrückt, das heißt, die Nicht-CO2-Gase werden gemäß ihrer Klimawirksamkeit gewichtet und in CO2-Werte umgerechnet. 1990 betrug der CO2-Anteil der gesamten emittierten Treibhausgase der Industrie und Schwellenländer 79,9 Prozent und im Jahr 2008 lag der Anteil bei 82,4 Prozent, jeweils ausgedrückt in CO2-Äquivalenten.</div>
+        </div>
+
+        <!-- Question -->
+        <div class="question-box">
+            <h2>Question 8</h2>
+            <p>Treibhausgase kommen vom Weltall auf die Erde.</p>
+            <div class="options">
+                
+                <label>
+                    <input type="radio" name="q8" value="0" onclick="saveAnswer(8, '0')">
+                    Richtig
+                </label>
+                <label>
+                    <input type="radio" name="q8" value="1" onclick="saveAnswer(8, '1')">
+                    Falsch
+                </label>
+            </div>
+            
+            <div class="nav-buttons">
+                <a href="q7.html"><button class="secondary">Previous</button></a>
+                <a href="q9.html"><button>Next Question</button></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        function togglePassage() {
+            const container = document.getElementById('main-container');
+            const passage = document.getElementById('passage-panel');
+            const btn = document.getElementById('toggle-btn');
+            
+            if (passage.classList.contains('hidden')) {
+                passage.classList.remove('hidden');
+                container.classList.add('split-view');
+                btn.textContent = 'Hide Passage';
+            } else {
+                passage.classList.add('hidden');
+                container.classList.remove('split-view');
+                btn.textContent = 'Show Passage';
+            }
+        }
+        
+        // Save answer to local storage (simple persistence for the session)
+        function saveAnswer(qId, value) {
+            const answers = JSON.parse(sessionStorage.getItem('herausforderung-klimawandel_answers') || '{}');
+            answers[qId] = value;
+            sessionStorage.setItem('herausforderung-klimawandel_answers', JSON.stringify(answers));
+        }
+
+        // Restore answer on load
+        function restoreAnswer(qId) {
+            const answers = JSON.parse(sessionStorage.getItem('herausforderung-klimawandel_answers') || '{}');
+            if (answers[qId]) {
+                const el = document.querySelector(`input[value="${answers[qId]}"]`);
+                if (el) el.checked = true;
+            }
+        }
+    
+        window.onload = function() {
+            restoreAnswer(8);
+        };
+    </script>
+</body>
+</html>
+        

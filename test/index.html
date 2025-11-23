@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Generator & Library</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; }
+        h1, h2 { text-align: center; }
+        .section { border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-bottom: 30px; background: #fdfdfd; }
+        .upload-box { border: 2px dashed #ccc; padding: 30px; border-radius: 10px; text-align: center; }
+        button { padding: 10px 20px; font-size: 16px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #218838; }
+        #result { margin-top: 20px; text-align: center; }
+        
+        .test-list { list-style: none; padding: 0; }
+        .test-item { background: white; border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .test-item a { text-decoration: none; color: #007bff; font-weight: bold; font-size: 1.1em; }
+        .test-item a:hover { text-decoration: underline; }
+        .test-meta { font-size: 0.9em; color: #666; }
+        .refresh-link { text-align: right; display: block; margin-bottom: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>Test Platform</h1>
+
+    <!-- List of Available Tests -->
+    <div class="section">
+        <h2>Available Tests</h2>
+        <p style="text-align: center; color: #666;">Select a test below to start.</p>
+        <div id="test-list-container">
+            <p style="text-align: center;">Loading tests...</p>
+        </div>
+    </div>
+
+    <!-- Upload Section (Only works locally) -->
+    <div class="section" id="upload-section">
+        <h2>Create New Test</h2>
+        <p style="text-align: center;">Upload a JSON file to generate a new test site.</p>
+        
+        <div class="upload-box">
+            <input type="file" id="fileInput" accept=".json">
+            <br><br>
+            <button onclick="uploadFile()">Generate Test</button>
+        </div>
+
+        <div id="result"></div>
+        <p style="font-size: 0.8em; color: #999; text-align: center; margin-top: 10px;">Note: Uploading only works when running the server locally.</p>
+    </div>
+
+    <script>
+        // 1. Fetch and display existing tests
+        async function loadTests() {
+            try {
+                const response = await fetch('tests.json');
+                if (!response.ok) throw new Error('Failed to load test list');
+                
+                const tests = await response.json();
+                const container = document.getElementById('test-list-container');
+                
+                if (tests.length === 0) {
+                    container.innerHTML = '<p style="text-align: center;">No tests available yet.</p>';
+                    return;
+                }
+
+                const listHtml = `
+                    <ul class="test-list">
+                        ${tests.map(t => `
+                            <li class="test-item">
+                                <div>
+                                    <a href="tests/${t.slug}/index.html">${t.title}</a>
+                                </div>
+                                <span class="test-meta">Generated</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                container.innerHTML = listHtml;
+            } catch (error) {
+                document.getElementById('test-list-container').innerHTML = '<p style="text-align: center; color: red;">Could not load tests.</p>';
+            }
+        }
+
+        // 2. Upload Logic
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('testFile', file);
+
+            try {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = 'Processing...';
+                
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p style="color: green;">${result.message}</p>
+                        <a href="${result.url}" target="_blank"><button>Go to Test</button></a>
+                    `;
+                    // Reload the list
+                    loadTests();
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">Error: ${result.message || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p style="color: red;">Error uploading file. Is the server running?</p>`;
+            }
+        }
+
+        // Initialize
+        loadTests();
+    </script>
+</body>
+</html>
