@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of Life - İnteraktif Eğitim</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #1a1b1e;
+            --bg-panel: #25262b;
+            --accent: #ff007a; /* Patt Vira'nın tarzına uygun canlı bir pembe */
+            --accent-sec: #00e5ff;
+            --text-main: #e1e1e6;
+            --text-muted: #a0a0a5;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        header {
+            background-color: #141517;
+            padding: 0 25px;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent);
+        }
+        h1 { font-size: 1.4rem; margin: 0; display: flex; align-items: center; gap: 15px; color: #fff; }
+        .subtitle { font-size: 0.9rem; color: var(--text-muted); font-weight: normal; }
+        .step-badge {
+            background: linear-gradient(45deg, var(--accent), #bd0059);
+            color: #fff; padding: 6px 14px;
+            border-radius: 20px; font-size: 0.9rem; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 0, 122, 0.3);
+        }
+
+        /* LAYOUT */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 60px);
+        }
+
+        /* SOL PANEL: DERS */
+        .tutorial-panel {
+            width: 33%;
+            padding: 30px;
+            overflow-y: auto;
+            background-color: var(--bg-panel);
+            border-right: 1px solid #333;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+        
+        /* TIPOGRAFİ VE KUTULAR */
+        h2 { color: var(--accent-sec); margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        h3 { color: #fff; margin-top: 25px; margin-bottom: 10px; font-size: 1.1rem; }
+        p { margin-bottom: 15px; color: #ccc; }
+        
+        .patt-box {
+            background: linear-gradient(to right, rgba(255, 0, 122, 0.1), transparent);
+            border-left: 4px solid var(--accent);
+            padding: 15px 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .patt-box strong { color: var(--accent); display: block; margin-bottom: 5px; }
+        
+        .concept-box {
+            background: rgba(0, 229, 255, 0.05);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+        .concept-title { color: var(--accent-sec); font-weight: bold; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        
+        code { background: #141517; padding: 2px 6px; border-radius: 4px; color: #ff79c6; font-family: 'Fira Code', monospace; font-size: 0.9em; }
+
+        /* ORTA PANEL: EDİTÖR */
+        .editor-panel {
+            width: 34%;
+            display: flex;
+            flex-direction: column;
+            background-color: #282a36; /* Dracula bg */
+            border-right: 1px solid #333;
+        }
+        .editor-toolbar {
+            background-color: #191a21;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        .run-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .run-btn:hover { background: #ff3399; transform: scale(1.05); }
+
+        .CodeMirror { flex: 1; height: auto !important; font-family: 'Fira Code', monospace; font-size: 14px; }
+
+        /* SAĞ PANEL: ÖNİZLEME */
+        .preview-panel {
+            width: 33%;
+            background-color: #111;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        #canvas-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        #p5-container {
+            border: 2px solid #333;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            /* Canvas buraya gelecek */
+        }
+
+        /* Butonlar için özel stil - Patt Vira stili */
+        .p5-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+        .p5-controls button {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .p5-controls button:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* NAVİGASYON */
+        .nav-area {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            padding-bottom: 20px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #333;
+            color: white;
+            transition: 0.2s;
+        }
+        .nav-btn.next { background: linear-gradient(45deg, #2196F3, #00bcd4); }
+        .nav-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        #error-log { 
+            color: #ff5252; 
+            background: rgba(255,82,82,0.1); 
+            border: 1px solid rgba(255,82,82,0.3);
+            padding: 15px; 
+            font-family: monospace; 
+            display: none; 
+            width: 90%; 
+            margin-top: 20px; 
+            border-radius: 8px; 
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🧬 Game of Life <span class="subtitle">| P5.js Atölyesi</span></h1>
+    <div class="step-badge">Adım <span id="current-step">1</span> / 9</div>
+</header>
+
+<div class="main-layout">
+    <div class="tutorial-panel" id="tutorial-content">
+        <!-- İçerik JS ile dolacak -->
+    </div>
+
+    <div class="editor-panel">
+        <div class="editor-toolbar">
+            <span style="font-size: 0.85rem; color: #aaa;">sketch.js</span>
+            <button class="run-btn" onclick="runCode()">▶ Çalıştır</button>
+        </div>
+        <textarea id="code-area"></textarea>
+    </div>
+
+    <div class="preview-panel">
+        <div id="canvas-wrapper">
+            <div id="p5-container"></div>
+            <!-- Kontrol butonları buraya eklenecek (JS ile) -->
+            <div id="p5-controls" class="p5-controls"></div>
+        </div>
+        <div id="error-log"></div>
+    </div>
+</div>
+
+<script>
+    /*
+     * MÜFREDAT VE İÇERİK
+     * Patt Vira'nın videosuna sadık kalınarak hazırlanmıştır.
+     */
+    const steps = [
+        {
+            title: "1. Giriş: Izgarayı Oluşturmak",
+            content: `
+                <h2>Boşluktan Düzene</h2>
+                <p>Başlamadan önce Patt Vira'nın videosunu izlemeniz gerekmektedir. Bu atölye ilgili video baz alınarak hazırlanmıştır.</p>
+                
+                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-bottom: 20px;">
+                    <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/lsWulRIWzdo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+
+                <p>Patt Vira videoya <strong>"Game of Life"</strong>ın kurallarından değil, önce oyun alanımızı inşa etmekten başlıyor. Çünkü dijital bir dünyada, hücrelerin yaşayacağı bir eve ihtiyacımız var.</p>
+                
+                <div class="patt-box">
+                    <strong>🎥 Patt Vira Diyor ki:</strong>
+                    "İlk yapmamız gereken şey ekranı küçük karelere bölmek. Bunu matematiksel bir bulmaca gibi düşünün. Ekran genişliğini (width) kare boyutuna (size) bölersek, kaç sütunumuz olacağını buluruz."
+                </div>
+
+                <div class="concept-box">
+                    <div class="concept-title">📘 Temel Kavram: Döngüler (Loops)</div>
+                    <p>Bilgisayara "Bana 100 tane kare çiz" demek yerine, "Şu işlemi 100 kere tekrar et" deriz. Buna <strong>Loop</strong> denir.</p>
+                    <ul>
+                        <li><code>i</code> döngüsü soldan sağa (Sütunlar) ilerler.</li>
+                        <li><code>j</code> döngüsü yukarıdan aşağı (Satırlar) iner.</li>
+                    </ul>
+                    <p>Bu <strong>İç İçe Döngü (Nested Loop)</strong> yapısı, bir apartmandaki tüm daireleri tek tek gezmek gibidir.</p>
+                </div>
+
+                <p>Sağdaki kodda <code>rect()</code> fonksiyonu ile kareleri çiziyoruz. <strong>"Çalıştır"</strong>a basıp ızgarayı görün!</p>
+            `,
+            code: `let size = 40; // Karelerin büyüklüğü
+let cols; 
+let rows;
+
+function setup() {
+  createCanvas(400, 400);
+  
+  // Kaç sütun ve satır sığacağını hesapla
+  cols = width / size;
+  rows = height / size;
+}
+
+function draw() {
+  background(220);
+  
+  // İÇ İÇE DÖNGÜLER
+  // i: Sütun numarası (0, 1, 2...)
+  for (let i = 0; i < cols; i++) {
+  
+    // j: Satır numarası
+    for (let j = 0; j < rows; j++) {
+      
+      // Karenin x ve y koordinatlarını hesapla
+      let x = i * size;
+      let y = j * size;
+      
+      stroke(0); // Siyah kenarlık
+      fill(255); // Beyaz iç
+      rect(x, y, size, size);
+    }
+  }
+}`
+        },
+        {
+            title: "2. Veri Yapısı: 2D Diziler",
+            content: `
+                <h2>Görünenin Arkasındaki Veri</h2>
+                <p>Ekrana kare çizdik ama bilgisayar şu an sadece resim çizdiğini sanıyor. Hangi karenin "canlı" hangisinin "ölü" olduğunu aklında tutmuyor.</p>
+                
+                <div class="patt-box">
+                    <strong>🎥 Patt Vira Diyor ki:</strong>
+                    "Görsellik güzel ama bize bir beyin lazım! Her bir karenin durumunu (1 veya 0) saklamak için 2 Boyutlu Dizi (2D Array) oluşturacağız."
+                </div>
+
+                <div class="concept-box">
+                    <div class="concept-title">🧠 Temel Kavram: Diziler (Arrays)</div>
+                    <p>Değişken (Variable) tek bir bilgi tutar (<code>x = 5</code>). Dizi (Array) ise bir listedir (<code>liste = [5, 10, 15]</code>).</p>
+                    <p><strong>2D Dizi</strong> ise "Listelerin Listesi"dir. Bir Excel tablosu gibi düşünün:</p>
+                    <pre>grid = [
+  [0, 1, 0],  // 1. Sütun
+  [1, 1, 0],  // 2. Sütun
+  ...
+]</pre>
+                    <p><code>grid[i][j]</code> bize tam olarak i. sütun ve j. satırdaki bilgiyi verir.</p>
+                </div>
+
+                <p>Kodu çalıştırdığınızda siyah (1) ve beyaz (0) kareler rastgele dağılacak. Çünkü <code>random(2)</code> ile yazı tura attık!</p>
+            `,
+            code: `let size = 40;
+let cols, rows;
+let grid = []; // Veriyi tutacak boş liste
+
+function setup() {
+  createCanvas(400, 400);
+  cols = width / size;
+  rows = height / size;
+
+  // 2D DİZİYİ OLUŞTURMA
+  for (let i = 0; i < cols; i++) {
+    grid[i] = []; // Her sütun için yeni bir liste aç
+    
+    for (let j = 0; j < rows; j++) {
+      // floor(random(2)) bize 0 veya 1 verir
+      grid[i][j] = floor(random(2)); 
+    }
+  }
+}
+
+function draw() {
+  background(220);
+
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      let x = i * size;
+      let y = j * size;
+      
+      // VERİYE GÖRE RENKLENDİRME
+      // Eğer grid[i][j] 1 ise SİYAH, değilse BEYAZ
+      if (grid[i][j] == 1) {
+        fill(0); 
+      } else {
+        fill(255);
+      }
+      
+      rect(x, y, size, size);
+    }
+  }
+}`
+        },
+        {
+            title: "3. Düzenleme: Class Kullanımı",
+            content: `
+                <h2>Dağınıklığı Toplamak: Class</h2>
+                <p>Kodumuz şimdiden uzadı. Patt Vira burada profesyonel bir dokunuş yapıyor: <strong>Refactoring</strong> (Kodu İyileştirme).</p>
+                
+                <div class="patt-box">
+                    <strong>🎥 Patt Vira'nın Yöntemi:</strong>
+                    "Tüm bu grid işlemlerini ana kodun içinde (setup/draw) tutmak yerine, onları kendi özel 'Kutusuna' (Class) taşıyalım. Böylece ana kodumuz tertemiz kalacak."
+                </div>
+
+                <div class="concept-box">
+                    <div class="concept-title">🏗️ Temel Kavram: Class (Sınıf)</div>
+                    <p>Bir <strong>Class</strong>, nesneler üretmek için bir fabrikadır. Bizim <code>Grid</code> fabrikamız şunları bilir:</p>
+                    <ul>
+                        <li><strong>constructor:</strong> Fabrika ilk açıldığında ne yapacak? (Diziyi oluştur)</li>
+                        <li><strong>display:</strong> Kendini nasıl çizecek? (Kareleri boya)</li>
+                    </ul>
+                    <p>Böylece <code>setup()</code> içinde sadece <code>myGrid = new Grid()</code> dememiz yeterli olur.</p>
+                </div>
+                
+                <p>Bu adımda görsel bir değişiklik yok, ama kodun "Mimarisi" çok daha sağlam hale geldi.</p>
+            `,
+            code: `let size = 40;
+let myGrid; // Grid nesnemiz için değişken
+
+function setup() {
+  createCanvas(400, 400);
+  // Grid fabrikasından yeni bir ızgara üret
+  myGrid = new Grid(size);
+}
+
+function draw() {
+  background(220);
+  // Grid kendi kendini çizsin
+  myGrid.display();
+}
+
+// --- GRID SINIFI (CLASS) ---
+class Grid {
+  // Kurucu Fonksiyon: İlk değerleri ayarlar
+  constructor(cellSize) {
+    this.size = cellSize;
+    this.cols = width / this.size;
+    this.rows = height / this.size;
+    this.grid = [];
+    
+    // Başlangıçta rastgele doldur
+    for (let i = 0; i < this.cols; i++) {
+      this.grid[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        this.grid[i][j] = floor(random(2));
+      }
+    }
+  }
+  
+  // Çizim Fonksiyonu
+  display() {
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        let x = i * this.size;
+        let y = j * this.size;
+        
+        if (this.grid[i][j] == 1) {
+          fill(0);
+        } else {
+          fill(255);
+        }
+        rect(x, y, this.size, this.size);
+      }
+    }
+  }
+}`
+        },
+        {
+            title: "4. Mantık: Komşularını Say",
+            content: `
+                <h2>Hayatın Kuralı: Komşuluk</h2>
+                <p>Game of Life'da bir hücrenin kaderini (yaşayıp öleceğini) komşuları belirler. Her hücrenin etrafında 8 komşusu vardır.</p>
+
+                <div class="patt-box">
+                    <strong>🎥 Patt Vira Açıklıyor:</strong>
+                    "Bir hücrenin etrafındaki 3x3'lük alanı taramalıyız. Bunu yapmak için yine iç içe döngü kullanacağız ama bu sefer <code>-1</code>'den <code>+1</code>'e kadar. Yani solundan sağına, yukarısından aşağısına bakacağız."
+                </div>
+
+                <p>Aşağıdaki kodda hücrelerin içine kırmızı sayılar yazdık. Bu sayılar, o hücrenin <strong>canlı komşu sayısını</strong> gösteriyor. </p>
+                <p><em>Not: Kenardaki hücreler için şimdilik basit bir çözüm uyguladık, yoksa hata verirlerdi.</em></p>
+            `,
+            code: `let size = 50; // Yazıları okumak için büyüttük
+let myGrid;
+
+function setup() {
+  createCanvas(400, 400);
+  myGrid = new Grid(size);
+  noLoop(); // Tek kare çizip dursun, rahat inceleyelim
+}
+
+function draw() {
+  background(220);
+  myGrid.display();
+}
+
+class Grid {
+  constructor(cellSize) {
+    this.size = cellSize;
+    this.cols = width / this.size;
+    this.rows = height / this.size;
+    this.grid = [];
+    
+    for (let i = 0; i < this.cols; i++) {
+      this.grid[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        this.grid[i][j] = floor(random(2));
+      }
+    }
+  }
+
+  display() {
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        // Kareyi çiz
+        if (this.grid[i][j] == 1) fill(0);
+        else fill(255);
+        rect(i*this.size, j*this.size, this.size, this.size);
+        
+        // KOMŞU SAYISINI HESAPLA VE YAZ
+        // Kenarlardan kaçınıyoruz (Hata almamak için)
+        if (i > 0 && i < this.cols-1 && j > 0 && j < this.rows-1) {
+            let neighbors = this.countNeighbors(i, j);
+            
+            fill(255, 0, 0); // Kırmızı yazı
+            textSize(20);
+            textAlign(CENTER, CENTER);
+            text(neighbors, i*this.size + this.size/2, j*this.size + this.size/2);
+        }
+      }
+    }
+  }
+  
+  // --- KRİTİK FONKSİYON ---
+  countNeighbors(x, y) {
+    let sum = 0;
+    // 3x3 alan taraması (x-1, x, x+1)
+    for (let i = -1; i < 2; i++) {
+      for (let j = -1; j < 2; j++) {
+        sum += this.grid[x+i][y+j];
+      }
+    }
+    // Kendimizi toplama dahil ettik, onu çıkaralım!
+    sum -= this.grid[x][y];
+    return sum;
+  }
+}`
+        },
+        {
+            title: "5. Sınırları Aşmak: Modulo (%)",
+            content: `
+                <h2>Pac-Man Evreni</h2>
+                <p>Az önceki kodda kenarlar sorunluydu. Patt Vira burada harika bir matematiksel hile kullanıyor: <strong>Modulo Operatörü</strong>.</p>
+                
+                <div class="patt-box">
+                    <strong>🎥 Video Notu (14:20):</strong>
+                    "Dünyamızın düz bir tepsi gibi bitmesini istemiyoruz. Sağdan çıkan soldan girsin, yukarıdan çıkan aşağıdan girsin. Bunu <code>%</code> (Mod) işareti ile sağlarız."
+                </div>
+
+                <div class="concept-box">
+                    <div class="concept-title">🔢 Matematik: Modulo (%)</div>
+                    <p>Bölme işleminden kalanı verir. Saat gibi düşünün: 13:00 aslında 1:00'dir (13 % 12 = 1).</p>
+                    <p>Formül: <code>(x + i + cols) % cols</code></p>
+                    <p>Bu formül sayesinde, index -1 olduğunda (sol kenardan çıkınca), otomatik olarak en sağa (cols-1) ışınlanırız.</p>
+                </div>
+            `,
+            code: `let size = 40;
+let myGrid;
+
+function setup() {
+  createCanvas(400, 400);
+  myGrid = new Grid(size);
+  noLoop();
+}
+
+function draw() {
+  background(220);
+  myGrid.display();
+}
+
+class Grid {
+  constructor(cellSize) {
+    this.size = cellSize;
+    this.cols = width / this.size;
+    this.rows = height / this.size;
+    this.grid = [];
+    
+    for (let i = 0; i < this.cols; i++) {
+      this.grid[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        this.grid[i][j] = floor(random(2));
+      }
+    }
+  }
+
+  display() {
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        if (this.grid[i][j] == 1) fill(0);
+        else fill(255);
+        rect(i*this.size, j*this.size, this.size, this.size);
+        
+        // Artık kenar kontrolüne gerek yok!
+        let neighbors = this.countNeighbors(i, j);
+        fill(255, 0, 0);
+        textSize(20);
+        textAlign(CENTER, CENTER);
+        text(neighbors, i*this.size + this.size/2, j*this.size + this.size/2);
+      }
+    }
+  }
+  
+  countNeighbors(x, y) {
+    let sum = 0;
+    for (let i = -1; i < 2; i++) {
+      for (let j = -1; j < 2; j++) {
+        
+        // SİHİRLİ FORMÜL: Kenarları birbirine bağlar
+        let col = (x + i + this.cols) % this.cols;
+        let row = (y + j + this.rows) % this.rows;
+        
+        sum += this.grid[col][row];
+      }
+    }
+    sum -= this.grid[x][y];
+    return sum;
+  }
+}`
+        },
+        {
+            title: "6. Kurallar ve Gelecek Nesil",
+            content: `
+                <h2>Yaşat ya da Öldür</h2>
+                <p>Artık komşuları sayabiliyoruz. Şimdi Conway'in 4 efsanevi kuralını uygulama vakti.</p>
+                <ol>
+                    <li><strong>Yalnızlık:</strong> Komşu < 2 ise ÖLÜR.</li>
+                    <li><strong>Kalabalık:</strong> Komşu > 3 ise ÖLÜR.</li>
+                    <li><strong>İdeal:</strong> Komşu 2 veya 3 ise YAŞAR.</li>
+                    <li><strong>Doğum:</strong> Ölü hücrenin tam 3 komşusu varsa CANLANIR.</li>
+                </ol>
+
+                <div class="concept-box">
+                    <div class="concept-title">⚠️ Kritik Hata: Değişikliği Anında Yapmak</div>
+                    <p>Eğer <code>grid</code> üzerinde değişiklik yaparken hesaplamaya devam edersek, sonuçlar karışır. Bu yüzden <strong>nextGen</strong> adında BOŞ bir sayfa açarız, hesaplamaları oraya yazarız. İşimiz bitince eski sayfayı atıp yenisini alırız.</p>
+                </div>
+                
+                <p>Çalıştır'a bastığınızda hareket başlayacak! Hücrelerin doğup öldüğünü izleyin.</p>
+            `,
+            code: `let size = 10; // Küçük kareler daha iyi görünür
+let myGrid;
+
+function setup() {
+  createCanvas(400, 400);
+  myGrid = new Grid(size);
+  frameRate(10); // Hızı biraz düşürelim
+}
+
+function draw() {
+  background(220);
+  myGrid.update();  // Hesapla
+  myGrid.display(); // Çiz
+}
+
+class Grid {
+  constructor(cellSize) {
+    this.size = cellSize;
+    this.cols = width / this.size;
+    this.rows = height / this.size;
+    this.grid = [];
+    
+    for (let i = 0; i < this.cols; i++) {
+      this.grid[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        this.grid[i][j] = floor(random(2));
+      }
+    }
+  }
+
+  display() {
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        if (this.grid[i][j] == 1) fill(0);
+        else fill(255);
+        noStroke(); // Kenarlıkları kaldırdık, daha temiz
+        rect(i*this.size, j*this.size, this.size, this.size);
+      }
+    }
+  }
+  
+  update() {
+    let nextGen = []; // GELECEK NESİL (Boş Sayfa)
+    
+    for (let i = 0; i < this.cols; i++) {
+      nextGen[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        
+        let n = this.countNeighbors(i, j);
+        let state = this.grid[i][j];
+        
+        // KURALLAR
+        if (state == 1 && (n < 2 || n > 3)) {
+          nextGen[i][j] = 0; // Ölüm
+        } else if (state == 0 && n == 3) {
+          nextGen[i][j] = 1; // Doğum
+        } else {
+          nextGen[i][j] = state; // Değişim Yok
+        }
+      }
+    }
+    
+    this.grid = nextGen; // Sayfayı çevir
+  }
+  
+  countNeighbors(x, y) {
+    let sum = 0;
+    for (let i = -1; i < 2; i++) {
+      for (let j = -1; j < 2; j++) {
+        let col = (x + i + this.cols) % this.cols;
+        let row = (y + j + this.rows) % this.rows;
+        sum += this.grid[col][row];
+      }
+    }
+    sum -= this.grid[x][y];
+    return sum;
+  }
+}`
+        },
+        {
+            title: "7. Etkileşim: Butonlar",
+            content: `
+                <h2>Kontrol Paneli</h2>
+                <p>Oyun sürekli akıyor ama bazen durdurup incelemek veya baştan başlatmak isteriz.</p>
+                
+                <div class="patt-box">
+                    <strong>🎥 Video Notu:</strong>
+                    Patt Vira videoda p5.js'in <code>createButton()</code> özelliğini kullanarak arayüz elemanları ekliyor. Biz de "Oynat/Durdur", "Temizle" ve "Rastgele" butonları ekleyelim.
+                </div>
+                
+                <p>Aşağıdaki butonlara basarak simülasyonu kontrol edebilirsiniz.</p>
+            `,
+            code: `let size = 10;
+let myGrid;
+let isPlaying = false; // Başlangıçta duraklat
+let btnPlay, btnClear, btnRandom;
+
+function setup() {
+  createCanvas(400, 400);
+  myGrid = new Grid(size);
+  
+  // BUTONLARI OLUŞTURMA
+  btnPlay = createButton('Oynat/Durdur');
+  btnPlay.mousePressed(togglePlay);
+  
+  btnClear = createButton('Temizle');
+  btnClear.mousePressed(resetGrid);
+  
+  btnRandom = createButton('Rastgele');
+  btnRandom.mousePressed(randomGrid);
+}
+
+function draw() {
+  background(220);
+  if (isPlaying) {
+    myGrid.update();
+  }
+  myGrid.display();
+}
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+}
+function resetGrid() {
+  myGrid.clear();
+}
+function randomGrid() {
+  myGrid.randomize();
+}
+
+class Grid {
+  constructor(cellSize) {
+    this.size = cellSize;
+    this.cols = width / this.size;
+    this.rows = height / this.size;
+    this.grid = [];
+    this.randomize();
+  }
+
+  randomize() {
+    for (let i = 0; i < this.cols; i++) {
+      this.grid[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        this.grid[i][j] = floor(random(2));
+      }
+    }
+  }
+  
+  clear() {
+     for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        this.grid[i][j] = 0;
+      }
+    }
+  }
+
+  display() {
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        if (this.grid[i][j] == 1) fill(0);
+        else fill(255);
+        noStroke();
+        rect(i * this.size, j * this.size, this.size, this.size);
+      }
+    }
+  }
+  
+  update() {
+    let nextGen = [];
+    for (let i = 0; i < this.cols; i++) {
+      nextGen[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        let n = this.countNeighbors(i, j);
+        let state = this.grid[i][j];
+        if (state == 1 && (n < 2 || n > 3)) nextGen[i][j] = 0;
+        else if (state == 0 && n == 3) nextGen[i][j] = 1;
+        else nextGen[i][j] = state;
+      }
+    }
+    this.grid = nextGen;
+  }
+  
+  countNeighbors(x, y) {
+    let sum = 0;
+    for (let i = -1; i < 2; i++) {
+      for (let j = -1; j < 2; j++) {
+        let col = (x + i + this.cols) % this.cols;
+        let row = (y + j + this.rows) % this.rows;
+        sum += this.grid[col][row];
+      }
+    }
+    sum -= this.grid[x][y];
+    return sum;
+  }
+}`
+        },
+        {
+            title: "8. Tanrı Modu: Mouse Etkileşimi",
+            content: `
+                <h2>Hayat Yaratmak</h2>
+                <p>Şu an sadece izleyiciyiz. Videonun 27. dakikasında Patt Vira, mouse ile ekrana dokunarak hücre yaratma özelliği ekliyor.</p>
+                
+                <div class="concept-box">
+                    <div class="concept-title">🖱️ Mouse Koordinatları</div>
+                    <p><code>mouseX</code> ve <code>mouseY</code> bize piksel değerini verir (Örn: 250px). Ama bize <strong>ızgara koordinatı</strong> lazım (Örn: 12. Sütun).</p>
+                    <p>Çözüm: <code>floor(mouseX / size)</code>. 250 / 20 = 12.5 -> 12. Sütun.</p>
+                </div>
+
+                <p><strong>Deneyin:</strong> "Temizle"ye basın, "Oynat" DURMUŞ olsun. Ekrana kendi desenlerinizi çizin (Planörler, kutular...) ve sonra "Oynat"a basın!</p>
+            `,
+            code: `let size = 10;
+let myGrid;
+let isPlaying = false;
+let btnPlay, btnClear, btnRandom;
+
+function setup() {
+  createCanvas(400, 400);
+  myGrid = new Grid(size);
+  
+  btnPlay = createButton('Oynat/Durdur');
+  btnPlay.mousePressed(togglePlay);
+  
+  btnClear = createButton('Temizle');
+  btnClear.mousePressed(resetGrid);
+  
+  btnRandom = createButton('Rastgele');
+  btnRandom.mousePressed(randomGrid);
+}
+
+function draw() {
+  background(220);
+  if (isPlaying) {
+    myGrid.update();
+  }
+  myGrid.display();
+}
+
+// MOUSE SÜRÜKLEME
+function mouseDragged() {
+  // Hangi kutunun üzerindeyiz?
+  let col = floor(mouseX / size);
+  let row = floor(mouseY / size);
+  
+  // Biraz daha kalın bir fırça yapalım (3x3)
+  let margin = 1;
+  for(let i = -margin; i <= margin; i++) {
+     for(let j = -margin; j <= margin; j++) {
+        // Sınırları ve Modulo'yu unutma
+        let c = (col + i + myGrid.cols) % myGrid.cols;
+        let r = (row + j + myGrid.rows) % myGrid.rows;
+        myGrid.grid[c][r] = 1;
+     }
+  }
+}
+
+function togglePlay() { isPlaying = !isPlaying; }
+function resetGrid() { myGrid.clear(); }
+function randomGrid() { myGrid.randomize(); }
+
+class Grid {
+  constructor(cellSize) {
+    this.size = cellSize;
+    this.cols = width / this.size;
+    this.rows = height / this.size;
+    this.grid = [];
+    this.randomize();
+  }
+  randomize() {
+    for (let i = 0; i < this.cols; i++) {
+      this.grid[i] = [];
+      for (let j = 0; j < this.rows; j++) { this.grid[i][j] = floor(random(2)); }
+    }
+  }
+  clear() {
+     for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) { this.grid[i][j] = 0; }
+    }
+  }
+  display() {
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        if (this.grid[i][j] == 1) fill(0); else fill(255);
+        noStroke();
+        rect(i * this.size, j * this.size, this.size, this.size);
+      }
+    }
+  }
+  update() {
+    let nextGen = [];
+    for (let i = 0; i < this.cols; i++) {
+      nextGen[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        let n = this.countNeighbors(i, j);
+        let state = this.grid[i][j];
+        if (state == 1 && (n < 2 || n > 3)) nextGen[i][j] = 0;
+        else if (state == 0 && n == 3) nextGen[i][j] = 1;
+        else nextGen[i][j] = state;
+      }
+    }
+    this.grid = nextGen;
+  }
+  countNeighbors(x, y) {
+    let sum = 0;
+    for (let i = -1; i < 2; i++) {
+      for (let j = -1; j < 2; j++) {
+        let col = (x + i + this.cols) % this.cols;
+        let row = (y + j + this.rows) % this.rows;
+        sum += this.grid[col][row];
+      }
+    }
+    sum -= this.grid[x][y];
+    return sum;
+  }
+}`
+        },
+        {
+            title: "9. Final: Renkler ve HSB",
+            content: `
+                <h2>Gökkuşağı Finali 🌈</h2>
+                <p>Ve geldik videonun sonuna! Siyah beyaz dünya biraz sıkıcı olabilir. Patt Vira finalde renk katıyor.</p>
+                
+                <div class="patt-box">
+                    <strong>🎥 Renk Teorisi: HSB Modu</strong>
+                    RGB (Kırmızı, Yeşil, Mavi) yerine <strong>HSB (Hue, Saturation, Brightness)</strong> kullanacağız.
+                    <ul>
+                        <li><strong>Hue (Ton):</strong> Rengin kendisi (0-360). Bunu sürekli artırırsak gökkuşağı döngüsü elde ederiz.</li>
+                    </ul>
+                </div>
+
+                <p>Tebrikler! Conway'in Hayat Oyunu'nu sıfırdan inşa ettiniz. Kodu kurcalamaktan çekinmeyin.</p>
+                
+            `,
+            code: `/* 
+   ----- Coding Tutorial by Patt Vira ----- 
+   Name: Conway's Game of Life
+   Video: https://youtu.be/lsWulRIWzdo
+*/
+
+let cols; let rows; let size = 5;
+let grid; let play = true;
+let hueValue = 0; 
+let btnPlay, btnReset, btnRandom;
+
+function setup() {
+  createCanvas(400, 400);
+  colorMode(HSB, 255); // Renk Modunu Değiştir
+  grid = new Grid();
+  
+  btnPlay = createButton('Oynat/Durdur');
+  btnPlay.mousePressed(playGrid);
+  
+  btnReset = createButton('Temizle');
+  btnReset.mousePressed(resetGrid);
+  
+  btnRandom = createButton('Rastgele');
+  btnRandom.mousePressed(randomGrid);
+}
+
+function draw() {
+  background(220);
+  if (play == true) {
+    grid.update();
+  }
+  grid.display();
+}
+
+// --- ETKİLEŞİM FONKSİYONLARI ---
+function playGrid() { play = !play; }
+function resetGrid() { grid.resetGrid(); }
+function randomGrid() { grid.randomGrid(); }
+
+function mouseDragged() {
+  let margin = 2;
+  let x = floor(mouseX / size);
+  let y = floor(mouseY / size);
+  
+  for (let i=-margin; i<margin; i++) {
+    for (let j=-margin; j<margin; j++) {
+      // Kenar kontrolleri (Basit versiyon)
+      let col = (x + i + grid.cols) % grid.cols;
+      let row = (y + j + grid.rows) % grid.rows;
+      if(grid.grid[col] && grid.grid[col][row] !== undefined) {
+         grid.grid[col][row] = 1;
+      }
+    }
+  }
+  
+  hueValue += 1;
+  if (hueValue > 255) hueValue = 0;
+}
+
+class Grid {
+  constructor() {
+    this.cols = width/size;
+    this.rows = height/size; 
+    this.grid = [];
+    this.randomGrid();
+  }
+  
+  display() {
+    for (let i=0; i<this.cols; i++) {
+      for (let j=0; j<this.rows; j++) {
+        if (this.grid[i][j] == 0) {
+          if (play) fill(255);
+          else fill(100);
+        } else {
+          fill(hueValue, 255, 255); // HSB Rengi
+        }
+        noStroke();
+        rect(i*size, j*size, size, size);
+      }
+    }  
+  }
+  
+  update() {
+    let nextGen = [];
+    for (let i=0; i<this.cols; i++) {
+      nextGen[i] = [];
+      for (let j=0; j<this.rows; j++) {
+          let n = this.neighboringStates(this.grid, i, j);
+          if (this.grid[i][j] == 1 && n < 2) {
+            nextGen[i][j] = 0;
+          } else if (this.grid[i][j] == 1 && (n == 2 || n ==3 )) {
+            nextGen[i][j] = 1;
+          } else if (this.grid[i][j] == 1 && n > 3) {
+            nextGen[i][j] = 0;
+          } else if (this.grid[i][j] == 0 && n == 3) {
+            nextGen[i][j] = 1;
+          } else {
+            nextGen[i][j] = this.grid[i][j];
+          }
+        }
+    }
+    this.grid = nextGen;
+    // Rengi güncelle
+    hueValue = (hueValue + 0.5) % 255;
+  }
+  
+  neighboringStates(grid, x, y) {
+    let sum = 0;
+    for (let i=-1; i<2; i++) {
+      for (let j=-1; j<2; j++) {
+        let xIndex = (x + i + this.cols) % this.cols;
+        let yIndex = (y + j + this.rows) % this.rows;
+        sum += grid[xIndex][yIndex];
+      }
+    }
+    sum -= grid[x][y];
+    return sum;
+  }
+  
+  resetGrid() {
+    for (let i=0; i<this.cols; i++) {
+      for (let j=0; j<this.rows; j++) {
+        this.grid[i][j] = 0;
+      }
+    }
+  }
+  
+  randomGrid() {
+    for (let i=0; i<this.cols; i++) {
+      this.grid[i] = [];
+      for (let j=0; j<this.rows; j++) {
+        this.grid[i][j] = floor(random(2));
+      }
+    }
+  }
+}`
+        }
+    ];
+
+    // --- UYGULAMA MANTIĞI ---
+
+    let currentStep = 0;
+    let myP5Instance = null;
+    let codeMirrorEditor;
+
+    window.onload = function() {
+        codeMirrorEditor = CodeMirror.fromTextArea(document.getElementById("code-area"), {
+            mode: "javascript",
+            theme: "dracula",
+            lineNumbers: true,
+            autoCloseBrackets: true,
+            tabSize: 2,
+            lineWrapping: true,
+            viewportMargin: Infinity
+        });
+
+        loadStep(0);
+    };
+
+    function loadStep(index) {
+        currentStep = index;
+
+        // UI Güncelle
+        document.getElementById('current-step').innerText = index + 1;
+        document.getElementById('tutorial-content').innerHTML = steps[index].content + generateNavButtons();
+
+        // Editör İçeriğini Güncelle
+        codeMirrorEditor.setValue(steps[index].code);
+
+        // Kodu Çalıştır
+        runCode();
+    }
+
+    function generateNavButtons() {
+        let html = '<div class="nav-area">';
+        if (currentStep > 0) {
+            html += `<button class="nav-btn" onclick="loadStep(${currentStep - 1})">⬅ Önceki Adım</button>`;
+        } else {
+            html += `<div style="flex:1"></div>`; // Boşluk tutucu
+        }
+
+        if (currentStep < steps.length - 1) {
+            html += `<button class="nav-btn next" onclick="loadStep(${currentStep + 1})">Sonraki Adım ➡</button>`;
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function runCode() {
+        const container = document.getElementById('p5-container');
+        const controlsDiv = document.getElementById('p5-controls');
+        const errorLog = document.getElementById('error-log');
+
+        container.innerHTML = '';
+        controlsDiv.innerHTML = ''; // Butonları temizle
+        errorLog.style.display = 'none';
+
+        if (myP5Instance) {
+            myP5Instance.remove();
+            myP5Instance = null;
+        }
+
+        const userCode = codeMirrorEditor.getValue();
+
+        const s = function(p) {
+            p.setup = function() {};
+            p.draw = function() {};
+            
+            // createButton'ı override edip bizim kontrol paneline yönlendirelim
+            // Bu sayede butonlar kaymaz!
+            const originalCreateButton = p.createButton;
+            p.createButton = function(label) {
+                let btn = originalCreateButton.call(p, label);
+                btn.parent('p5-controls'); // Bizim özel kontrol div'imiz
+                return btn;
+            };
+
+            try {
+                // Güvenli çalıştırma
+                const runnable = new Function('p', `
+                    with(p) {
+                        ${userCode}
+                        
+                        // P5 hookları
+                        if(typeof setup === 'function') p.setup = setup;
+                        if(typeof draw === 'function') p.draw = draw;
+                        if(typeof mousePressed === 'function') p.mousePressed = mousePressed;
+                        if(typeof mouseDragged === 'function') p.mouseDragged = mouseDragged;
+                        if(typeof mouseClicked === 'function') p.mouseClicked = mouseClicked;
+                    }
+                `);
+                runnable(p);
+            } catch (err) {
+                console.error(err);
+                errorLog.style.display = 'block';
+                errorLog.innerText = "HATA: " + err.message;
+            }
+        };
+
+        try {
+            myP5Instance = new p5(s, 'p5-container');
+        } catch (e) {
+            errorLog.style.display = 'block';
+            errorLog.innerText = "Başlatma Hatası: " + e.message;
+        }
+    }
+</script>
+
+</body>
+</html>
