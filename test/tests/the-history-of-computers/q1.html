@@ -92,6 +92,7 @@
             sessionStorage.setItem('the-history-of-computers_answers', JSON.stringify(answers));
         }
 
+
         // Restore answer on load
         function restoreAnswer(qId) {
             const answers = JSON.parse(sessionStorage.getItem('the-history-of-computers_answers') || '{}');

@@ -84,6 +84,7 @@
             sessionStorage.setItem('herausforderung-klimawandel_answers', JSON.stringify(answers));
         }
 
+
         // Restore answer on load
         function restoreAnswer(qId) {
             const answers = JSON.parse(sessionStorage.getItem('herausforderung-klimawandel_answers') || '{}');
