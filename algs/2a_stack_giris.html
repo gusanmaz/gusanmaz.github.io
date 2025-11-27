@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.1: Stack (Yığın) Kavramı</title>
+    <link href="style.css" rel="stylesheet" />
+    <style>
+        .visual-container { 
+            background: white; padding: 30px; border-radius: 15px; text-align: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); min-height: 400px; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        .stack-box {
+            width: 200px; height: 300px; border: 5px solid #333; border-top: none;
+            background: #ecf0f1; position: relative; display: flex; flex-direction: column-reverse;
+            align-items: center; padding-bottom: 5px; overflow: hidden;
+        }
+        
+        .stack-item {
+            width: 180px; height: 50px; background: var(--accent); color: white;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
+            margin-bottom: 2px; border-radius: 5px;
+            animation: dropIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes dropIn { from { transform: translateY(-300px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes popOut { to { transform: translateY(-300px); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📚 2.1: Stack (Yığın) Nedir?</h1>
+        <p>Last In, First Out (LIFO) Prensibi</p>
+    </header>
+
+    <div class="visual-container">
+        <div class="stack-box" id="stack"></div>
+        <div style="margin-top: 20px;">
+            <button class="btn btn-run" onclick="visualPush()">Push (Ekle)</button>
+            <button class="btn btn-reset" onclick="visualPop()">Pop (Çıkar)</button>
+            <button class="btn" style="background: #f39c12;" onclick="visualPeek()">Peek (Bak)</button>
+        </div>
+        <p id="msg" style="font-weight: bold; margin-top: 15px; color: #555;">Stack Boş</p>
+    </div>
+
+    <div class="section">
+        <h2>Gerçek Hayattan Örnekler</h2>
+        <ul>
+            <li>🍽️ <strong>Tabak Yığını:</strong> En son koyduğunuz tabağı ilk alırsınız.</li>
+            <li>🔙 <strong>Tarayıcı Geçmişi:</strong> Geri tuşu en son girdiğiniz sayfayı açar.</li>
+            <li>📝 <strong>Ctrl+Z (Undo):</strong> Son yapılan işlem geri alınır.</li>
+        </ul>
+    </div>
+
+    <div class="nav-footer">
+        <a href="1c_numpy_detay.html" class="btn">⬅️ Önceki: Numpy</a>
+        <a href="2b_stack_numpy.html" class="btn btn-next">Sonraki: Kodlama ➡️</a>
+    </div>
+</div>
+
+<script>
+    const stackDiv = document.getElementById('stack');
+    const msg = document.getElementById('msg');
+    let count = 0;
+    const MAX = 5;
+
+    function visualPush() {
+        if (count >= MAX) { msg.innerText = "⚠️ Stack Dolu!"; msg.style.color = "red"; return; }
+        const item = document.createElement('div');
+        item.className = 'stack-item';
+        item.innerText = "Data " + (count + 1);
+        stackDiv.appendChild(item);
+        count++;
+        msg.innerText = "✅ Push: Eklendi"; msg.style.color = "green";
+    }
+
+    function visualPop() {
+        if (count === 0) { msg.innerText = "⚠️ Stack Boş!"; msg.style.color = "red"; return; }
+        const item = stackDiv.lastElementChild;
+        item.style.animation = "popOut 0.5s forwards";
+        setTimeout(() => { item.remove(); count--; msg.innerText = "🔻 Pop: Çıkarıldı"; msg.style.color = "#c0392b"; }, 500);
+    }
+
+    function visualPeek() {
+        if (count === 0) return;
+        const item = stackDiv.lastElementChild;
+        item.style.background = "#f39c12";
+        setTimeout(() => item.style.background = "", 500);
+        msg.innerText = "👀 Peek: Görüldü"; msg.style.color = "#f39c12";
+    }
+</script>
+</body>
+</html>

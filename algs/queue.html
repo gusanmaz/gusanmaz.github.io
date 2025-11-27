@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue (Kuyruk) - Ana Menü</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #333;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+        }
+        h1 { color: #11998e; margin-bottom: 10px; }
+        p { color: #666; font-size: 1.2em; margin-bottom: 40px; }
+        
+        .card-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 30px;
+            width: 300px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        
+        .card-numpy { border-color: #2980b9; }
+        .card-numpy:hover { background: #ebf5fb; }
+        .card-numpy h3 { color: #2980b9; }
+        
+        .card-python { border-color: #27ae60; }
+        .card-python:hover { background: #e9f7ef; }
+        .card-python h3 { color: #27ae60; }
+        
+        .icon { font-size: 3em; margin-bottom: 20px; display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚶 Queue (Kuyruk) Dünyası</h1>
+        <p>Nasıl öğrenmek istersiniz?</p>
+        
+        <div class="card-container">
+            <a href="queue_numpy.html" class="card card-numpy">
+                <span class="icon">🔄</span>
+                <h3>Derinlemesine (Numpy)</h3>
+                <p>Dairesel Kuyruk (Circular Queue), Modülo operatörü ve sabit boyut zorlukları.</p>
+                <small>Mühendislik Yaklaşımı</small>
+            </a>
+            
+            <a href="queue_python.html" class="card card-python">
+                <span class="icon">🚀</span>
+                <h3>Pratik (Python)</h3>
+                <p>collections.deque kullanımı, performans farkları ve gerçek hayat simülasyonları.</p>
+                <small>Yazılımcı Yaklaşımı</small>
+            </a>
+        </div>
+    </div>
+
+    <div style="position: fixed; top: 20px; left: 20px;">
+        <a href="analiz.html" style="color: white; text-decoration: none; font-weight: bold;">⬅️ Analiz Sayfasına Dön</a>
+    </div>
+</body>
+</html>

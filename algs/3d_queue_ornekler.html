@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.4: Queue Örnekleri</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🧩 3.4: Queue Algoritmaları ve Simülasyonlar</h1>
+        <p>Oyunlar ve İşletim Sistemleri</p>
+    </header>
+
+    <div class="section">
+        <h2>1. Sıcak Patates Oyunu (Josephus Problemi)</h2>
+        <p>Queue kullanarak dairesel eleme oyunu simülasyonu.</p>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Oyna</button>
+                    <button class="btn" onclick="toggleEdit('code1')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code1"><code class="language-python">from collections import deque
+
+def sicak_patates(oyuncular, tur_sayisi):
+    q = deque(oyuncular)
+    print(f"Başlangıç: {list(q)}\n")
+    
+    tur = 1
+    while len(q) > 1:
+        # Patatesi elden ele geçir
+        for i in range(tur_sayisi):
+            kisi = q.popleft()
+            q.append(kisi)
+            
+        # Tur bitti, elinde patates olan yandı
+        yanan = q.popleft()
+        print(f"Tur {tur}: {yanan} yandı! Kalanlar: {list(q)}")
+        tur += 1
+        
+    return q[0]
+
+kazanan = sicak_patates(["Ali", "Veli", "Ayşe", "Fatma", "Can", "Zeynep"], 2)
+print(f"\n🏆 KAZANAN: {kazanan}")</code></pre>
+
+            <textarea id="code1" class="code-editor">from collections import deque
+
+def sicak_patates(oyuncular, tur_sayisi):
+    q = deque(oyuncular)
+    print(f"Başlangıç: {list(q)}\n")
+    tur = 1
+    while len(q) > 1:
+        for i in range(tur_sayisi):
+            kisi = q.popleft()
+            q.append(kisi)
+        yanan = q.popleft()
+        print(f"Tur {tur}: {yanan} yandı! Kalanlar: {list(q)}")
+        tur += 1
+    return q[0]
+
+kazanan = sicak_patates(["Ali", "Veli", "Ayşe", "Fatma", "Can", "Zeynep"], 2)
+print(f"\n🏆 KAZANAN: {kazanan}")</textarea>
+            
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>2. Yazıcı Kuyruğu (Printer Spooler)</h2>
+        <p>Ofis yazıcısı simülasyonu.</p>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Simüle Et</button>
+                    <button class="btn" onclick="toggleEdit('code2')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code2"><code class="language-python">from collections import deque
+import time
+
+class Yazici:
+    def __init__(self):
+        self.kuyruk = deque()
+        
+    def belge_ekle(self, belge):
+        self.kuyruk.append(belge)
+        print(f"📥 Eklendi: {belge}")
+        
+    def yazdir(self):
+        print("\n🖨️ Yazdırma Başlıyor...")
+        while self.kuyruk:
+            belge = self.kuyruk.popleft()
+            print(f"   Çıktı alınıyor: {belge}...")
+            # time.sleep(1) 
+            print("   ✅ Tamamlandı.")
+        print("🏁 Tüm belgeler yazdırıldı.")
+
+ofis_yazicisi = Yazici()
+ofis_yazicisi.belge_ekle("Rapor.pdf")
+ofis_yazicisi.belge_ekle("Tez.docx")
+ofis_yazicisi.belge_ekle("Fotoğraf.jpg")
+
+ofis_yazicisi.yazdir()</code></pre>
+
+            <textarea id="code2" class="code-editor">from collections import deque
+import time
+
+class Yazici:
+    def __init__(self):
+        self.kuyruk = deque()
+    def belge_ekle(self, belge):
+        self.kuyruk.append(belge)
+        print(f"📥 Eklendi: {belge}")
+    def yazdir(self):
+        print("\n🖨️ Yazdırma Başlıyor...")
+        while self.kuyruk:
+            belge = self.kuyruk.popleft()
+            print(f"   Çıktı alınıyor: {belge}...")
+            print("   ✅ Tamamlandı.")
+        print("🏁 Tüm belgeler yazdırıldı.")
+
+ofis_yazicisi = Yazici()
+ofis_yazicisi.belge_ekle("Rapor.pdf")
+ofis_yazicisi.belge_ekle("Tez.docx")
+ofis_yazicisi.belge_ekle("Fotoğraf.jpg")
+ofis_yazicisi.yazdir()</textarea>
+            
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="3c_queue_python.html" class="btn">⬅️ Önceki: Python</a>
+        <a href="siniflar.html" class="btn" style="background:#e67e22">🏠 Ana Menüye Dön</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+</body>
+</html>

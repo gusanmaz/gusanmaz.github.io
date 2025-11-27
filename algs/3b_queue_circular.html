@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.2: Circular Queue</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .clock-container { 
+            position: relative; width: 300px; height: 300px; margin: 20px auto; 
+            border: 2px dashed #ccc; border-radius: 50%; 
+        }
+        .cell {
+            position: absolute; width: 50px; height: 50px; background: white; border: 2px solid #333;
+            border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 14px; transition: all 0.3s;
+        }
+        .cell.filled { background: #1abc9c; color: white; border-color: #16a085; }
+        .idx-label { font-size: 10px; color: #666; position: absolute; top: -15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🔄 3.2: Circular Queue (Dairesel Kuyruk)</h1>
+        <p>Modülo Aritmetiği ile Sonsuz Döngü</p>
+    </header>
+
+    <div class="section">
+        <h2>Görsel Simülasyon</h2>
+        <div class="clock-container" id="clock"></div>
+        <div style="text-align: center;">
+            <button class="btn btn-run" onclick="demoEnqueue()">Enqueue</button>
+            <button class="btn btn-reset" onclick="demoDequeue()">Dequeue</button>
+            <p id="status" style="margin-top: 10px;">Head: 0, Tail: 0</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Numpy Implementasyonu</h2>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code"><code class="language-python">import numpy as np
+
+class CircularQueue:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)
+        self.head = 0
+        self.tail = 0
+        self.size = 0
+        
+    def enqueue(self, val):
+        if self.size == self.capacity:
+            print("❌ Dolu!")
+            return
+        self.data[self.tail] = val
+        self.tail = (self.tail + 1) % self.capacity
+        self.size += 1
+        print(f"Enqueue({val}) -> {self.data}")
+        
+    def dequeue(self):
+        if self.size == 0:
+            print("❌ Boş!")
+            return
+        val = self.data[self.head]
+        self.data[self.head] = 0
+        self.head = (self.head + 1) % self.capacity
+        self.size -= 1
+        print(f"Dequeue() -> {val}")
+        return val
+
+q = CircularQueue(5)
+q.enqueue(10)
+q.enqueue(20)
+q.dequeue()
+q.enqueue(30)</code></pre>
+
+            <textarea id="code" class="code-editor">import numpy as np
+
+class CircularQueue:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)
+        self.head = 0
+        self.tail = 0
+        self.size = 0
+    def enqueue(self, val):
+        if self.size == self.capacity:
+            print("❌ Dolu!")
+            return
+        self.data[self.tail] = val
+        self.tail = (self.tail + 1) % self.capacity
+        self.size += 1
+        print(f"Enqueue({val}) -> {self.data}")
+    def dequeue(self):
+        if self.size == 0:
+            print("❌ Boş!")
+            return
+        val = self.data[self.head]
+        self.data[self.head] = 0
+        self.head = (self.head + 1) % self.capacity
+        self.size -= 1
+        print(f"Dequeue() -> {val}")
+        return val
+
+q = CircularQueue(5)
+q.enqueue(10)
+q.enqueue(20)
+q.dequeue()
+q.enqueue(30)</textarea>
+            
+            <div id="output-code" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="3a_queue_giris.html" class="btn">⬅️ Önceki: Queue</a>
+        <a href="3c_queue_python.html" class="btn btn-next">Sonraki: Python ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    // Visual
+    const container = document.getElementById('clock');
+    const status = document.getElementById('status');
+    const CAP = 8; const RADIUS = 130;
+    let head = 0; let tail = 0; let size = 0;
+    const items = new Array(CAP).fill(null);
+
+    function initVisual() {
+        container.innerHTML = '';
+        for(let i=0; i<CAP; i++) {
+            const angle = (i * (360 / CAP)) - 90;
+            const rad = angle * (Math.PI / 180);
+            const x = 150 + RADIUS * Math.cos(rad) - 25;
+            const y = 150 + RADIUS * Math.sin(rad) - 25;
+            const cell = document.createElement('div');
+            cell.className = 'cell'; cell.id = `cell-${i}`;
+            cell.style.left = `${x}px`; cell.style.top = `${y}px`;
+            cell.innerHTML = `<span class="idx-label">${i}</span><span class="val">-</span>`;
+            container.appendChild(cell);
+        }
+        updatePointers();
+    }
+
+    function updatePointers() {
+        for(let i=0; i<CAP; i++) {
+            const cell = document.getElementById(`cell-${i}`);
+            if(items[i] !== null) { cell.classList.add('filled'); cell.querySelector('.val').innerText = items[i]; }
+            else { cell.classList.remove('filled'); cell.querySelector('.val').innerText = '-'; }
+        }
+        status.innerText = `Head: ${head}, Tail: ${tail}, Size: ${size}`;
+    }
+
+    function demoEnqueue() {
+        if(size < CAP) { items[tail] = String.fromCharCode(65 + Math.floor(Math.random()*26)); tail = (tail + 1) % CAP; size++; updatePointers(); }
+    }
+    function demoDequeue() {
+        if(size > 0) { items[head] = null; head = (head + 1) % CAP; size--; updatePointers(); }
+    }
+    initVisual();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); await pyodide.loadPackage("numpy"); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+</body>
+</html>
