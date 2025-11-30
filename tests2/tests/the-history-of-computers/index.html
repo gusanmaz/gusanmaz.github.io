@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The History of Computers</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .container { display: flex; flex-direction: column; gap: 20px; }
+        .passage-box { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .question-box { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .hidden { display: none; }
+        .split-view { display: flex; flex-direction: row; gap: 20px; }
+        .split-view .passage-box, .split-view .question-box { flex: 1; }
+        button { cursor: pointer; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        button.secondary { background: #6c757d; }
+        button.secondary:hover { background: #545b62; }
+        .options label { display: block; margin: 10px 0; cursor: pointer; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: space-between; }
+    </style>
+    <script>
+        // Clear answers when starting/retaking the test
+        sessionStorage.removeItem('the-history-of-computers_answers');
+    </script>
+</head>
+<body>
+    <h1>The History of Computers</h1>
+    <div class="container">
+        <div class="passage-box">
+            <h2>Passage</h2>
+            <div id="passage-content">The history of computers covers their development from simple devices to aid calculation to modern day computers. The first mechanical computer, created by Charles Babbage in 1822, doesn't really resemble what most would consider a computer today. <br><br>Between 1833 and 1871, he created the Analytical Engine, a device he never finished, but it was the first to include an arithmetic logic unit, control flow in the form of conditional branching and loops, and integrated memory, making it the first design for a general-purpose computer that could be described in modern terms as Turing-complete.</div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="q1.html"><button>Start Test</button></a>
+        </div>
+    </div>
+</body>
+</html>
+    

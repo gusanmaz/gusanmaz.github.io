@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Äpfel - gesünder als gedacht - Question 4</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .container { display: flex; flex-direction: column; gap: 20px; }
+        .passage-box { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .question-box { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .hidden { display: none; }
+        .split-view { display: flex; flex-direction: row; gap: 20px; }
+        .split-view .passage-box { flex: 2; }
+        .split-view .question-box { flex: 1; }
+        button { cursor: pointer; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        button.secondary { background: #6c757d; }
+        button.secondary:hover { background: #545b62; }
+        .options label { display: block; margin: 10px 0; cursor: pointer; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <h1>Äpfel - gesünder als gedacht</h1>
+    
+    <!-- Controls -->
+    <div style="margin-bottom: 20px;">
+        <button id="toggle-btn" class="secondary" onclick="togglePassage()">Show Passage</button>
+    </div>
+
+    <div id="main-container" class="container">
+        <!-- Hidden Passage -->
+        <div id="passage-panel" class="passage-box hidden">
+            <h2>Passage</h2>
+            <div>Der Apfel ist wohl die bekannteste deutsche Obstsorte. Äpfel werden in Europa vor allem als Nahrungsmittel angepflanzt. Darüber hinaus schreibt man ihnen eine Wirkung als Heilmittel zu. In der Kunst symbolisieren Apfel und Apfelbaum die Sexualität, Fruchtbarkeit und das Leben, die Erkenntnis und Entscheidung sowie den Reichtum. Dass Äpfel gesund sind, gilt seit Generationen als sicher, denn schon bevor die Frucht wissenschaftlich untersucht wurde, hat man geraten, bei Krankheiten Äpfel zu essen. Was steckt denn wirklich im Apfel? Sind Äpfel tatsächlich so gesund, wie man sagt?<br>Ja, das ist korrekt. Wissenschaftlich lässt sich das bestätigen. Denn in einem Apfel stecken mehr als 30 Vitamine, Mineralstoffe, Spurenelemente, Ballaststoffe und hochwirksame sekundäre Pflanzenstoffe. So viele komplexe, gesunde Wirkstoffe auf einmal enthält kein anderes Lebensmittel. Äpfel sind eine wahre Vitaminbombe und ersetzen damit jedes Nahrungsergänzungsmittel. Im Apfel sind die lebenswichtigen Vitamine C, E, K, B1, B2, B6. Und besonders vitaminhaltig sind die sonnengereiften Äpfel, sie enthalten vor allem sehr viel Vitamin C, wahrscheinlich das bekannteste Vitamin. Das Vitamin C stärkt die Abwehrkräfte und schützt die Zellen. Das beugt Erkältungen vor und stärkt unser Immunsystem, wir werden also dadurch allgemein gesünder. Aber Vitamin C ist nicht alles, oder?<br>Sonst enthalten Äpfel eine ganze Fülle von Mineralstoffen. Mineralstoffe wie Kalium, Eisen, Jod und Zink sind wichtig für den gesamten Stoffwechsel, die Nerven und Muskeln. Kalium hilft außerdem, den Wasserhaushalt im Körper zu regulieren.<br>Und für die Verdauung, also auch wichtig für Menschen, die Gewichtsprobleme haben, sind Ballaststoffe wie zum Beispiel Pektin. Ballaststoffe regulieren die Verdauung und halten lange satt. Außerdem kann Pektin helfen, auf natürliche Weise den Cholesterinspiegel zu senken. Aber vor allem ist der Apfel reich an so genannten Antioxidantien. Hier sind besonders die sekundären Pflanzenstoffe wie die Polypenole zu nennen. So kann der gelblich-rote Farbstoff – das Quercetin – eine ganze Menge. Es sitzt vor allem in der Schale. Studien haben ergeben, dass dass Quercetin die gefährlichen freien Radikale fängt. Damit schützt es die Zellen und wirkt entzündungshemmend.<br>Mal eine andere Frage: Viele schälen einen Apfel vor dem Essen. Was ist die beste Art, einen Apfel zu essen?</div>
+        </div>
+
+        <!-- Question -->
+        <div class="question-box">
+            <h2>Question 4</h2>
+            <p>Äpfel sind Zeichen für Fruchtbarkeit und Reichtum.</p>
+            <div class="options">
+                
+                <label>
+                    <input type="radio" name="q4" value="0" onclick="saveAnswer(4, '0')">
+                    Richtig
+                </label>
+                <label>
+                    <input type="radio" name="q4" value="1" onclick="saveAnswer(4, '1')">
+                    Falsch
+                </label>
+            </div>
+            
+            <div class="nav-buttons">
+                <a href="q3.html"><button class="secondary">Previous</button></a>
+                <a href="q5.html"><button>Next Question</button></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        function togglePassage() {
+            const container = document.getElementById('main-container');
+            const passage = document.getElementById('passage-panel');
+            const btn = document.getElementById('toggle-btn');
+            
+            if (passage.classList.contains('hidden')) {
+                passage.classList.remove('hidden');
+                container.classList.add('split-view');
+                btn.textContent = 'Hide Passage';
+            } else {
+                passage.classList.add('hidden');
+                container.classList.remove('split-view');
+                btn.textContent = 'Show Passage';
+            }
+        }
+        
+        // Save answer to local storage (simple persistence for the session)
+        function saveAnswer(qId, value) {
+            const answers = JSON.parse(sessionStorage.getItem('pfel-ges-nder-als-gedacht_answers') || '{}');
+            answers[qId] = value;
+            sessionStorage.setItem('pfel-ges-nder-als-gedacht_answers', JSON.stringify(answers));
+        }
+
+
+        // Restore answer on load
+        function restoreAnswer(qId) {
+            const answers = JSON.parse(sessionStorage.getItem('pfel-ges-nder-als-gedacht_answers') || '{}');
+            if (answers[qId]) {
+                const el = document.querySelector(`input[value="${answers[qId]}"]`);
+                if (el) el.checked = true;
+            }
+        }
+    
+        window.onload = function() {
+            restoreAnswer(4);
+        };
+    </script>
+</body>
+</html>
+        

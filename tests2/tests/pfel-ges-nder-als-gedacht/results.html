@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Äpfel - gesünder als gedacht - Results</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .container { display: flex; flex-direction: column; gap: 20px; }
+        .passage-box { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .question-box { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .hidden { display: none; }
+        .split-view { display: flex; flex-direction: row; gap: 20px; }
+        .split-view .passage-box { flex: 2; }
+        .split-view .question-box { flex: 1; }
+        button { cursor: pointer; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        button.secondary { background: #6c757d; }
+        button.secondary:hover { background: #545b62; }
+        .options label { display: block; margin: 10px 0; cursor: pointer; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <h1>Test Completed</h1>
+    <div class="container">
+        <div class="question-box">
+            <h2>Your Results</h2>
+            <div id="score-display">Calculating...</div>
+            <div id="answers-review"></div>
+            <div style="margin-top: 20px;">
+                <a href="index.html"><button>Retake Test</button></a>
+                <a href="/"><button class="secondary">Upload New Test</button></a>
+            </div>
+        </div>
+    </div>
+    <script>
+        const questions = [{"id":1,"text":"Seit langem ist die gesundheitsfördernde Wirkung von Äpfeln bekannt.","options":["Richtig","Falsch"],"answer":"Richtig"},{"id":2,"text":"Die Komplexität von Inhaltsstoffen macht diese Obstsorte einzigartig.","options":["Richtig","Falsch"],"answer":"Richtig"},{"id":3,"text":"Menschen mit Gewichtsproblemen sollen Äpfel nur mit Bedacht und mit Vorsicht verzehren.","options":["Richtig","Falsch"],"answer":"Falsch"},{"id":4,"text":"Äpfel sind Zeichen für Fruchtbarkeit und Reichtum.","options":["Richtig","Falsch"],"answer":"Richtig"},{"id":5,"text":"Äpfel werden nur in Deutschland vor allem als Nahrungsmittel angepflanzt.","options":["Richtig","Falsch"],"answer":"Falsch"},{"id":6,"text":"So viele gesunde Wirkstoffe auf einmal enthalten eigentlich viele Lebensmittel.","options":["Richtig","Falsch"],"answer":"Falsch"}];
+        const answers = JSON.parse(sessionStorage.getItem('pfel-ges-nder-als-gedacht_answers') || '{}');
+        let score = 0;
+        let reviewHtml = '';
+
+        questions.forEach((q, idx) => {
+            const userAnswer = answers[q.id];
+            // Assuming answer in JSON is the correct index or value. 
+            // We'll assume the JSON provided 'answer' is the content string like "A", 
+            // but my current logic uses index 0-3. 
+            // Let's adjust the logic: The prompt said "Multiple choice questions... and answers". 
+            // Usually answer key is an index or the string. 
+            // I'll assume the 'answer' field in JSON matches one of the options strings OR is an index.
+            
+            // Simple check: is it an index?
+            let isCorrect = false;
+            // If answer is "A", map to index 0? Or just string match.
+            // Let's try string match against options[userAnswer].
+            
+            const userVal = (userAnswer !== undefined) ? q.options[userAnswer] : "No Answer";
+            
+            // Check if q.answer is an index or string
+            let correctVal = q.answer;
+            // Convert to string if it's likely an index (0-3)
+            if (typeof q.answer === 'number' && q.answer < q.options.length) {
+                 correctVal = q.options[q.answer];
+            }
+
+            if (userVal === correctVal) {
+                score++;
+                isCorrect = true;
+            }
+
+            reviewHtml += `
+                <div style="margin-top: 10px; padding: 10px; border-bottom: 1px solid #eee; color: ${isCorrect ? 'green' : 'red'}">
+                    <strong>Q${idx+1}:</strong> ${q.text} <br>
+                    Your Answer: ${userVal} <br>
+                    Correct Answer: ${correctVal}
+                </div>
+            `;
+        });
+
+        document.getElementById('score-display').innerHTML = `<h3>Score: ${score} / ${questions.length}</h3>`;
+        document.getElementById('answers-review').innerHTML = reviewHtml;
+    </script>
+</body>
+</html>
+    
