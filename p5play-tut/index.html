@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p5.play Eğitimi - İnteraktif Öğrenme</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+    
+    <!-- p5.play Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
+    <script src="https://p5play.org/v3/planck.min.js"></script>
+    <script src="https://p5play.org/v3/p5play.js"></script>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar">
+        <div class="logo">
+            <span class="logo-icon">🎮</span>
+            <h1>p5.play</h1>
+            <span class="version">v3 Rehberi</span>
+        </div>
+        <div id="nav-links"></div>
+        <div class="sidebar-footer">
+            <a href="https://p5play.org/learn" target="_blank" class="external-link">
+                <span>📚</span> Resmi Dokümantasyon
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="content">
+        <div id="lesson-container"></div>
+    </main>
+
+    <!-- Playground Helper - İçerik dosyalarından ÖNCE yüklenmeli! -->
+    <script src="playground.js"></script>
+    
+    <!-- İçerik Dosyaları -->
+    <script src="content/0_intro.js"></script>
+    <script src="content/1_sprites_basics.js"></script>
+    <script src="content/2_physics.js"></script>
+    <script src="content/3_movement.js"></script>
+    <script src="content/4_collisions.js"></script>
+    <script src="content/5_visuals.js"></script>
+    <script src="content/6_groups.js"></script>
+    <script src="content/7_input.js"></script>
+    <script src="content/8_camera.js"></script>
+    <script src="content/9_advanced.js"></script>
+    
+    <!-- Ana Veri ve Mantık -->
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
