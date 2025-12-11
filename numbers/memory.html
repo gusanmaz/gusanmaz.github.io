@@ -1074,23 +1074,66 @@
             </div>
         </div>
 
-        <div class="pointer-visual">
-            <div style="text-align: center;">
-                <div style="color: var(--text-muted); margin-bottom: 0.5rem;">Başlangıç:</div>
-                <div style="display: flex; gap: 1rem; justify-content: center; align-items: center;">
-                    <div class="var-box">
-                        <div class="var-name">a</div>
-                        <div class="var-addr">ref →</div>
+        <div class="content-box" style="background: var(--bg-code); padding: 1.5rem;">
+            <div style="display: flex; flex-wrap: wrap; gap: 3rem; justify-content: center;">
+                <!-- Başlangıç durumu -->
+                <div style="text-align: center;">
+                    <div style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">1. Başlangıç: a = 10, b = a</div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
+                        <div class="var-box" style="min-width: 60px;">
+                            <div class="var-name">a</div>
+                        </div>
+                        <div style="color: var(--accent);">→</div>
+                        <div class="var-box" style="background: rgba(68,255,68,0.15); border-color: #44ff44;">
+                            <div class="var-value">10</div>
+                            <div class="var-addr">@ ...1024</div>
+                        </div>
+                        <div style="color: var(--accent);">←</div>
+                        <div class="var-box" style="min-width: 60px;">
+                            <div class="var-name">b</div>
+                        </div>
                     </div>
-                    <div class="var-box" style="background: rgba(68,255,68,0.1);">
-                        <div class="var-value">10</div>
-                        <div class="var-addr">@ 0x...1024</div>
-                    </div>
-                    <div class="var-box">
-                        <div class="var-name">b</div>
-                        <div class="var-addr">ref →</div>
+                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.75rem;">
+                        a ve b <strong>aynı nesneye</strong> işaret ediyor
                     </div>
                 </div>
+                
+                <!-- Sonra durumu -->
+                <div style="text-align: center;">
+                    <div style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">2. Sonra: a = 20</div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
+                        <div class="var-box" style="min-width: 60px;">
+                            <div class="var-name">a</div>
+                        </div>
+                        <div style="color: var(--accent);">→</div>
+                        <div class="var-box" style="background: rgba(255,68,68,0.15); border-color: #ff6666;">
+                            <div class="var-value">20</div>
+                            <div class="var-addr">@ ...1344</div>
+                        </div>
+                    </div>
+                    <div style="height: 0.5rem;"></div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
+                        <div class="var-box" style="min-width: 60px;">
+                            <div class="var-name">b</div>
+                        </div>
+                        <div style="color: var(--accent);">→</div>
+                        <div class="var-box" style="background: rgba(68,255,68,0.15); border-color: #44ff44;">
+                            <div class="var-value">10</div>
+                            <div class="var-addr">@ ...1024</div>
+                        </div>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.75rem;">
+                        a <strong>yeni nesneye</strong> işaret ediyor, b hâlâ eskisine
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box formula" style="margin-top: 1.5rem; margin-bottom: 0;">
+                <strong>Immutable Neden Böyle?</strong><br>
+                <code>a = 20</code> dediğimizde 10 değeri 20'ye <em>dönüşmüyor</em>. 
+                Bunun yerine bellekte <strong>yeni bir 20 nesnesi</strong> oluşturuluyor ve 
+                <code>a</code> artık ona işaret ediyor. Eski 10 nesnesi yerinde duruyor, 
+                <code>b</code> hâlâ ona işaret ediyor.
             </div>
         </div>
 
