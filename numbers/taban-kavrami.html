@@ -169,22 +169,110 @@ Sola gittikçe konum artar</pre>
 
         <h3>Decimal → Herhangi Bir Tabana</h3>
 
-        <p>Sayıyı hedef tabana tekrar tekrar böl, kalanları ters sırada yaz.</p>
+        <p>Bu dönüşüm için <strong>"Tekrarlı Bölme Algoritması"</strong> kullanılır.</p>
+
+        <div class="content-box" style="background: var(--bg-code);">
+            <h4 style="margin-top: 0; color: var(--cyan);">📋 Algoritma</h4>
+            <div class="code-block" style="margin: 1rem 0;">
+                <div class="code-content">
+<pre><span class="line-num">1</span><span class="keyword">function</span> <span class="function">decimalToBase</span>(<span class="variable">sayi</span>, <span class="variable">taban</span>):
+<span class="line-num">2</span>    <span class="variable">sonuc</span> = <span class="string">""</span>                  <span class="comment">// boş string</span>
+<span class="line-num">3</span>    
+<span class="line-num">4</span>    <span class="keyword">while</span> <span class="variable">sayi</span> > <span class="number">0</span>:             <span class="comment">// sayı 0 olana kadar</span>
+<span class="line-num">5</span>        <span class="variable">kalan</span> = <span class="variable">sayi</span> % <span class="variable">taban</span>    <span class="comment">// mod işlemi (kalan)</span>
+<span class="line-num">6</span>        <span class="variable">sonuc</span> = <span class="variable">kalan</span> + <span class="variable">sonuc</span>   <span class="comment">// kalanı BAŞA ekle</span>
+<span class="line-num">7</span>        <span class="variable">sayi</span> = <span class="variable">sayi</span> // <span class="variable">taban</span>    <span class="comment">// tam bölme (floor)</span>
+<span class="line-num">8</span>    
+<span class="line-num">9</span>    <span class="keyword">return</span> <span class="variable">sonuc</span></pre>
+                </div>
+            </div>
+            
+            <p style="margin-bottom: 0;"><strong>Neden çalışıyor?</strong></p>
+            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                <li><code>sayı % taban</code> → en sağdaki (birler) basamağı verir</li>
+                <li><code>sayı // taban</code> → sayıyı bir basamak sağa kaydırır</li>
+                <li>Her adımda bir basamak çıkarıyoruz, en sağdan başlayarak</li>
+                <li>Bu yüzden kalanları ters sırada (başa ekleyerek) birleştiriyoruz</li>
+            </ul>
+        </div>
 
         <div class="code-block">
-            <div class="code-header">Örnek: Decimal 25 → Binary</div>
+            <div class="code-header">Örnek: 25₁₀ → Binary (taban 2)</div>
             <div class="code-content">
-<pre><span class="line-num">1</span><span class="comment">// 2'ye bölmeye devam et, kalanları not al</span>
+<pre><span class="line-num">1</span><span class="comment">// Başlangıç: sayı = 25, sonuç = ""</span>
 <span class="line-num">2</span>
-<span class="line-num">3</span>   25 ÷ 2 = 12  kalan: <span class="bin">1</span>  ↑
-<span class="line-num">4</span>   12 ÷ 2 = 6   kalan: <span class="bin">0</span>  │
-<span class="line-num">5</span>    6 ÷ 2 = 3   kalan: <span class="bin">0</span>  │ yukarı oku
-<span class="line-num">6</span>    3 ÷ 2 = 1   kalan: <span class="bin">1</span>  │
-<span class="line-num">7</span>    1 ÷ 2 = 0   kalan: <span class="bin">1</span>  ┘
-<span class="line-num">8</span>
-<span class="line-num">9</span><span class="comment">// Sonuç: Kalanları aşağıdan yukarı oku</span>
-<span class="line-num">10</span>   25₁₀ = <span class="bin">11001</span>₂</pre>
+<span class="line-num">3</span><span class="comment">// Adım 1:</span>
+<span class="line-num">4</span>   25 % 2 = <span class="bin">1</span>     <span class="comment">// kalan → sonuç = "1"</span>
+<span class="line-num">5</span>   25 // 2 = 12    <span class="comment">// yeni sayı</span>
+<span class="line-num">6</span>
+<span class="line-num">7</span><span class="comment">// Adım 2:</span>
+<span class="line-num">8</span>   12 % 2 = <span class="bin">0</span>     <span class="comment">// kalan → sonuç = "01"</span>
+<span class="line-num">9</span>   12 // 2 = 6     <span class="comment">// yeni sayı</span>
+<span class="line-num">10</span>
+<span class="line-num">11</span><span class="comment">// Adım 3:</span>
+<span class="line-num">12</span>   6 % 2 = <span class="bin">0</span>      <span class="comment">// kalan → sonuç = "001"</span>
+<span class="line-num">13</span>   6 // 2 = 3      <span class="comment">// yeni sayı</span>
+<span class="line-num">14</span>
+<span class="line-num">15</span><span class="comment">// Adım 4:</span>
+<span class="line-num">16</span>   3 % 2 = <span class="bin">1</span>      <span class="comment">// kalan → sonuç = "1001"</span>
+<span class="line-num">17</span>   3 // 2 = 1      <span class="comment">// yeni sayı</span>
+<span class="line-num">18</span>
+<span class="line-num">19</span><span class="comment">// Adım 5:</span>
+<span class="line-num">20</span>   1 % 2 = <span class="bin">1</span>      <span class="comment">// kalan → sonuç = "11001"</span>
+<span class="line-num">21</span>   1 // 2 = 0      <span class="comment">// sayı = 0, DUR!</span>
+<span class="line-num">22</span>
+<span class="line-num">23</span><span class="comment">// Sonuç: 25₁₀ = 11001₂</span></pre>
             </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">Örnek: 255₁₀ → Hex (taban 16)</div>
+            <div class="code-content">
+<pre><span class="line-num">1</span><span class="comment">// Hex'te 10=A, 11=B, 12=C, 13=D, 14=E, 15=F</span>
+<span class="line-num">2</span>
+<span class="line-num">3</span><span class="comment">// Adım 1:</span>
+<span class="line-num">4</span>   255 % 16 = <span class="hex">15</span>  → <span class="hex">F</span>    <span class="comment">// sonuç = "F"</span>
+<span class="line-num">5</span>   255 // 16 = 15
+<span class="line-num">6</span>
+<span class="line-num">7</span><span class="comment">// Adım 2:</span>
+<span class="line-num">8</span>   15 % 16 = <span class="hex">15</span>   → <span class="hex">F</span>    <span class="comment">// sonuç = "FF"</span>
+<span class="line-num">9</span>   15 // 16 = 0           <span class="comment">// DUR!</span>
+<span class="line-num">10</span>
+<span class="line-num">11</span><span class="comment">// Sonuç: 255₁₀ = FF₁₆</span></pre>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">Python'da Gerçek Kod</div>
+            <div class="code-content">
+<pre><span class="line-num">1</span><span class="keyword">def</span> <span class="function">decimal_to_base</span>(<span class="variable">sayi</span>, <span class="variable">taban</span>):
+<span class="line-num">2</span>    <span class="keyword">if</span> <span class="variable">sayi</span> == <span class="number">0</span>:
+<span class="line-num">3</span>        <span class="keyword">return</span> <span class="string">"0"</span>
+<span class="line-num">4</span>    
+<span class="line-num">5</span>    <span class="variable">rakamlar</span> = <span class="string">"0123456789ABCDEF"</span>
+<span class="line-num">6</span>    <span class="variable">sonuc</span> = <span class="string">""</span>
+<span class="line-num">7</span>    
+<span class="line-num">8</span>    <span class="keyword">while</span> <span class="variable">sayi</span> > <span class="number">0</span>:
+<span class="line-num">9</span>        <span class="variable">kalan</span> = <span class="variable">sayi</span> % <span class="variable">taban</span>
+<span class="line-num">10</span>        <span class="variable">sonuc</span> = <span class="variable">rakamlar</span>[<span class="variable">kalan</span>] + <span class="variable">sonuc</span>
+<span class="line-num">11</span>        <span class="variable">sayi</span> = <span class="variable">sayi</span> // <span class="variable">taban</span>
+<span class="line-num">12</span>    
+<span class="line-num">13</span>    <span class="keyword">return</span> <span class="variable">sonuc</span>
+<span class="line-num">14</span>
+<span class="line-num">15</span><span class="comment"># Test</span>
+<span class="line-num">16</span><span class="function">print</span>(<span class="function">decimal_to_base</span>(<span class="number">25</span>, <span class="number">2</span>))   <span class="comment"># "11001"</span>
+<span class="line-num">17</span><span class="function">print</span>(<span class="function">decimal_to_base</span>(<span class="number">255</span>, <span class="number">16</span>)) <span class="comment"># "FF"</span>
+<span class="line-num">18</span><span class="function">print</span>(<span class="function">decimal_to_base</span>(<span class="number">100</span>, <span class="number">8</span>))  <span class="comment"># "144"</span></pre>
+            </div>
+        </div>
+
+        <div class="info-box concept">
+            <strong>Görselleştirme: Neden Ters Sırada?</strong><br>
+            <code>sayı % taban</code> her zaman <strong>en sağdaki basamağı</strong> verir.<br>
+            İlk bulduğumuz kalan → birler basamağı (en sağ)<br>
+            İkinci kalan → onlar basamağı<br>
+            Son kalan → en soldaki basamak<br>
+            Bu yüzden kalanları <strong>ters çeviriyoruz</strong> (veya başa ekliyoruz).
         </div>
 
         <h2>Octal (8'lik) Sistem</h2>
