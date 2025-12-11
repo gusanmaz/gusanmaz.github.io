@@ -11,9 +11,7 @@
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: #333;
             margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 40px 20px;
             min-height: 100vh;
         }
         .container {
@@ -22,68 +20,143 @@
             border-radius: 20px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
             text-align: center;
-            max-width: 800px;
-            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
         }
         h1 { color: #11998e; margin-bottom: 10px; }
-        p { color: #666; font-size: 1.2em; margin-bottom: 40px; }
+        .subtitle { color: #666; font-size: 1.2em; margin-bottom: 30px; }
         
         .card-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
+            margin-top: 20px;
         }
         
         .card {
             background: #f8f9fa;
             border: 2px solid transparent;
             border-radius: 15px;
-            padding: 30px;
-            width: 300px;
+            padding: 25px;
             cursor: pointer;
             transition: all 0.3s;
             text-decoration: none;
             color: #333;
+            text-align: left;
         }
         
-        .card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
         
-        .card-numpy { border-color: #2980b9; }
-        .card-numpy:hover { background: #ebf5fb; }
-        .card-numpy h3 { color: #2980b9; }
+        .card-1 { border-color: #3498db; }
+        .card-1:hover { background: #ebf5fb; }
+        .card-1 h3 { color: #3498db; }
         
-        .card-python { border-color: #27ae60; }
-        .card-python:hover { background: #e9f7ef; }
-        .card-python h3 { color: #27ae60; }
+        .card-2 { border-color: #9b59b6; }
+        .card-2:hover { background: #f5eef8; }
+        .card-2 h3 { color: #9b59b6; }
         
-        .icon { font-size: 3em; margin-bottom: 20px; display: block; }
+        .card-3 { border-color: #27ae60; }
+        .card-3:hover { background: #e9f7ef; }
+        .card-3 h3 { color: #27ae60; }
+        
+        .card-4 { border-color: #e67e22; }
+        .card-4:hover { background: #fef5e7; }
+        .card-4 h3 { color: #e67e22; }
+        
+        .card-5 { border-color: #e74c3c; }
+        .card-5:hover { background: #fdedec; }
+        .card-5 h3 { color: #e74c3c; }
+        
+        .card-6 { border-color: #1abc9c; }
+        .card-6:hover { background: #e8f8f5; }
+        .card-6 h3 { color: #1abc9c; }
+        
+        .card-7 { border-color: #f39c12; }
+        .card-7:hover { background: #fef9e7; }
+        .card-7 h3 { color: #f39c12; }
+        
+        .icon { font-size: 2em; margin-bottom: 10px; display: block; }
+        .card h3 { margin: 10px 0; font-size: 1.1em; }
+        .card p { margin: 0; font-size: 0.9em; color: #666; }
+        .card small { color: #999; font-size: 0.8em; }
+        
+        .section-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            text-align: left;
+        }
+        
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            background: rgba(0,0,0,0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+        .back-link:hover { background: rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
+    <a href="index.html" class="back-link">🏠 Ana Menü</a>
+    
     <div class="container">
         <h1>🚶 Queue (Kuyruk) Dünyası</h1>
-        <p>Nasıl öğrenmek istersiniz?</p>
+        <p class="subtitle">FIFO: First In, First Out</p>
         
+        <h2 class="section-title">📚 Temel Kavramlar</h2>
         <div class="card-container">
-            <a href="queue_numpy.html" class="card card-numpy">
-                <span class="icon">🔄</span>
-                <h3>Derinlemesine (Numpy)</h3>
-                <p>Dairesel Kuyruk (Circular Queue), Modülo operatörü ve sabit boyut zorlukları.</p>
-                <small>Mühendislik Yaklaşımı</small>
+            <a href="3a_queue_giris.html" class="card card-1">
+                <span class="icon">🚶</span>
+                <h3>3.1: Queue Nedir?</h3>
+                <p>FIFO prensibi, temel operasyonlar ve görselleştirme</p>
             </a>
             
-            <a href="queue_python.html" class="card card-python">
-                <span class="icon">🚀</span>
-                <h3>Pratik (Python)</h3>
-                <p>collections.deque kullanımı, performans farkları ve gerçek hayat simülasyonları.</p>
-                <small>Yazılımcı Yaklaşımı</small>
+            <a href="3b_queue_circular.html" class="card card-2">
+                <span class="icon">🔄</span>
+                <h3>3.2: Circular Queue</h3>
+                <p>Dairesel kuyruk, modülo aritmetiği, Numpy implementasyonu</p>
+            </a>
+            
+            <a href="3c_queue_python.html" class="card card-3">
+                <span class="icon">🐍</span>
+                <h3>3.3: Python Deque</h3>
+                <p>collections.deque, performans farkları, wrapper class</p>
             </a>
         </div>
-    </div>
-
-    <div style="position: fixed; top: 20px; left: 20px;">
-        <a href="analiz.html" style="color: white; text-decoration: none; font-weight: bold;">⬅️ Analiz Sayfasına Dön</a>
+        
+        <h2 class="section-title">🧪 Uygulamalar & Algoritmalar</h2>
+        <div class="card-container">
+            <a href="3d_queue_ornekler.html" class="card card-4">
+                <span class="icon">🧩</span>
+                <h3>3.4: Queue Örnekleri</h3>
+                <p>Sıcak patates, yazıcı kuyruğu, sliding window, scheduler</p>
+            </a>
+            
+            <a href="3e_queue_analiz.html" class="card card-5">
+                <span class="icon">📊</span>
+                <h3>3.5: Big O Analizi</h3>
+                <p>Zaman ve alan karmaşıklığı, performans karşılaştırma</p>
+            </a>
+            
+            <a href="3f_queue_bfs.html" class="card card-6">
+                <span class="icon">🌳</span>
+                <h3>3.6: BFS Algoritması</h3>
+                <p>Genişlik öncelikli arama, graf traversal, en kısa yol</p>
+            </a>
+            
+            <a href="3g_queue_priority.html" class="card card-7">
+                <span class="icon">⭐</span>
+                <h3>3.7: Priority Queue</h3>
+                <p>Heap veri yapısı, heapq modülü, Dijkstra algoritması</p>
+            </a>
+        </div>
     </div>
 </body>
 </html>

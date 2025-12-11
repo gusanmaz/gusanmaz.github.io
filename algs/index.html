@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmalar ve Veri Yapıları - Ana Menü</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        header h1 {
+            font-size: 3em;
+            color: #e94560;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+        }
+        
+        header p {
+            color: #a0a0a0;
+            font-size: 1.3em;
+        }
+        
+        .modules {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .module {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .module-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .module-title {
+            color: white;
+            font-size: 1.5em;
+        }
+        
+        .module-subtitle {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .topics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .topic {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .topic:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            border-color: #e94560;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+        }
+        
+        .topic-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .topic h3 {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .topic p {
+            font-size: 0.85em;
+            color: #999;
+        }
+        
+        /* Module Colors */
+        .module-0 .module-number { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .module-0 .topic:hover { border-color: #667eea; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2); }
+        
+        .module-1 .module-number { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .module-1 .topic:hover { border-color: #3498db; box-shadow: 0 10px 30px rgba(52, 152, 219, 0.2); }
+        
+        .module-2 .module-number { background: linear-gradient(135deg, #8e44ad, #c0392b); }
+        .module-2 .topic:hover { border-color: #8e44ad; box-shadow: 0 10px 30px rgba(142, 68, 173, 0.2); }
+        
+        .module-3 .module-number { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .module-3 .topic:hover { border-color: #11998e; box-shadow: 0 10px 30px rgba(17, 153, 142, 0.2); }
+        
+        .module-4 .module-number { background: linear-gradient(135deg, #e94560, #764ba2); }
+        .module-4 .topic:hover { border-color: #e94560; box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2); }
+        
+        .menu-link {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .menu-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐍 Algoritmalar ve Veri Yapıları</h1>
+            <p>Python ile İnteraktif Ders Notları</p>
+        </header>
+        
+        <div class="modules">
+            <!-- Modül 0: Python Temelleri -->
+            <div class="module module-0">
+                <div class="module-header">
+                    <div class="module-number">0</div>
+                    <div>
+                        <div class="module-title">Python Temelleri</div>
+                        <div class="module-subtitle">Fonksiyonlar ve Sınıflar</div>
+                    </div>
+                </div>
+                <div class="topics">
+                    <a href="fonksiyonlar.html" class="topic">
+                        <div class="topic-icon">📚</div>
+                        <h3>Fonksiyonlar</h3>
+                        <p>def, return, parametreler, recursion</p>
+                    </a>
+                    <a href="siniflar.html" class="topic">
+                        <div class="topic-icon">🎯</div>
+                        <h3>Sınıflar ve Objeler</h3>
+                        <p>OOP, __init__, self, instance methods</p>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Modül 1: Algoritma Analizi ve Diziler -->
+            <div class="module module-1">
+                <div class="module-header">
+                    <div class="module-number">1</div>
+                    <div>
+                        <div class="module-title">Algoritma Analizi & Diziler</div>
+                        <div class="module-subtitle">Big O, C Dizileri, Numpy</div>
+                    </div>
+                </div>
+                <div class="topics">
+                    <a href="1a_analiz_giris.html" class="topic">
+                        <div class="topic-icon">📊</div>
+                        <h3>1.1: Algoritma Analizi</h3>
+                        <p>Big O notasyonu, zaman karmaşıklığı</p>
+                    </a>
+                    <a href="1b_c_dizileri.html" class="topic">
+                        <div class="topic-icon">📦</div>
+                        <h3>1.2: C Dizileri</h3>
+                        <p>Bellek yapısı, pointer arithmetic</p>
+                    </a>
+                    <a href="1c_numpy_detay.html" class="topic">
+                        <div class="topic-icon">🔢</div>
+                        <h3>1.3: Numpy Detay</h3>
+                        <p>ndarray, broadcasting, vektörizasyon</p>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Modül 2: Stack -->
+            <div class="module module-2">
+                <div class="module-header">
+                    <div class="module-number">2</div>
+                    <div>
+                        <div class="module-title">Stack (Yığın)</div>
+                        <div class="module-subtitle">LIFO: Last In, First Out</div>
+                    </div>
+                </div>
+                <div class="topics">
+                    <a href="2a_stack_giris.html" class="topic">
+                        <div class="topic-icon">📚</div>
+                        <h3>2.1: Stack Nedir?</h3>
+                        <p>LIFO prensibi, push/pop operasyonları</p>
+                    </a>
+                    <a href="2b_stack_numpy.html" class="topic">
+                        <div class="topic-icon">🔢</div>
+                        <h3>2.2: Numpy ile Stack</h3>
+                        <p>Sabit boyut, stack pointer</p>
+                    </a>
+                    <a href="2c_stack_analiz.html" class="topic">
+                        <div class="topic-icon">📊</div>
+                        <h3>2.3: Big O Analizi</h3>
+                        <p>Performans karşılaştırma</p>
+                    </a>
+                    <a href="2d_stack_python.html" class="topic">
+                        <div class="topic-icon">🐍</div>
+                        <h3>2.4: Python List Stack</h3>
+                        <p>Python listesi ile stack</p>
+                    </a>
+                    <a href="2e_stack_ornekler.html" class="topic">
+                        <div class="topic-icon">🧩</div>
+                        <h3>2.5: Örnekler</h3>
+                        <p>Parantez dengeleme, undo/redo</p>
+                    </a>
+                    <a href="2f_stack_aritmetik.html" class="topic">
+                        <div class="topic-icon">🔣</div>
+                        <h3>2.6: Aritmetik İfadeler</h3>
+                        <p>Dijkstra'nın iki stack algoritması</p>
+                    </a>
+                </div>
+                <a href="stack.html" class="menu-link">📋 Stack Alt Menüsü →</a>
+            </div>
+            
+            <!-- Modül 3: Queue -->
+            <div class="module module-3">
+                <div class="module-header">
+                    <div class="module-number">3</div>
+                    <div>
+                        <div class="module-title">Queue (Kuyruk)</div>
+                        <div class="module-subtitle">FIFO: First In, First Out</div>
+                    </div>
+                </div>
+                <div class="topics">
+                    <a href="3a_queue_giris.html" class="topic">
+                        <div class="topic-icon">🚶</div>
+                        <h3>3.1: Queue Nedir?</h3>
+                        <p>FIFO prensibi, enqueue/dequeue</p>
+                    </a>
+                    <a href="3b_queue_circular.html" class="topic">
+                        <div class="topic-icon">🔄</div>
+                        <h3>3.2: Circular Queue</h3>
+                        <p>Dairesel kuyruk, modülo</p>
+                    </a>
+                    <a href="3c_queue_python.html" class="topic">
+                        <div class="topic-icon">🐍</div>
+                        <h3>3.3: Python Deque</h3>
+                        <p>collections.deque</p>
+                    </a>
+                    <a href="3d_queue_ornekler.html" class="topic">
+                        <div class="topic-icon">🧩</div>
+                        <h3>3.4: Örnekler</h3>
+                        <p>Sıcak patates, sliding window</p>
+                    </a>
+                    <a href="3e_queue_analiz.html" class="topic">
+                        <div class="topic-icon">📊</div>
+                        <h3>3.5: Big O Analizi</h3>
+                        <p>Performans karşılaştırma</p>
+                    </a>
+                    <a href="3f_queue_bfs.html" class="topic">
+                        <div class="topic-icon">🌳</div>
+                        <h3>3.6: BFS Algoritması</h3>
+                        <p>Genişlik öncelikli arama</p>
+                    </a>
+                    <a href="3g_queue_priority.html" class="topic">
+                        <div class="topic-icon">⭐</div>
+                        <h3>3.7: Priority Queue</h3>
+                        <p>Heap, Dijkstra algoritması</p>
+                    </a>
+                </div>
+                <a href="queue.html" class="menu-link">📋 Queue Alt Menüsü →</a>
+            </div>
+            
+            <!-- Modül 4: Linked List -->
+            <div class="module module-4">
+                <div class="module-header">
+                    <div class="module-number">4</div>
+                    <div>
+                        <div class="module-title">Linked List (Bağlı Liste)</div>
+                        <div class="module-subtitle">Dinamik Veri Yapısı</div>
+                    </div>
+                </div>
+                <div class="topics">
+                    <a href="4a_linked_list_giris.html" class="topic">
+                        <div class="topic-icon">🔗</div>
+                        <h3>4.1: Linked List Nedir?</h3>
+                        <p>Node yapısı, pointer kavramı</p>
+                    </a>
+                    <a href="4b_linked_list_tek.html" class="topic">
+                        <div class="topic-icon">➡️</div>
+                        <h3>4.2: Singly Linked List</h3>
+                        <p>Tek yönlü liste</p>
+                    </a>
+                    <a href="4c_linked_list_cift.html" class="topic">
+                        <div class="topic-icon">↔️</div>
+                        <h3>4.3: Doubly Linked List</h3>
+                        <p>Çift yönlü liste</p>
+                    </a>
+                    <a href="4d_linked_list_circular.html" class="topic">
+                        <div class="topic-icon">🔄</div>
+                        <h3>4.4: Circular Linked List</h3>
+                        <p>Dairesel liste, Josephus</p>
+                    </a>
+                    <a href="4e_linked_list_python.html" class="topic">
+                        <div class="topic-icon">🐍</div>
+                        <h3>4.5: Python ile Pratik</h3>
+                        <p>collections.deque, pratik kullanım</p>
+                    </a>
+                    <a href="4f_linked_list_algoritmalar.html" class="topic">
+                        <div class="topic-icon">🧩</div>
+                        <h3>4.6: Algoritmalar</h3>
+                        <p>Tersine çevirme, döngü tespiti</p>
+                    </a>
+                    <a href="4g_linked_list_analiz.html" class="topic">
+                        <div class="topic-icon">📊</div>
+                        <h3>4.7: Big O Analizi</h3>
+                        <p>Array vs Linked List</p>
+                    </a>
+                </div>
+                <a href="linked_list.html" class="menu-link">📋 Linked List Alt Menüsü →</a>
+            </div>
+        </div>
+        
+        <footer>
+            <p>🐍 Python ile Algoritmalar ve Veri Yapıları Dersi</p>
+        </footer>
+    </div>
+</body>
+</html>
+

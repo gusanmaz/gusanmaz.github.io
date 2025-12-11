@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linked List (Bağlı Liste) - Ana Menü</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 { 
+            color: #667eea; 
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle { 
+            color: #666; 
+            font-size: 1.2em; 
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: #333;
+            text-align: left;
+        }
+        
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+        }
+        
+        .card-1 { border-color: #3498db; }
+        .card-1:hover { background: #ebf5fb; }
+        .card-1 h3 { color: #3498db; }
+        
+        .card-2 { border-color: #27ae60; }
+        .card-2:hover { background: #e9f7ef; }
+        .card-2 h3 { color: #27ae60; }
+        
+        .card-3 { border-color: #9b59b6; }
+        .card-3:hover { background: #f5eef8; }
+        .card-3 h3 { color: #9b59b6; }
+        
+        .card-4 { border-color: #e67e22; }
+        .card-4:hover { background: #fef5e7; }
+        .card-4 h3 { color: #e67e22; }
+        
+        .card-5 { border-color: #1abc9c; }
+        .card-5:hover { background: #e8f8f5; }
+        .card-5 h3 { color: #1abc9c; }
+        
+        .card-6 { border-color: #e74c3c; }
+        .card-6:hover { background: #fdedec; }
+        .card-6 h3 { color: #e74c3c; }
+        
+        .card-7 { border-color: #34495e; }
+        .card-7:hover { background: #ebedef; }
+        .card-7 h3 { color: #34495e; }
+        
+        .icon { 
+            font-size: 2em; 
+            margin-bottom: 10px; 
+            display: block; 
+        }
+        
+        .card h3 { 
+            margin: 10px 0; 
+            font-size: 1.1em; 
+        }
+        
+        .card p { 
+            margin: 0; 
+            font-size: 0.9em; 
+            color: #666; 
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            text-align: left;
+        }
+        
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            background: rgba(0,0,0,0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+        
+        .back-link:hover { 
+            background: rgba(0,0,0,0.3); 
+        }
+        
+        .visual-demo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8eb);
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        
+        .node-visual {
+            display: flex;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .node-data {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .node-next {
+            padding: 10px 15px;
+            background: #ecf0f1;
+            font-size: 12px;
+        }
+        
+        .arrow {
+            color: #e74c3c;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">🏠 Ana Menü</a>
+    
+    <div class="container">
+        <h1>🔗 Linked List (Bağlı Liste)</h1>
+        <p class="subtitle">Dinamik Veri Yapısının Temeli</p>
+        
+        <div class="visual-demo">
+            <span style="color: #27ae60; font-weight: bold;">HEAD →</span>
+            <div class="node-visual">
+                <div class="node-data">A</div>
+                <div class="node-next">next</div>
+            </div>
+            <span class="arrow">→</span>
+            <div class="node-visual">
+                <div class="node-data">B</div>
+                <div class="node-next">next</div>
+            </div>
+            <span class="arrow">→</span>
+            <div class="node-visual">
+                <div class="node-data">C</div>
+                <div class="node-next">null</div>
+            </div>
+            <span class="arrow">→</span>
+            <span style="background: #e74c3c; color: white; padding: 8px 15px; border-radius: 5px;">NULL</span>
+        </div>
+        
+        <h2 class="section-title">📚 Temel Kavramlar</h2>
+        <div class="card-container">
+            <a href="4a_linked_list_giris.html" class="card card-1">
+                <span class="icon">🔗</span>
+                <h3>4.1: Bağlı Liste Nedir?</h3>
+                <p>Node yapısı, pointer kavramı, Array vs Linked List karşılaştırma</p>
+            </a>
+            
+            <a href="4b_linked_list_tek.html" class="card card-2">
+                <span class="icon">➡️</span>
+                <h3>4.2: Singly Linked List</h3>
+                <p>Tek yönlü liste, temel operasyonlar, tail pointer optimizasyonu</p>
+            </a>
+            
+            <a href="4c_linked_list_cift.html" class="card card-3">
+                <span class="icon">↔️</span>
+                <h3>4.3: Doubly Linked List</h3>
+                <p>Çift yönlü liste, ileri-geri hareket, O(1) sondan silme</p>
+            </a>
+            
+            <a href="4d_linked_list_circular.html" class="card card-4">
+                <span class="icon">🔄</span>
+                <h3>4.4: Circular Linked List</h3>
+                <p>Dairesel liste, sonsuz döngü, Josephus problemi</p>
+            </a>
+        </div>
+        
+        <h2 class="section-title">🛠️ Pratik & Algoritmalar</h2>
+        <div class="card-container">
+            <a href="4e_linked_list_python.html" class="card card-5">
+                <span class="icon">🐍</span>
+                <h3>4.5: Python ile Pratik</h3>
+                <p>collections.deque, performans karşılaştırma, wrapper class</p>
+            </a>
+            
+            <a href="4f_linked_list_algoritmalar.html" class="card card-6">
+                <span class="icon">🧩</span>
+                <h3>4.6: Algoritmalar</h3>
+                <p>Tersine çevirme, döngü tespiti, orta nokta, merge sorted</p>
+            </a>
+            
+            <a href="4g_linked_list_analiz.html" class="card card-7">
+                <span class="icon">📊</span>
+                <h3>4.7: Big O Analizi</h3>
+                <p>Zaman/alan karmaşıklığı, ne zaman hangisi, benchmark</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+

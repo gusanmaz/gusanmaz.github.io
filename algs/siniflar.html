@@ -340,9 +340,10 @@
             <h1>🎯 Python Sınıflar ve Objeler</h1>
             <p>Algoritmalar ve Veri Yapıları Dersi - Object-Oriented Programming (OOP)</p>
             <div class="nav-links">
+                <a href="index.html">🏠 Ana Menü</a>
                 <a href="fonksiyonlar.html">📚 Fonksiyonlar</a>
-                <a href="siniflar.html">🎯 Sınıflar ve Objeler</a>
-                <a href="1a_analiz_giris.html">📊 Veri Yapıları Ders 1</a>
+                <a href="siniflar.html">🎯 Sınıflar</a>
+                <a href="1a_analiz_giris.html">📊 Bölüm 1 →</a>
             </div>
         </header>
 
@@ -595,7 +596,11 @@ dikdortgen2.bilgi_yazdir()</code></pre>
                     <button class="run-button" onclick="runCode(21)">▶ Çalıştır</button>
                 </div>
                 <div class="code-editor">
-                    <pre><code class="language-python" id="code21">import math
+                    <pre><code class="language-python" id="code21">def ebob_hesapla(a, b):
+    """En Büyük Ortak Bölen (Öklid algoritması)"""
+    while b:
+        a, b = b, a % b
+    return a
 
 class Kesir:
     """Matematiksel kesir sınıfı"""
@@ -613,7 +618,7 @@ class Kesir:
     
     def sadelestir(self):
         """Kesri sadeleştirir (EBOB ile)"""
-        ebob = math.gcd(abs(self.pay), abs(self.payda))
+        ebob = ebob_hesapla(abs(self.pay), abs(self.payda))
         self.pay //= ebob
         self.payda //= ebob
         
@@ -733,9 +738,7 @@ print(f"\n1/2 + 1/3 + 1/6 = {sonuc.goster()}")</code></pre>
                     <button class="run-button" onclick="runCode(22)">▶ Çalıştır</button>
                 </div>
                 <div class="code-editor">
-                    <pre><code class="language-python" id="code22">import math
-
-class Ucgen:
+                    <pre><code class="language-python" id="code22">class Ucgen:
     """Üçgen sınıfı - üç kenar uzunluğu ile tanımlanır"""
     
     def __init__(self, a, b, c):
@@ -763,7 +766,7 @@ class Ucgen:
             return 0
         
         s = self.cevre() / 2
-        alan = math.sqrt(s * (s - self.a) * (s - self.b) * (s - self.c))
+        alan = (s * (s - self.a) * (s - self.b) * (s - self.c)) ** 0.5
         return alan
     
     def dik_mi(self):
@@ -1019,7 +1022,11 @@ araba1.bilgi()
                 <li>Instance Variables ve Methods</li>
                 <li>Pratik örnekler: Dikdörtgen, Üçgen, Öğrenci, Banka</li>
             </ul>
-            <p style="margin-top: 20px;"><strong>← Önceki ders:</strong> <a href="fonksiyonlar.html">Fonksiyonlar</a></p>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <a href="fonksiyonlar.html" style="color: #f5576c;">← Önceki: Fonksiyonlar</a>
+                <a href="index.html" style="color: #f5576c;">🏠 Ana Menü</a>
+                <a href="1a_analiz_giris.html" style="color: #f5576c;">Sonraki: Bölüm 1 →</a>
+            </div>
         </footer>
     </div>
 

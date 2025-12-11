@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.7: Linked List Analizi ve Big O</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-table th {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .comparison-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .o1 { color: #27ae60; font-weight: bold; }
+        .on { color: #e74c3c; font-weight: bold; }
+        .amortized { color: #f39c12; font-weight: bold; }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+        
+        .summary-card h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .use-case {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .use-array { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: 2px solid #2196f3; }
+        .use-linked { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: 2px solid #4caf50; }
+        
+        .memory-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .memory-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .memory-cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .cell-array { background: #3498db; color: white; }
+        .cell-node { background: #27ae60; color: white; }
+        .cell-pointer { background: #e74c3c; color: white; font-size: 10px; }
+        .cell-empty { background: #ecf0f1; color: #bdc3c7; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📊 4.7: Linked List Analizi</h1>
+        <p>Big O Karşılaştırması ve Seçim Kriterleri</p>
+    </header>
+
+    <div class="section">
+        <h2>⏱️ Zaman Karmaşıklığı Karşılaştırması</h2>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Operasyon</th>
+                    <th>Array</th>
+                    <th>Singly LL</th>
+                    <th>Doubly LL</th>
+                    <th>Python list</th>
+                    <th>deque</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Erişim (index)</strong></td>
+                    <td class="o1">O(1)</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                    <td class="o1">O(1)</td>
+                    <td class="on">O(n)</td>
+                </tr>
+                <tr>
+                    <td><strong>Arama (değer)</strong></td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                </tr>
+                <tr>
+                    <td><strong>Başa Ekleme</strong></td>
+                    <td class="on">O(n)</td>
+                    <td class="o1">O(1)</td>
+                    <td class="o1">O(1)</td>
+                    <td class="on">O(n)</td>
+                    <td class="o1">O(1)</td>
+                </tr>
+                <tr>
+                    <td><strong>Sona Ekleme</strong></td>
+                    <td class="amortized">O(1)*</td>
+                    <td class="on">O(n)/O(1)†</td>
+                    <td class="o1">O(1)</td>
+                    <td class="amortized">O(1)*</td>
+                    <td class="o1">O(1)</td>
+                </tr>
+                <tr>
+                    <td><strong>Ortaya Ekleme</strong></td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                </tr>
+                <tr>
+                    <td><strong>Baştan Silme</strong></td>
+                    <td class="on">O(n)</td>
+                    <td class="o1">O(1)</td>
+                    <td class="o1">O(1)</td>
+                    <td class="on">O(n)</td>
+                    <td class="o1">O(1)</td>
+                </tr>
+                <tr>
+                    <td><strong>Sondan Silme</strong></td>
+                    <td class="o1">O(1)</td>
+                    <td class="on">O(n)</td>
+                    <td class="o1">O(1)</td>
+                    <td class="o1">O(1)</td>
+                    <td class="o1">O(1)</td>
+                </tr>
+                <tr>
+                    <td><strong>Ortadan Silme</strong></td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)‡</td>
+                    <td class="on">O(n)</td>
+                    <td class="on">O(n)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 14px; color: #666; margin-top: 10px;">
+            * Amortized O(1) - Çoğu durumda O(1), bazen yeniden boyutlandırma gerekir<br>
+            † Tail pointer varsa O(1)<br>
+            ‡ Node verilmişse O(1), değer ile aranıyorsa O(n)
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>💾 Alan Karmaşıklığı</h2>
+        
+        <div class="memory-diagram">
+            <div>
+                <h4 style="margin-top: 0;">📦 Array (Bitişik Hafıza)</h4>
+                <div class="memory-row">
+                    <div class="memory-cell cell-array">10</div>
+                    <div class="memory-cell cell-array">20</div>
+                    <div class="memory-cell cell-array">30</div>
+                    <div class="memory-cell cell-array">40</div>
+                    <div class="memory-cell cell-empty">-</div>
+                    <div class="memory-cell cell-empty">-</div>
+                    <span style="margin-left: 15px;">Toplam: 4 × size(int) = <strong>16 byte</strong></span>
+                </div>
+            </div>
+            
+            <div>
+                <h4>🔗 Linked List (Dağınık Hafıza + Pointer)</h4>
+                <div class="memory-row">
+                    <div style="display: flex; border: 2px solid #2c3e50; border-radius: 8px; overflow: hidden;">
+                        <div class="memory-cell cell-node">10</div>
+                        <div class="memory-cell cell-pointer">ptr</div>
+                    </div>
+                    <span>→</span>
+                    <div style="display: flex; border: 2px solid #2c3e50; border-radius: 8px; overflow: hidden;">
+                        <div class="memory-cell cell-node">20</div>
+                        <div class="memory-cell cell-pointer">ptr</div>
+                    </div>
+                    <span>→</span>
+                    <div style="display: flex; border: 2px solid #2c3e50; border-radius: 8px; overflow: hidden;">
+                        <div class="memory-cell cell-node">30</div>
+                        <div class="memory-cell cell-pointer">ptr</div>
+                    </div>
+                    <span>→</span>
+                    <div style="display: flex; border: 2px solid #2c3e50; border-radius: 8px; overflow: hidden;">
+                        <div class="memory-cell cell-node">40</div>
+                        <div class="memory-cell cell-pointer">null</div>
+                    </div>
+                </div>
+                <p style="margin-top: 10px;">Toplam: 4 × (size(int) + size(pointer)) = 4 × (4 + 8) = <strong>48 byte</strong> (64-bit)</p>
+            </div>
+        </div>
+        
+        <div class="summary-card" style="margin-top: 20px; background: linear-gradient(135deg, #fff3cd, #ffeeba); border: 2px solid #ffc107;">
+            <h4 style="margin-top: 0; color: #856404;">⚠️ Hafıza Overhead</h4>
+            <p>Linked List her eleman için ekstra <strong>8 byte</strong> (64-bit sistemde) pointer tutar.</p>
+            <p>Doubly LL için bu <strong>16 byte</strong> olur (prev + next).</p>
+            <p style="margin-bottom: 0;">Küçük veri tiplerinde (int, char) bu overhead <strong>%100-300</strong> ekstra alan demek!</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Ne Zaman Hangisi?</h2>
+        
+        <div class="use-case-grid">
+            <div class="use-case use-array">
+                <h3 style="color: #1565c0;">📦 Array / List Kullan</h3>
+                <ul style="text-align: left;">
+                    <li>Sık index erişimi gerekiyorsa</li>
+                    <li>Cache locality önemliyse</li>
+                    <li>Hafıza kısıtlıysa</li>
+                    <li>Veri boyutu önceden biliniyorsa</li>
+                    <li>Sona ekleme/silme ağırlıklıysa</li>
+                </ul>
+            </div>
+            
+            <div class="use-case use-linked">
+                <h3 style="color: #2e7d32;">🔗 Linked List Kullan</h3>
+                <ul style="text-align: left;">
+                    <li>Başa çok ekleme/silme varsa</li>
+                    <li>Sık ortaya ekleme/silme varsa</li>
+                    <li>Boyut çok değişkense</li>
+                    <li>Gerçek zamanlı sistemlerde (tahmin edilebilir)</li>
+                    <li>Özel yapılar gerekiyorsa (LRU Cache)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧪 Pratik Performans Testi</h2>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Benchmark</button>
+                    <button class="btn" onclick="toggleEdit('code1')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code1"><code class="language-python">import time
+from collections import deque
+
+N = 30000
+print(f"🧪 Performans Testi: {N} işlem\n")
+print("=" * 55)
+
+# ======= BAŞA EKLEME =======
+print("\n📌 BAŞA EKLEME:")
+
+# List
+liste = []
+start = time.time()
+for i in range(N):
+    liste.insert(0, i)
+list_time = time.time() - start
+print(f"  list.insert(0, x)   : {list_time:.4f} sn")
+
+# Deque (LL benzeri)
+d = deque()
+start = time.time()
+for i in range(N):
+    d.appendleft(i)
+deque_time = time.time() - start
+print(f"  deque.appendleft(x) : {deque_time:.4f} sn")
+
+print(f"  📊 Deque {list_time/deque_time:.0f}x hızlı!")
+
+# ======= BAŞTAN SİLME =======
+print("\n📌 BAŞTAN SİLME:")
+
+liste = list(range(N))
+start = time.time()
+while liste:
+    liste.pop(0)
+list_time = time.time() - start
+print(f"  list.pop(0)         : {list_time:.4f} sn")
+
+d = deque(range(N))
+start = time.time()
+while d:
+    d.popleft()
+deque_time = time.time() - start
+print(f"  deque.popleft()     : {deque_time:.4f} sn")
+
+print(f"  📊 Deque {list_time/deque_time:.0f}x hızlı!")
+
+# ======= RANDOM ACCESS =======
+print("\n📌 RANDOM ACCESS (index erişimi):")
+
+liste = list(range(N))
+d = deque(range(N))
+
+# List
+start = time.time()
+for i in range(N):
+    _ = liste[i]
+list_time = time.time() - start
+print(f"  list[i]             : {list_time:.4f} sn")
+
+# Deque
+start = time.time()
+for i in range(N):
+    _ = d[i]
+deque_time = time.time() - start
+print(f"  deque[i]            : {deque_time:.4f} sn")
+
+print(f"  📊 List {deque_time/list_time:.1f}x hızlı!")
+
+print("\n" + "=" * 55)
+print("\n📋 SONUÇ:")
+print("  • Başa ekleme/silme → deque (Linked List)")
+print("  • Index erişimi → list (Array)")
+print("  • Genel kullanım → list genellikle yeterli")</code></pre>
+
+            <textarea id="code1" class="code-editor">import time
+from collections import deque
+
+N = 30000
+print(f"🧪 Test: {N} işlem\n")
+
+# Başa ekleme
+liste = []
+start = time.time()
+for i in range(N): liste.insert(0, i)
+print(f"list.insert(0): {time.time()-start:.4f} sn")
+
+d = deque()
+start = time.time()
+for i in range(N): d.appendleft(i)
+print(f"deque.appendleft: {time.time()-start:.4f} sn")
+
+# Random access
+liste = list(range(N))
+d = deque(range(N))
+
+start = time.time()
+for i in range(N): _ = liste[i]
+print(f"\nlist[i]: {time.time()-start:.4f} sn")
+
+start = time.time()
+for i in range(N): _ = d[i]
+print(f"deque[i]: {time.time()-start:.4f} sn")</textarea>
+            
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📚 Özet Tablo</h2>
+        <div class="summary-card">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 2px solid #eee;">
+                    <td style="padding: 12px; width: 30%;"><strong>Özellik</strong></td>
+                    <td style="padding: 12px; width: 35%;"><strong>Array</strong></td>
+                    <td style="padding: 12px; width: 35%;"><strong>Linked List</strong></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px;">Hafıza Yerleşimi</td>
+                    <td style="padding: 10px;">Bitişik (contiguous)</td>
+                    <td style="padding: 10px;">Dağınık (scattered)</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px;">Cache Performansı</td>
+                    <td style="padding: 10px; color: #27ae60;">✅ İyi (locality)</td>
+                    <td style="padding: 10px; color: #e74c3c;">❌ Kötü (random)</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px;">Boyut Değişikliği</td>
+                    <td style="padding: 10px; color: #e74c3c;">Yeniden tahsis</td>
+                    <td style="padding: 10px; color: #27ae60;">✅ Kolay</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px;">Hafıza Overhead</td>
+                    <td style="padding: 10px; color: #27ae60;">✅ Düşük</td>
+                    <td style="padding: 10px; color: #e74c3c;">Pointer başına 8 byte</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;">Pratik Kullanım</td>
+                    <td style="padding: 10px;">Python <code>list</code></td>
+                    <td style="padding: 10px;">Python <code>deque</code></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="4f_linked_list_algoritmalar.html" class="btn">⬅️ Önceki: Algoritmalar</a>
+        <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="linked_list.html" class="btn btn-next">📋 Linked List Menü</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+</body>
+</html>
+
