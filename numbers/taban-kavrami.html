@@ -98,28 +98,30 @@ Sola gittikçe konum artar</pre>
                     <tr>
                         <th>Decimal (10)</th>
                         <th>Binary (2)</th>
+                        <th>Octal (8)</th>
                         <th>Hexadecimal (16)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><span class="dec">0</span></td><td><span class="bin">0</span></td><td><span class="hex">0</span></td></tr>
-                    <tr><td><span class="dec">1</span></td><td><span class="bin">1</span></td><td><span class="hex">1</span></td></tr>
-                    <tr><td><span class="dec">2</span></td><td><span class="bin">10</span> ← taşma!</td><td><span class="hex">2</span></td></tr>
-                    <tr><td><span class="dec">3</span></td><td><span class="bin">11</span></td><td><span class="hex">3</span></td></tr>
-                    <tr><td><span class="dec">7</span></td><td><span class="bin">111</span></td><td><span class="hex">7</span></td></tr>
-                    <tr><td><span class="dec">8</span></td><td><span class="bin">1000</span></td><td><span class="hex">8</span></td></tr>
-                    <tr><td><span class="dec">9</span></td><td><span class="bin">1001</span></td><td><span class="hex">9</span></td></tr>
-                    <tr><td><span class="dec">10</span> ← taşma!</td><td><span class="bin">1010</span></td><td><span class="hex">A</span></td></tr>
-                    <tr><td><span class="dec">15</span></td><td><span class="bin">1111</span></td><td><span class="hex">F</span></td></tr>
-                    <tr><td><span class="dec">16</span></td><td><span class="bin">10000</span></td><td><span class="hex">10</span> ← taşma!</td></tr>
+                    <tr><td><span class="dec">0</span></td><td><span class="bin">0</span></td><td><span class="oct">0</span></td><td><span class="hex">0</span></td></tr>
+                    <tr><td><span class="dec">1</span></td><td><span class="bin">1</span></td><td><span class="oct">1</span></td><td><span class="hex">1</span></td></tr>
+                    <tr><td><span class="dec">2</span></td><td><span class="bin">10</span> ← taşma!</td><td><span class="oct">2</span></td><td><span class="hex">2</span></td></tr>
+                    <tr><td><span class="dec">3</span></td><td><span class="bin">11</span></td><td><span class="oct">3</span></td><td><span class="hex">3</span></td></tr>
+                    <tr><td><span class="dec">7</span></td><td><span class="bin">111</span></td><td><span class="oct">7</span></td><td><span class="hex">7</span></td></tr>
+                    <tr><td><span class="dec">8</span></td><td><span class="bin">1000</span></td><td><span class="oct">10</span> ← taşma!</td><td><span class="hex">8</span></td></tr>
+                    <tr><td><span class="dec">9</span></td><td><span class="bin">1001</span></td><td><span class="oct">11</span></td><td><span class="hex">9</span></td></tr>
+                    <tr><td><span class="dec">10</span> ← taşma!</td><td><span class="bin">1010</span></td><td><span class="oct">12</span></td><td><span class="hex">A</span></td></tr>
+                    <tr><td><span class="dec">15</span></td><td><span class="bin">1111</span></td><td><span class="oct">17</span></td><td><span class="hex">F</span></td></tr>
+                    <tr><td><span class="dec">16</span></td><td><span class="bin">10000</span></td><td><span class="oct">20</span></td><td><span class="hex">10</span> ← taşma!</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="info-box concept">
             <strong>Dikkat!</strong><br>
-            Binary'de <code>10</code> yazdığında bu "on" değil, "iki" demek!<br>
-            Hex'te <code>10</code> yazdığında bu "on altı" demek!
+            Binary'de <code>10</code> yazdığında bu "on" değil, <strong>"iki"</strong> demek!<br>
+            Octal'de <code>10</code> yazdığında bu <strong>"sekiz"</strong> demek!<br>
+            Hex'te <code>10</code> yazdığında bu <strong>"on altı"</strong> demek!
         </div>
 
         <h2>Dönüşümün Matematiği</h2>
@@ -185,6 +187,102 @@ Sola gittikçe konum artar</pre>
             </div>
         </div>
 
+        <h2>Octal (8'lik) Sistem</h2>
+
+        <p>
+            Octal, <strong>8 tabanlı</strong> bir sayı sistemidir. 0-7 arası 8 rakam kullanır. 
+            Bilgisayar tarihinde önemli bir yeri vardır.
+        </p>
+
+        <h3>Neden Octal?</h3>
+
+        <div class="cards-grid">
+            <div class="card">
+                <h4>🔗 Binary ile İlişki</h4>
+                <p>8 = 2³<br>
+                Her octal rakamı tam olarak <strong>3 bit</strong>'e karşılık gelir</p>
+            </div>
+            <div class="card">
+                <h4>📜 Tarihsel</h4>
+                <p>Eski bilgisayarlar 12, 24, 36-bit kelime boyutu kullanırdı (3'e tam bölünür)</p>
+            </div>
+            <div class="card">
+                <h4>🐧 Unix/Linux</h4>
+                <p>Dosya izinleri octal ile gösterilir<br>
+                (chmod 755 gibi)</p>
+            </div>
+        </div>
+
+        <h3>Octal ↔ Binary Dönüşümü</h3>
+
+        <p>Her octal rakamı 3 bit'e karşılık gelir:</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Octal</th>
+                        <th>Binary (3 bit)</th>
+                        <th>Decimal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="oct">0</span></td><td><span class="bin">000</span></td><td>0</td></tr>
+                    <tr><td><span class="oct">1</span></td><td><span class="bin">001</span></td><td>1</td></tr>
+                    <tr><td><span class="oct">2</span></td><td><span class="bin">010</span></td><td>2</td></tr>
+                    <tr><td><span class="oct">3</span></td><td><span class="bin">011</span></td><td>3</td></tr>
+                    <tr><td><span class="oct">4</span></td><td><span class="bin">100</span></td><td>4</td></tr>
+                    <tr><td><span class="oct">5</span></td><td><span class="bin">101</span></td><td>5</td></tr>
+                    <tr><td><span class="oct">6</span></td><td><span class="bin">110</span></td><td>6</td></tr>
+                    <tr><td><span class="oct">7</span></td><td><span class="bin">111</span></td><td>7</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">Örnek: Octal 752₈ → Binary → Decimal</div>
+            <div class="code-content">
+<pre><span class="line-num">1</span><span class="comment">// Her octal rakamı 3 bit'e çevir</span>
+<span class="line-num">2</span>
+<span class="line-num">3</span>    <span class="oct">7</span>     <span class="oct">5</span>     <span class="oct">2</span>
+<span class="line-num">4</span>    ↓     ↓     ↓
+<span class="line-num">5</span>  <span class="bin">111</span>   <span class="bin">101</span>   <span class="bin">010</span>
+<span class="line-num">6</span>
+<span class="line-num">7</span><span class="comment">// Birleştir:</span>
+<span class="line-num">8</span>752₈ = <span class="bin">111101010</span>₂
+<span class="line-num">9</span>
+<span class="line-num">10</span><span class="comment">// Decimal'e:</span>
+<span class="line-num">11</span>= 7×64 + 5×8 + 2×1
+<span class="line-num">12</span>= 448 + 40 + 2
+<span class="line-num">13</span>= <span class="dec">490</span>₁₀</pre>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">Örnek: Binary → Octal (3'lü grupla)</div>
+            <div class="code-content">
+<pre><span class="line-num">1</span><span class="comment">// Binary sayıyı sağdan 3'erli grupla</span>
+<span class="line-num">2</span>
+<span class="line-num">3</span><span class="bin">11010110</span>₂
+<span class="line-num">4</span>
+<span class="line-num">5</span><span class="comment">// 3'lü gruplar (soldan eksikse 0 ekle):</span>
+<span class="line-num">6</span>  <span class="bin">011</span>   <span class="bin">010</span>   <span class="bin">110</span>
+<span class="line-num">7</span>    ↓     ↓     ↓
+<span class="line-num">8</span>   <span class="oct">3</span>     <span class="oct">2</span>     <span class="oct">6</span>
+<span class="line-num">9</span>
+<span class="line-num">10</span><span class="comment">// Sonuç:</span>
+<span class="line-num">11</span>11010110₂ = <span class="oct">326</span>₈</pre>
+            </div>
+        </div>
+
+        <div class="info-box example">
+            <strong>Hex vs Octal</strong><br>
+            Günümüzde <strong>hexadecimal</strong> daha yaygın çünkü:<br>
+            • Modern bilgisayarlar 8, 16, 32, 64-bit (hepsi 4'e bölünür, 3'e değil)<br>
+            • 1 byte = 2 hex rakamı (temiz), ama 1 byte = 2.67 octal rakamı (karışık)<br>
+            • Yine de Unix izinleri ve bazı eski sistemler octal kullanır
+        </div>
+
         <h2>İnteraktif: Basamak Değeri Hesaplayıcı</h2>
 
         <div class="interactive-section">
@@ -199,6 +297,7 @@ Sola gittikçe konum artar</pre>
                     <label>Kaynak Taban</label>
                     <select class="input-field" id="fromBase">
                         <option value="2">Binary (2)</option>
+                        <option value="8">Octal (8)</option>
                         <option value="10">Decimal (10)</option>
                         <option value="16">Hex (16)</option>
                     </select>
@@ -216,7 +315,8 @@ Sola gittikçe konum artar</pre>
             • Taban = kullanılan benzersiz rakam sayısı<br>
             • Her basamak = rakam × taban<sup>konum</sup><br>
             • Diğer sistem → Decimal: basamak değerlerini topla<br>
-            • Decimal → Diğer sistem: tabana böl, kalanları ters yaz
+            • Decimal → Diğer sistem: tabana böl, kalanları ters yaz<br>
+            • 2'nin katı tabanlar arası kolay dönüşüm: Hex ↔ 4 bit, Octal ↔ 3 bit
         </div>
 
         <div class="nav-buttons">
@@ -272,6 +372,10 @@ Sola gittikçe konum artar</pre>
                     <div class="result-item">
                         <div class="result-label">Binary</div>
                         <div class="result-value bin">${decimal.toString(2)}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Octal</div>
+                        <div class="result-value oct">${decimal.toString(8)}</div>
                     </div>
                     <div class="result-item">
                         <div class="result-label">Decimal</div>
