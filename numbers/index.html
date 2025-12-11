@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sayı Sistemleri | Bilişim Öğrencileri İçin</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">// sayıSistemleri</a>
+            <button class="menu-toggle" onclick="document.getElementById('nav').classList.toggle('active')">☰</button>
+            <ul class="nav-links" id="nav">
+                <li><a href="index.html" class="active">Giriş</a></li>
+                <li><a href="taban-kavrami.html">Taban Kavramı</a></li>
+                <li><a href="binary.html">Binary</a></li>
+                <li><a href="hexadecimal.html">Hexadecimal</a></li>
+                <li><a href="bit-byte.html">Bit & Byte</a></li>
+                <li><a href="memory.html">Memory</a></li>
+                <li><a href="programlama.html">Programlama</a></li>
+                <li><a href="renkler.html">Renkler</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero">
+            <h1>Sayı Sistemleri</h1>
+            <p>Bilgisayar bilimlerinin temel taşı: Binary, Hexadecimal ve daha fazlası</p>
+        </section>
+
+        <div class="content-box highlight">
+            <h2 style="margin-top: 0; border: none;">Neden Sayı Sistemleri?</h2>
+            <p>
+                Bilgisayarlar elektrik sinyalleriyle çalışır: <strong>akım var</strong> veya <strong>akım yok</strong>. 
+                Bu iki durumu temsil etmek için sadece iki rakam yeterli: <code>0</code> ve <code>1</code>.
+                İşte bu yüzden bilgisayarlar <strong>binary (ikili)</strong> sistemi kullanır.
+            </p>
+            <p>
+                Ama biz insanlar için uzun binary sayıları okumak zor. <code>11111111</code> yazmak yerine 
+                <code>FF</code> yazmak çok daha pratik. İşte bu yüzden <strong>hexadecimal (16'lık)</strong> sistem 
+                programcıların vazgeçilmezi oldu.
+            </p>
+        </div>
+
+        <h2>Bu Eğitimde Neler Öğreneceksin?</h2>
+
+        <div class="cards-grid">
+            <a href="taban-kavrami.html" class="card" style="text-decoration: none; color: inherit;">
+                <h4>📐 Taban Kavramı</h4>
+                <p>Sayı sistemlerinin matematiği. Basamak değeri nasıl çalışır?</p>
+            </a>
+            
+            <a href="binary.html" class="card" style="text-decoration: none; color: inherit;">
+                <h4>🔢 Binary Sistem</h4>
+                <p>Bilgisayarların dili. 0 ve 1 ile her şeyi nasıl ifade ediyoruz?</p>
+            </a>
+            
+            <a href="hexadecimal.html" class="card" style="text-decoration: none; color: inherit;">
+                <h4>🔷 Hexadecimal</h4>
+                <p>Programcıların favorisi. Memory adresleri ve renk kodları.</p>
+            </a>
+            
+            <a href="bit-byte.html" class="card" style="text-decoration: none; color: inherit;">
+                <h4>💾 Bit & Byte</h4>
+                <p>n bit'te kaç değer saklanır? Veri boyutlarının matematiği.</p>
+            </a>
+            
+            <a href="memory.html" class="card" style="text-decoration: none; color: inherit;">
+                <h4>🧠 Memory & Veri Saklama</h4>
+                <p>Veriler bellekte nasıl tutulur? ASCII, IEEE 754, pointerlar.</p>
+            </a>
+            
+            <a href="programlama.html" class="card" style="text-decoration: none; color: inherit;">
+                <h4>💻 Programlamada Kullanım</h4>
+                <p>JavaScript ve Python'da binary, hex nasıl yazılır?</p>
+            </a>
+            
+            <a href="renkler.html" class="card" style="text-decoration: none; color: inherit;">
+                <h4>🎨 Renk Kodları</h4>
+                <p>p5.js ile hex renklerin sırrı. RGB matematiği.</p>
+            </a>
+        </div>
+
+        <h2>Hızlı Bakış: Sayı Sistemleri</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sistem</th>
+                        <th>Taban</th>
+                        <th>Kullanılan Rakamlar</th>
+                        <th>Örnek</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Binary (İkili)</td>
+                        <td><span class="bin">2</span></td>
+                        <td>0, 1</td>
+                        <td><span class="bin">1010</span></td>
+                    </tr>
+                    <tr>
+                        <td>Decimal (Onluk)</td>
+                        <td><span class="dec">10</span></td>
+                        <td>0, 1, 2, 3, 4, 5, 6, 7, 8, 9</td>
+                        <td><span class="dec">10</span></td>
+                    </tr>
+                    <tr>
+                        <td>Hexadecimal (16'lık)</td>
+                        <td><span class="hex">16</span></td>
+                        <td>0-9 ve A, B, C, D, E, F</td>
+                        <td><span class="hex">A</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-box concept">
+            <strong>Önemli Kavram</strong><br>
+            Yukarıdaki üç örnek (<span class="bin">1010₂</span>, <span class="dec">10₁₀</span>, <span class="hex">A₁₆</span>) 
+            aslında <strong>aynı sayıyı</strong> farklı sistemlerde gösteriyor!
+        </div>
+
+        <div class="nav-buttons">
+            <span></span>
+            <a href="taban-kavrami.html" class="btn btn-primary">Başla: Taban Kavramı →</a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        Sayı Sistemleri Eğitimi • Bilişim MYO Öğrencileri İçin
+    </footer>
+</body>
+</html>
