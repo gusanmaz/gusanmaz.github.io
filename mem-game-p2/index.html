@@ -247,7 +247,8 @@
                     <li>İkisi birden <code>-1</code> ise → "Hiç kart seçilmemiş" anlamına gelir</li>
                     <li>Aslında <strong>sadece birini kontrol etmek de yeterli!</strong> Çünkü kodumuzda
                         <code>satir1</code> ve <code>sutun1</code> her zaman birlikte değişiyor - biri <code>-1</code>
-                        olduğunda diğeri de <code>-1</code> oluyor</li>
+                        olduğunda diğeri de <code>-1</code> oluyor
+                    </li>
                     <li>Yine de ikisini birden kontrol etmek niyetimizi daha <strong>açık</strong> gösteriyor - "bir
                         konum seçilmiş mi?" sorusunu net cevaplıyor</li>
                 </ul>
@@ -434,7 +435,8 @@
             <div class="concept-box">
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.8;">
                     <div><span class="number">1.</span> İkinci kart seçilince:
-                        <code>counter = <span class="number">0</span></code></div>
+                        <code>counter = <span class="number">0</span></code>
+                    </div>
                     <div><span class="number">2.</span> Her draw() çağrısında: <code>counter++</code> (counter artıyor)
                     </div>
                     <div><span class="number">3.</span> 60 FPS × 0.5 saniye = <span class="number">30</span> frame
@@ -802,6 +804,40 @@
                 </div>
             </div>
 
+            <div class="info-box" style="background: rgba(255, 153, 64, 0.1); border-left-color: var(--accent-orange);">
+                <h4>📦 2D Dizi Başlatma: <code>gameBoard[satir] = []</code></h4>
+                <p>Bu satır biraz kafa karıştırıcı olabilir. Ne yapıyor?</p>
+                <div style="margin: 1rem 0; padding: 1rem; background: var(--bg-primary); border-radius: 6px;">
+                    <p style="margin-bottom: 0.5rem;"><strong>Adım adım:</strong></p>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 2;">
+                        <div><span class="keyword">let</span> gameBoard = []; <span class="comment">// Başta boş
+                                dizi</span></div>
+                        <div style="margin-top: 0.5rem;"><span class="comment">// satir = 0 olduğunda:</span></div>
+                        <div>gameBoard[0] = []; <span class="comment">// gameBoard = [[]]</span></div>
+                        <div style="margin-top: 0.5rem;"><span class="comment">// satir = 1 olduğunda:</span></div>
+                        <div>gameBoard[1] = []; <span class="comment">// gameBoard = [[], []]</span></div>
+                        <div style="margin-top: 0.5rem;"><span class="comment">// ... ve böyle devam eder</span></div>
+                    </div>
+                </div>
+                <p><strong>Neden her satır için yeni dizi?</strong></p>
+                <ul>
+                    <li>2D dizi aslında "dizilerin dizisi"dir</li>
+                    <li><code>gameBoard[0]</code> = birinci satırdaki tüm sütunlar</li>
+                    <li><code>gameBoard[1]</code> = ikinci satırdaki tüm sütunlar</li>
+                    <li>Her satır için önce boş dizi oluşturuyoruz, sonra sütunları dolduruyoruz</li>
+                </ul>
+                <div
+                    style="margin-top: 1rem; padding: 0.75rem; background: var(--bg-primary); border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
+                    <div>gameBoard = [</div>
+                    <div style="margin-left: 1rem;">["red", "mavi", ...], <span class="comment">// gameBoard[0]</span>
+                    </div>
+                    <div style="margin-left: 1rem;">["yesil", "white", ...], <span class="comment">//
+                            gameBoard[1]</span></div>
+                    <div style="margin-left: 1rem;">... <span class="comment">// gameBoard[2], gameBoard[3]</span></div>
+                    <div>]</div>
+                </div>
+            </div>
+
             <div class="code-block">
                 <div class="code-header">
                     <div class="code-dots"><span class="red"></span><span class="yellow"></span><span
@@ -903,7 +939,8 @@
                     <li>Grid yapısı bozulmuyor (hala 4x4)</li>
                     <li>Boş string kontrol etmesi kolay: <code>if (word == "")</code></li>
                     <li>Alternatifler: <code>null</code>, <code>undefined</code>, <code>"DELETED"</code> - ama
-                        <code>""</code> en basit ve temiz</li>
+                        <code>""</code> en basit ve temiz
+                    </li>
                 </ul>
             </div>
 
@@ -966,6 +1003,49 @@
             <div class="story-text">
                 <h3>🎨 Görsel Değişiklik</h3>
                 <p>Boş hücreleri farklı göstermek için <code>drawGameBoard</code> içinde kontrol ekliyoruz:</p>
+            </div>
+
+            <div class="info-box">
+                <h4>🎯 fill() Komutunun Sırası ÇOK ÖNEMLİ!</h4>
+                <p>p5.js'de <code>fill()</code> komutu, kendinden <strong>sonra</strong> çizilen her şeyin rengini
+                    belirler. Bu yüzden sırası kritik:</p>
+                <div
+                    style="margin: 1rem 0; padding: 1rem; background: var(--bg-primary); border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 2;">
+                    <div><span class="keyword">fill</span>(<span class="string">'white'</span>); <span
+                            class="comment">// Varsayılan renk</span></div>
+                    <div><span class="keyword">if</span> (boş) <span class="keyword">fill</span>(<span
+                            class="string">'black'</span>); <span class="comment">// Boşsa üzerine yaz</span></div>
+                    <div><span class="keyword">if</span> (seçili) <span class="keyword">fill</span>(<span
+                            class="string">'yellow'</span>); <span class="comment">// Seçiliyse tekrar üzerine
+                            yaz</span></div>
+                    <div><span class="function">rect</span>(...); <span class="comment">// ← Son fill() ile
+                            çizilir!</span></div>
+                </div>
+                <p style="margin-top: 0.5rem;">Her <code>if</code> önceki <code>fill()</code>'i
+                    <strong>ezebilir</strong>. Son çağrılan <code>fill()</code> geçerli olur!
+                </p>
+            </div>
+
+            <div class="info-box"
+                style="background: rgba(199, 146, 234, 0.1); border-left-color: var(--accent-purple);">
+                <h4>🎩 Görsel Hile: Siyah Karede Text Neden Görünmüyor?</h4>
+                <p>Dikkatli bakarsanız ilginç bir şey fark edeceksiniz: Siyah kareler text'i gizliyor! Ama neden?</p>
+                <div
+                    style="margin: 1rem 0; padding: 1rem; background: var(--bg-primary); border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 2;">
+                    <div><span class="comment">// Kare siyah çizildi</span></div>
+                    <div><span class="function">fill</span>(<span class="string">'black'</span>);</div>
+                    <div><span class="function">rect</span>(...); <span class="comment">// Siyah kare</span></div>
+                    <div style="margin-top: 0.5rem;"><span class="comment">// Text yazmadan ÖNCE fill tekrar
+                            çağrılıyor</span></div>
+                    <div><span class="function">fill</span>(<span class="string">'black'</span>); <span
+                            class="comment">// ← Text rengi de siyah!</span></div>
+                    <div><span class="function">text</span>(word, ...); <span class="comment">// Siyah text, siyah
+                            üzerine = GİZLİ!</span></div>
+                </div>
+                <p style="color: var(--accent-purple); margin-top: 0.5rem;">
+                    💡 Aslında text orada! Sadece <strong>siyah zemin üzerine siyah text</strong> yazıldığı için
+                    görünmüyor. Bu bir "hile" - kasıtlı veya kazara olmuş olabilir!
+                </p>
             </div>
 
             <div class="code-block">
@@ -1063,7 +1143,8 @@
                             <div style="margin-left: 1rem;">(satir1 == -1) && (sutun1 == -1) && <span class="comment">//
                                     Birinci seçilmemiş</span></div>
                             <div style="margin-left: 1rem; color: var(--accent-green);">gameBoard[loc[0]][loc[1]] != ""
-                                <span class="comment">// Hücre dolu</span></div>
+                                <span class="comment">// Hücre dolu</span>
+                            </div>
                             <div>) { ... }</div>
                         </div>
                     </div>
@@ -1077,7 +1158,8 @@
                             <div style="margin-left: 1rem;">!((satir1 == loc[0]) && (sutun1 == loc[1])) && <span
                                     class="comment">// Aynı kart değil</span></div>
                             <div style="margin-left: 1rem; color: var(--accent-green);">gameBoard[loc[0]][loc[1]] != ""
-                                <span class="comment">// Hücre dolu</span></div>
+                                <span class="comment">// Hücre dolu</span>
+                            </div>
                             <div>) { ... }</div>
                         </div>
                     </div>
@@ -1089,7 +1171,8 @@
                 <p>Boş hücre kontrolünde <code>!=</code> (eşit değil) operatörünü kullanıyoruz:</p>
                 <ul>
                     <li><code>gameBoard[loc[0]][loc[1]] != ""</code> → "Bu hücredeki değer boş string'e eşit
-                        <strong>değil</strong> mi?"</li>
+                        <strong>değil</strong> mi?"
+                    </li>
                     <li>Eğer hücre boşsa (<code>== ""</code>), koşul <code>false</code> olur → tıklama kabul edilmez
                     </li>
                     <li>Eğer hücre doluysa (<code>!= ""</code>), koşul <code>true</code> olur → tıklama kabul edilir
@@ -1100,12 +1183,14 @@
                 <div style="margin: 1rem 0; padding: 1rem; background: var(--bg-primary); border-radius: 6px;">
                     <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
                         <div style="margin-bottom: 0.5rem;"><span style="color: var(--accent-green);">✓ Yöntem 1:</span>
-                            <code>if (hücre != "") { ... }</code></div>
+                            <code>if (hücre != "") { ... }</code>
+                        </div>
                         <div style="margin-left: 1rem; color: var(--text-secondary); font-size: 0.8rem;">→ "Eğer hücre
                             boş değilse, işlemi yap"</div>
                         <div style="margin-top: 1rem; margin-bottom: 0.5rem;"><span
                                 style="color: var(--accent-orange);">○ Yöntem 2:</span>
-                            <code>if (hücre == "") { } else { ... }</code></div>
+                            <code>if (hücre == "") { } else { ... }</code>
+                        </div>
                         <div style="margin-left: 1rem; color: var(--text-secondary); font-size: 0.8rem;">→ "Eğer hücre
                             boşsa hiçbir şey yapma, değilse işlemi yap"</div>
                     </div>
@@ -1281,17 +1366,70 @@
         <section id="step9" class="story-section">
             <div class="chapter-header">
                 <span class="chapter-number">Adım 9</span>
-                <h2>Daha İyi Kontrol: isGameBoardEmpty</h2>
+                <h2>Alternatif Yöntem: isGameBoardEmpty</h2>
             </div>
             <div class="story-text">
-                <p>Sayaç yöntemi çalışır, ama daha sağlam bir yöntem var: <strong>Grid'in gerçekten boş olup olmadığını
-                        kontrol etmek.</strong></p>
+                <p>Sayaç yöntemi (<code>matchedPair</code>) gayet iyi çalışır. Ama alternatif bir yöntem daha var:
+                    <strong>Grid'in gerçekten boş olup olmadığını kontrol etmek.</strong></p>
 
-                <h3>🎯 Neden Bu Daha İyi?</h3>
+                <h3>⚖️ İki Yaklaşımı Karşılaştıralım</h3>
+            </div>
+
+            <div class="code-comparison">
+                <div class="code-before" style="border-color: var(--accent-blue);">
+                    <h4 style="color: var(--accent-blue);">✅ Yöntem 1: matchedPair Sayacı</h4>
+                    <div style="font-size: 0.85rem; margin-bottom: 1rem;">
+                        <p><strong>Nasıl çalışır:</strong></p>
+                        <ul>
+                            <li>Her eşleşmede <code>matchedPair++</code></li>
+                            <li>8 olduğunda oyun biter</li>
+                        </ul>
+                        <p style="margin-top: 1rem; color: var(--accent-green);"><strong>➕ Artıları:</strong></p>
+                        <ul>
+                            <li><strong>Çok hızlı:</strong> O(1) - sadece bir sayı kontrolü</li>
+                            <li><strong>Basit:</strong> Tek satır: <code>if (matchedPair == 8)</code></li>
+                            <li><strong>Az bellek:</strong> Tek değişken yeterli</li>
+                        </ul>
+                        <p style="margin-top: 1rem; color: var(--accent-red);"><strong>➖ Eksileri:</strong></p>
+                        <ul>
+                            <li>Sayaç yanlışlıkla bozulabilir</li>
+                            <li>Grid boyutu değişirse 8 değişmeli</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="code-after" style="border-color: var(--accent-purple);">
+                    <h4 style="color: var(--accent-purple);">📊 Yöntem 2: isGameBoardEmpty</h4>
+                    <div style="font-size: 0.85rem; margin-bottom: 1rem;">
+                        <p><strong>Nasıl çalışır:</strong></p>
+                        <ul>
+                            <li>Tüm grid'i tarar</li>
+                            <li>Hiç kelime kalmadıysa true döner</li>
+                        </ul>
+                        <p style="margin-top: 1rem; color: var(--accent-green);"><strong>➕ Artıları:</strong></p>
+                        <ul>
+                            <li><strong>Güvenilir:</strong> Grid'in kendisi "gerçek kaynak"</li>
+                            <li><strong>Esnek:</strong> Grid boyutundan bağımsız</li>
+                            <li><strong>Robust:</strong> Sayaç hatası olamaz</li>
+                        </ul>
+                        <p style="margin-top: 1rem; color: var(--accent-red);"><strong>➖ Eksileri:</strong></p>
+                        <ul>
+                            <li><strong>Daha yavaş:</strong> O(n²) - her frame 16 hücre taranır</li>
+                            <li>Daha fazla kod</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>💡 Hangi Yöntemi Kullanmalıyım?</h4>
+                <p><strong>Gerçekte:</strong> 4x4'lük bir grid için performans farkı <em>hiç önemli değil!</em> Her iki
+                    yöntem de saniyede binlerce kez çalışabilir.</p>
+                <p style="margin-top: 0.5rem;"><strong>Tercih:</strong></p>
                 <ul>
-                    <li>Sayaç yanlışlıkla artırılabilir veya resetlenebilir</li>
-                    <li>Grid'in kendisi "gerçek kaynak" (source of truth)</li>
-                    <li>Daha güvenilir ve hata yapmaya karşı dayanıklı</li>
+                    <li><strong>Basit oyunlar için:</strong> <code>matchedPair</code> yeterli ve daha az kod</li>
+                    <li><strong>Karmaşık oyunlar için:</strong> <code>isGameBoardEmpty</code> daha güvenli - birçok
+                        yerde sayaç güncelleniyor olabilir</li>
+                    <li><strong>Öğrenme amacıyla:</strong> Her iki yöntemi de bilmek faydalı!</li>
                 </ul>
             </div>
 
