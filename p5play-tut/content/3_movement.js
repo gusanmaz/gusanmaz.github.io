@@ -112,54 +112,65 @@ function mousePressed() {
         </div>
 
         <div class="lesson-section">
-            <h3>Async/Await ile Sıralı Hareket</h3>
-            <p>Hareketleri sırayla yapmak için <code>async/await</code> kullanın:</p>
+            <h3>Sıralı Hareket (Patrol)</h3>
+            <p>Sprite'ın belirli noktalar arasında devriye gezmesini sağlayın. <code>moveTo</code> hedef mesafesini kontrol eder:</p>
             
             ${createPlayground(`
 let patrol;
+let waypoints = [
+    {x: 350, y: 80},
+    {x: 350, y: 220},
+    {x: 50, y: 220},
+    {x: 50, y: 80}
+];
+let currentWP = 0;
+let colors = ['#00ff88', '#00d4ff', '#c44dff', '#ff6b9d'];
 
-async function setup() {
+function setup() {
     new Canvas(400, 300);
     world.gravity.y = 0;
     
-    patrol = new Sprite(50, 100, 40, 40);
-    patrol.color = '#00ff88';
-    patrol.text = '🤖';
-    patrol.textSize = 20;
-    
-    // Devriye başlat
-    doPatrol();
-}
-
-async function doPatrol() {
-    while (true) {
-        patrol.color = '#00ff88';
-        await patrol.moveTo(350, 100, 3);
-        
-        patrol.color = '#00d4ff';
-        await patrol.moveTo(350, 220, 3);
-        
-        patrol.color = '#c44dff';
-        await patrol.moveTo(50, 220, 3);
-        
-        patrol.color = '#ff6b9d';
-        await patrol.moveTo(50, 100, 3);
-    }
+    patrol = new Sprite(50, 80, 35);
+    patrol.color = colors[0];
 }
 
 function draw() {
     background('#1a1a2e');
     
+    // Hedef nokta
+    let target = waypoints[currentWP];
+    
+    // Hedefe doğru hareket et
+    patrol.moveTowards(target, 0.05);
+    
+    // Hedefe yaklaştı mı kontrol et
+    let d = dist(patrol.x, patrol.y, target.x, target.y);
+    if (d < 5) {
+        // Sonraki waypoint'e geç
+        currentWP = (currentWP + 1) % waypoints.length;
+        patrol.color = colors[currentWP];
+    }
+    
+    // Waypoint'leri çiz
+    for (let i = 0; i < waypoints.length; i++) {
+        fill(colors[i]);
+        noStroke();
+        ellipse(waypoints[i].x, waypoints[i].y, 12);
+    }
+    
     // Rota çerçevesi
-    stroke(50);
-    strokeWeight(2);
+    stroke(60);
+    strokeWeight(1);
     noFill();
-    rect(50, 100, 300, 120);
-    noStroke();
+    beginShape();
+    for (let wp of waypoints) {
+        vertex(wp.x, wp.y);
+    }
+    endShape(CLOSE);
     
     fill(255);
     textSize(12);
-    text('Otomatik Devriye (async/await)', 15, 25);
+    text('Hedef: ' + currentWP, 15, 25);
 }
             `, 'Sıralı Hareket (Patrol)')}
         </div>

@@ -9,8 +9,37 @@ const physicsContent = {
         </div>
 
         <div class="lesson-section">
+            <h3>Fizik Motoru Nedir?</h3>
+            <p>Fizik motoru, gerçek dünyadaki fizik kurallarını (Newton yasaları) bilgisayar ortamında simüle eden yazılımdır. p5.play'in kullandığı <strong>Planck.js</strong>, ünlü <strong>Box2D</strong> fizik motorunun JavaScript versiyonudur.</p>
+            
+            <p>Box2D, şu oyunlarda kullanılmıştır:</p>
+            <ul style="margin: 12px 0; padding-left: 24px; line-height: 1.8;">
+                <li><strong>Angry Birds</strong> - Kuşların fiziksel hareketleri</li>
+                <li><strong>Cut the Rope</strong> - İp fiziği ve sallanma</li>
+                <li><strong>Limbo</strong> - Platform fiziği</li>
+                <li><strong>Crayon Physics Deluxe</strong> - Çizim tabanlı fizik bulmacaları</li>
+            </ul>
+            
+            <div class="info-box note">
+                <div class="info-title">🔬 Fizik Terimleri</div>
+                <p><strong>Kütle (mass):</strong> Nesnenin ağırlığı - büyük kütle = hareket ettirmesi zor<br>
+                <strong>Hız (velocity):</strong> Nesnenin hareket yönü ve hızı (vektör)<br>
+                <strong>İvme (acceleration):</strong> Hızın değişim oranı<br>
+                <strong>Kuvvet (force):</strong> Nesneyi hareket ettiren etki<br>
+                <strong>Sürtünme (friction):</strong> Hareketi yavaşlatan direnç</p>
+            </div>
+        </div>
+
+        <div class="lesson-section">
             <h3>Yerçekimi (Gravity)</h3>
-            <p>Dünya yerçekimini <code>world.gravity</code> ile kontrol edebilirsiniz:</p>
+            <p><strong>Yerçekimi</strong>, nesneleri bir yöne çeken kuvvettir. Gerçek dünyada aşağı doğrudur (9.8 m/s²). Oyunlarda bu değeri isteğe göre ayarlayabilirsiniz.</p>
+            
+            <p>p5.play'de yerçekimini <code>world.gravity</code> ile kontrol edebilirsiniz:</p>
+            
+            <pre style="background: var(--bg-elevated); padding: 12px; border-radius: 8px; margin: 12px 0; overflow-x: auto;"><code>world.gravity.y = 10;  // Aşağı yerçekimi (normal)
+world.gravity.y = -10; // Yukarı yerçekimi (ters)
+world.gravity.y = 0;   // Yerçekimi yok (uzay)
+world.gravity.x = 5;   // Yatay yerçekimi (rüzgar etkisi)</code></pre>
             
             ${createPlayground(`
 function setup() {
@@ -48,7 +77,7 @@ function draw() {
 
         <div class="lesson-section">
             <h3>Collider Türleri</h3>
-            <p>Sprite'ların fiziksel davranışını <strong>collider türü</strong> belirler:</p>
+            <p><strong>Collider</strong>, sprite'ın fiziksel sınırıdır - diğer nesnelerle çarpışmayı bu sınır belirler. Collider türü, sprite'ın fiziksel davranışını kontrol eder:</p>
             
             <table class="comparison-table">
                 <thead>
@@ -61,13 +90,13 @@ function draw() {
                 <tbody>
                     <tr>
                         <td><code>'dynamic'</code></td>
-                        <td>Fizikten etkilenir, hareket edebilir</td>
+                        <td>Fizikten etkilenir, hareket edebilir, çarpışır</td>
                         <td>Oyuncu, düşman, top, kutu</td>
                     </tr>
                     <tr>
                         <td><code>'static'</code></td>
-                        <td>Sabit durur, hareket etmez</td>
-                        <td>Zemin, duvar, platform</td>
+                        <td>Sabit durur, asla hareket etmez, çarpışır</td>
+                        <td>Zemin, duvar, sabit platform</td>
                     </tr>
                     <tr>
                         <td><code>'kinematic'</code></td>
@@ -76,8 +105,8 @@ function draw() {
                     </tr>
                     <tr>
                         <td><code>'none'</code></td>
-                        <td>Fiziksel çarpışma yok</td>
-                        <td>Sensör, trigger zone</td>
+                        <td>Fiziksel çarpışma yok, sadece görsel</td>
+                        <td>Arka plan, dekorasyon, sensör</td>
                     </tr>
                 </tbody>
             </table>

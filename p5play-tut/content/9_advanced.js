@@ -10,7 +10,30 @@ const advancedContent = {
 
         <div class="lesson-section">
             <h3>Joints (Eklemler)</h3>
-            <p>İki sprite'ı fiziksel olarak birbirine bağlayın. p5.play v3'te joint'ler için <code>new Joint(spriteA, spriteB)</code> kullanılır:</p>
+            <p>İki sprite'ı fiziksel olarak birbirine bağlayın. p5.play v3'te joint türleri:</p>
+            
+            <div class="property-grid">
+                <div class="property-card">
+                    <div class="name">new GlueJoint(a, b)</div>
+                    <div class="type">Joint</div>
+                    <div class="description">İki sprite'ı yapıştırır, aralarındaki mesafe sabit kalır.</div>
+                </div>
+                <div class="property-card">
+                    <div class="name">new DistanceJoint(a, b)</div>
+                    <div class="type">Joint</div>
+                    <div class="description">Esnek mesafe bağlantısı (yay gibi).</div>
+                </div>
+                <div class="property-card">
+                    <div class="name">new WheelJoint(a, b)</div>
+                    <div class="type">Joint</div>
+                    <div class="description">Tekerlek bağlantısı, bir eksen etrafında döner.</div>
+                </div>
+                <div class="property-card">
+                    <div class="name">new HingeJoint(a, b)</div>
+                    <div class="type">Joint</div>
+                    <div class="description">Menteşe bağlantısı, bir nokta etrafında döner.</div>
+                </div>
+            </div>
             
             ${createPlayground(`
 let anchor, ball;
@@ -19,19 +42,18 @@ function setup() {
     new Canvas(400, 300);
     world.gravity.y = 10;
     
-    // Sabit nokta
-    anchor = new Sprite(200, 50, 15, 15, 'static');
-    anchor.color = '#2d3436';
+    // Sabit nokta (tavana asılı)
+    anchor = new Sprite(200, 40, 20, 20, 'static');
+    anchor.color = '#636e72';
     
     // Sarkaç topu
-    ball = new Sprite(280, 120, 35);
+    ball = new Sprite(280, 140, 40);
     ball.color = '#ff6b9d';
-    ball.text = '🎱';
-    ball.textSize = 20;
+    ball.bounciness = 0.3;
     
-    // Basit bağlantı - joint oluştur
-    let j = new Joint(anchor, ball);
-    j.visible = false;
+    // DistanceJoint ile bağla (ip gibi)
+    let rope = new DistanceJoint(anchor, ball);
+    rope.springiness = 0; // Esnek değil, sabit uzunluk
 }
 
 function draw() {
@@ -43,19 +65,18 @@ function draw() {
     line(anchor.x, anchor.y, ball.x, ball.y);
     noStroke();
     
-    // Tıklayınca it
+    // Tıklayınca kuvvet uygula
     if (mouse.presses()) {
-        let dx = ball.x - mouseX;
-        let dy = ball.y - mouseY;
-        ball.vel.x += dx * 0.05;
-        ball.vel.y += dy * 0.05;
+        ball.vel.x += (ball.x - mouseX) * 0.1;
+        ball.vel.y += (ball.y - mouseY) * 0.1;
     }
     
     fill(255);
     textSize(12);
-    text('Tıkla: Sarkacı it', 15, 25);
+    text('Tikla: Sarkaci it', 15, 25);
+    text('DistanceJoint kullanimi', 15, 45);
 }
-            `, 'Basit Joint (Sarkaç)')}
+            `, 'Basit Sarkaç (DistanceJoint)')}
         </div>
 
         <div class="lesson-section">
@@ -64,41 +85,41 @@ function draw() {
             
             ${createPlayground(`
 let chain = [];
-let chainLength = 8;
+let chainLength = 6;
 
 function setup() {
     new Canvas(400, 300);
     world.gravity.y = 10;
     
-    // İlk halka (sabit)
-    let prev = new Sprite(200, 30, 20, 20, 'static');
+    // İlk halka (sabit - tavana asılı)
+    let prev = new Sprite(200, 30, 15, 15, 'static');
     prev.color = '#2d3436';
     chain.push(prev);
     
     // Zincir halkaları
     for (let i = 1; i < chainLength; i++) {
-        let link = new Sprite(200, 30 + i * 25, 15);
+        let link = new Sprite(200, 30 + i * 30, 20);
         link.color = '#febc2e';
-        link.mass = 0.5;
+        link.mass = 0.3;
         
-        // Önceki halkaya bağla
-        new Joint(prev, link);
+        // Önceki halkaya DistanceJoint ile bağla
+        let j = new DistanceJoint(prev, link);
+        j.springiness = 0;
         
         chain.push(link);
         prev = link;
     }
     
-    // Son halka büyük
-    chain[chain.length - 1].d = 30;
-    chain[chain.length - 1].color = '#ff6b9d';
-    chain[chain.length - 1].text = '⚽';
-    chain[chain.length - 1].textSize = 18;
+    // Son halka büyük ve renkli
+    let last = chain[chain.length - 1];
+    last.d = 35;
+    last.color = '#ff6b9d';
 }
 
 function draw() {
     background('#1a1a2e');
     
-    // Zinciri çiz
+    // Zincir çizgilerini çiz
     stroke('#febc2e');
     strokeWeight(2);
     for (let i = 0; i < chain.length - 1; i++) {
@@ -106,18 +127,16 @@ function draw() {
     }
     noStroke();
     
-    // Mouse ile son halkayı it
+    // Mouse ile son halkayı çek
     if (mouse.pressing()) {
         let last = chain[chain.length - 1];
-        let dx = mouseX - last.x;
-        let dy = mouseY - last.y;
-        last.vel.x += dx * 0.01;
-        last.vel.y += dy * 0.01;
+        last.vel.x += (mouseX - last.x) * 0.02;
+        last.vel.y += (mouseY - last.y) * 0.02;
     }
     
     fill(255);
     textSize(12);
-    text('Tıkla ve sürükle: Zinciri hareket ettir', 15, 25);
+    text('Mouse ile zinciri cek', 15, 25);
 }
             `, 'Zincir Efekti')}
         </div>

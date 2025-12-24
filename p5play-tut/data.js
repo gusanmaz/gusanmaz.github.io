@@ -11,7 +11,8 @@ const tutorialData = [
     groupsContent,
     inputContent,
     cameraContent,
-    advancedContent
+    advancedContent,
+    extraContent
 ];
 
 // Export for debugging

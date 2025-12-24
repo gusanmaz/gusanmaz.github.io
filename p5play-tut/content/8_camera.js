@@ -9,24 +9,50 @@ const cameraContent = {
         </div>
 
         <div class="lesson-section">
+            <h3>Kamera Neden Gerekli?</h3>
+            <p>Oyun dünyası genellikle ekrandan çok daha büyüktür. Kamera, bu geniş dünyanın sadece bir bölümünü göstermenizi sağlar:</p>
+            <ul>
+                <li><strong>Platform Oyunları:</strong> Mario gibi yatay kaydırmalı oyunlarda</li>
+                <li><strong>RPG Oyunları:</strong> Geniş haritalarda gezinti</li>
+                <li><strong>Takip Efektleri:</strong> Oyuncu karakterini merkeze almak</li>
+                <li><strong>Sinematik Anlar:</strong> Zoom, shake, pan efektleri</li>
+            </ul>
+        </div>
+
+        <div class="lesson-section">
             <h3>Temel Kamera Özellikleri</h3>
             
             <div class="property-grid">
                 <div class="property-card">
                     <div class="name">camera.x, camera.y</div>
                     <div class="type">number</div>
-                    <div class="description">Kameranın dünya koordinatlarındaki pozisyonu.</div>
+                    <div class="description">Kameranın baktığı nokta. Bu koordinat ekranın merkezinde görünür.</div>
                 </div>
                 <div class="property-card">
                     <div class="name">camera.zoom</div>
                     <div class="type">number</div>
-                    <div class="description">Yakınlaştırma. 1 = normal, 2 = 2x zoom.</div>
+                    <div class="description">Yakınlaştırma oranı. 1=normal, 2=2x büyük, 0.5=yarı boyut.</div>
                 </div>
                 <div class="property-card">
-                    <div class="name">camera.off() / camera.on()</div>
+                    <div class="name">camera.off()</div>
                     <div class="type">method</div>
-                    <div class="description">Kamerayı geçici olarak devre dışı bırak (UI için).</div>
+                    <div class="description">Kamera transformunu geçici olarak kapat. UI çizimi için kullanılır.</div>
                 </div>
+                <div class="property-card">
+                    <div class="name">camera.on()</div>
+                    <div class="type">method</div>
+                    <div class="description">Kamera transformunu tekrar aç.</div>
+                </div>
+            </div>
+            
+            <div class="info-box note">
+                <div class="info-title">🌍 Dünya vs Ekran Koordinatları - ÖNEMLİ!</div>
+                <p>Bu kavram kamera sisteminin temelidir:</p>
+                <ul>
+                    <li><strong>Dünya (World) Koordinatları:</strong> Sprite'ların gerçek konumu. <code>sprite.x = 1000</code> demek sprite dünyada x=1000 noktasında.</li>
+                    <li><strong>Ekran (Screen) Koordinatları:</strong> Canvas üzerinde gördüğümüz piksel konumu. Kamera hareket ettikçe değişir.</li>
+                </ul>
+                <p>Örnek: Oyuncu dünyada x=500'de. Kamera x=500'e ayarlanırsa, oyuncu ekranın <em>tam ortasında</em> görünür. Kamera x=400 olursa, oyuncu ekranda sağa kayar.</p>
             </div>
         </div>
 

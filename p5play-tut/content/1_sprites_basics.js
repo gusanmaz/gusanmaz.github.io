@@ -5,12 +5,47 @@ const spritesContent = {
     content: `
         <div class="lesson-header">
             <h2>Sprite Temelleri</h2>
-            <p class="subtitle">Sprite'lar p5.play'in temel yapı taşlarıdır. Şekil, boyut, renk ve fiziksel özelliklere sahip oyun nesneleridir.</p>
+            <p class="subtitle">Sprite'lar p5.play'in temel yapı taşlarıdır. Oyununuzdaki her nesne - karakterler, düşmanlar, platformlar, mermiler - birer sprite'tır.</p>
         </div>
 
         <div class="lesson-section">
-            <h3>Sprite Constructor</h3>
-            <p>Sprite oluşturucu çok esnektir. Farklı parametre kombinasyonlarıyla farklı şekiller oluşturabilirsiniz:</p>
+            <h3>Sprite Nedir?</h3>
+            <p><strong>Sprite</strong> kelimesi video oyun tarihinde "ekranda hareket eden grafik nesne" anlamına gelir. p5.play'de sprite:</p>
+            
+            <ul style="margin: 16px 0; padding-left: 24px; line-height: 1.8;">
+                <li><strong>Konum (x, y):</strong> Sprite'ın canvas üzerindeki yeri</li>
+                <li><strong>Boyut (width, height veya diameter):</strong> Sprite'ın büyüklüğü</li>
+                <li><strong>Şekil:</strong> Dikdörtgen, daire, çokgen vb.</li>
+                <li><strong>Görsel:</strong> Renk, görüntü veya animasyon</li>
+                <li><strong>Fizik:</strong> Hız, ivme, kütle, sürtünme</li>
+                <li><strong>Collider:</strong> Çarpışma algılama için sınır</li>
+            </ul>
+            
+            <div class="info-box note">
+                <div class="info-title">📝 Önemli</div>
+                <p>Bir sprite oluşturduğunuzda otomatik olarak <code>allSprites</code> grubuna eklenir ve her frame'de otomatik çizilir. Manuel çizim yapmanıza gerek yok!</p>
+            </div>
+        </div>
+
+        <div class="lesson-section">
+            <h3>Sprite Constructor (Yapıcı Fonksiyon)</h3>
+            <p><strong>Constructor</strong>, bir nesne oluşturmak için kullanılan özel fonksiyondur. <code>new Sprite()</code> yazdığınızda constructor çağrılır.</p>
+            
+            <p>Sprite constructor'ı çok esnektir - farklı parametre kombinasyonlarıyla farklı şekiller oluşturabilirsiniz:</p>
+            
+            <pre style="background: var(--bg-elevated); padding: 16px; border-radius: 8px; margin: 12px 0; overflow-x: auto;"><code>// Dikdörtgen: x, y, genişlik, yükseklik
+new Sprite(x, y, w, h)
+
+// Daire: x, y, çap
+new Sprite(x, y, diameter)
+
+// Çizgi: x, y, uzunluk, açı, 'line'
+new Sprite(x, y, length, angle, 'line')
+
+// Çokgen: x, y, kenarUzunluğu, 'şekilAdı'
+new Sprite(x, y, sideLength, 'triangle')
+new Sprite(x, y, sideLength, 'pentagon')
+new Sprite(x, y, sideLength, 'hexagon')</code></pre>
             
             ${createPlayground(`
 function setup() {
@@ -35,6 +70,7 @@ function setup() {
     let line1 = new Sprite(80, 280, 80, 45, 'line');
     line1.color = '#febc2e';
     line1.strokeWeight = 4;
+    line1.text = 'Çizgi';
 }
 
 function draw() {
@@ -45,34 +81,35 @@ function draw() {
 
         <div class="lesson-section">
             <h3>Özel Şekiller</h3>
-            <p>Poligon, üçgen ve diğer özel şekiller:</p>
+            <p>p5.play'de üçgen, beşgen, altıgen gibi düzenli çokgenler oluşturabilirsiniz. Bunlar için şekil adını string olarak verirsiniz:</p>
             
             ${createPlayground(`
 function setup() {
     new Canvas(400, 300);
     
-    // Üçgen
-    let tri = new Sprite(80, 100, 50, 50, 'triangle');
+    // Üçgen: x, y, kenarUzunluğu, 'triangle'
+    let tri = new Sprite(80, 80, 50, 'triangle');
     tri.color = '#c44dff';
-    tri.text = '▲';
     
-    // Düzensiz Poligon (nokta dizisi)
-    let poly = new Sprite(200, 100, [
-        [-30, -30], [30, -20], 
-        [40, 20], [0, 40], [-40, 20]
-    ]);
-    poly.color = '#febc2e';
+    // Pentagon: x, y, kenarUzunluğu, 'pentagon'
+    let penta = new Sprite(200, 80, 40, 'pentagon');
+    penta.color = '#00ff88';
     
-    // Düzenli Çokgen: x, y, çap, 'regular', kenarSayısı
-    let hex = new Sprite(320, 100, 50, 'regular', 6);
-    hex.color = '#00ff88';
+    // Hexagon: x, y, kenarUzunluğu, 'hexagon'
+    let hex = new Sprite(320, 80, 35, 'hexagon');
+    hex.color = '#febc2e';
     
-    // Daha fazla kenar = daha yuvarlak
-    let oct = new Sprite(120, 220, 50, 'regular', 8);
+    // Octagon: x, y, kenarUzunluğu, 'octagon'
+    let oct = new Sprite(80, 200, 30, 'octagon');
     oct.color = '#00d4ff';
     
-    let penta = new Sprite(280, 220, 50, 'regular', 5);
-    penta.color = '#ff6b9d';
+    // Düzensiz Polygon (nokta dizisi - kapalı)
+    // Noktaların başı ve sonu aynı olmalı
+    let poly = new Sprite([
+        [200, 170], [260, 160], 
+        [270, 210], [230, 240], [180, 210], [200, 170]
+    ]);
+    poly.color = '#ff6b9d';
 }
 
 function draw() {
@@ -288,7 +325,54 @@ function draw() {
         </div>
 
         <div class="lesson-section">
-            <h3>Sprite Görünürlük</h3>
+            <h3>Sprite Mirror (Aynalama)</h3>
+            <p><code>mirror.x</code> ozelligi sprite'in gorselini yatay olarak aynalar:</p>
+            
+            ${createPlayground(`
+let left, right;
+
+function setup() {
+    new Canvas(400, 300);
+    
+    // Asimetrik ok sekli (spriteArt ile)
+    let okImg = spriteArt(\`
+..bb
+..bbb
+bbbbb
+bbbbbb
+bbbbb
+..bbb
+..bb
+\`, 8);
+    
+    // Sol - normal
+    left = new Sprite(120, 150);
+    left.image = okImg;
+    left.collider = 'static';
+    
+    // Sag - aynali
+    right = new Sprite(280, 150);
+    right.image = okImg;
+    right.mirror.x = true;
+    right.collider = 'static';
+}
+
+function draw() {
+    background('#1a1a2e');
+    
+    fill(255);
+    textSize(11);
+    text('Normal', 100, 220);
+    text('mirror.x = true', 248, 220);
+    
+    stroke(100);
+    line(200, 80, 200, 220);
+}
+            `, 'Mirror Ornegi')}
+        </div>
+
+        <div class="lesson-section">
+            <h3>Sprite'ı Kaldırma</h3>
             
             <div class="property-grid">
                 <div class="property-card">
@@ -314,68 +398,75 @@ function draw() {
             </div>
             
             ${createPlayground(`
-function setup() {
-    new Canvas(400, 300);
-    
-    // Arkadaki (düşük layer)
-    let back = new Sprite(180, 150, 80, 80);
-    back.color = '#ff6b9d';
-    back.layer = 1;
-    back.text = 'Arka';
-    
-    // Öndeki (yüksek layer)
-    let front = new Sprite(220, 150, 80, 80);
-    front.color = '#00d4ff';
-    front.layer = 2;
-    front.text = 'Ön';
-    
-    // Yarı saydam
-    let ghost = new Sprite(320, 150, 60, 60);
-    ghost.color = '#00ff88';
-    ghost.opacity = 0.5;
-    ghost.text = '👻';
-    ghost.textSize = 30;
-}
-
-function draw() {
-    background('#1a1a2e');
-}
-            `, 'Görünürlük ve Layer')}
-        </div>
-
-        <div class="lesson-section">
-            <h3>Sprite Mirror (Aynalama)</h3>
-            <p>Sprite'ı yatay veya dikey olarak aynalayın:</p>
-            
-            ${createPlayground(`
-let original, mirrored;
+let kirmizi, mavi, yesil;
 
 function setup() {
     new Canvas(400, 300);
     
-    original = new Sprite(130, 150, 60, 80);
-    original.color = '#00d4ff';
-    original.text = '👉';
-    original.textSize = 30;
+    // Üç kart - üst üste binecek şekilde
+    // collider 'none' = fizik yok, birbirini itmez
     
-    mirrored = new Sprite(270, 150, 60, 80);
-    mirrored.color = '#ff6b9d';
-    mirrored.text = '👉';
-    mirrored.textSize = 30;
-    mirrored.mirror.x = true;
+    // Kırmızı kart (en altta başlar)
+    kirmizi = new Sprite(160, 150, 100, 130);
+    kirmizi.color = '#ff5f57';
+    kirmizi.layer = 0;
+    kirmizi.text = 'KIRMIZI';
+    kirmizi.textSize = 12;
+    kirmizi.collider = 'none';
+    
+    // Mavi kart (ortada başlar)
+    mavi = new Sprite(200, 150, 100, 130);
+    mavi.color = '#007aff';
+    mavi.layer = 1;
+    mavi.text = 'MAVİ';
+    mavi.textSize = 12;
+    mavi.collider = 'none';
+    
+    // Yeşil kart (en üstte başlar)
+    yesil = new Sprite(240, 150, 100, 130);
+    yesil.color = '#28cd41';
+    yesil.layer = 2;
+    yesil.text = 'YEŞİL\\n(ÖN)';
+    yesil.textSize = 12;
+    yesil.collider = 'none';
 }
 
 function draw() {
     background('#1a1a2e');
     
     fill(255);
-    textSize(12);
-    textAlign(CENTER);
-    text('Normal', 130, 220);
-    text('mirror.x = true', 270, 220);
+    textSize(11);
+    text('1, 2, 3 tuşlarına bas - o kartı öne getir', 10, 20);
+    
+    // Klavye ile layer değiştir
+    if (kb.presses('1')) {
+        kirmizi.layer = 10;
+        mavi.layer = 1;
+        yesil.layer = 2;
+        kirmizi.text = 'KIRMIZI\\n(ÖN)';
+        mavi.text = 'MAVİ';
+        yesil.text = 'YEŞİL';
+    }
+    if (kb.presses('2')) {
+        kirmizi.layer = 0;
+        mavi.layer = 10;
+        yesil.layer = 2;
+        kirmizi.text = 'KIRMIZI';
+        mavi.text = 'MAVİ\\n(ÖN)';
+        yesil.text = 'YEŞİL';
+    }
+    if (kb.presses('3')) {
+        kirmizi.layer = 0;
+        mavi.layer = 1;
+        yesil.layer = 10;
+        kirmizi.text = 'KIRMIZI';
+        mavi.text = 'MAVİ';
+        yesil.text = 'YEŞİL\\n(ÖN)';
+    }
 }
-            `, 'Mirror Örneği')}
+            `, 'Görünürlük ve Layer')}
         </div>
+
 
         <div class="lesson-section">
             <h3>Sprite'ı Kaldırma</h3>

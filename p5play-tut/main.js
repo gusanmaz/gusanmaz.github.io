@@ -14,6 +14,27 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('tutorialData found:', tutorialData.length, 'sections');
     initNavigation();
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        // Check saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeToggle.innerHTML = '<span class="icon">🌙</span> Tema Değiştir';
+        }
+
+        themeToggle.onclick = () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            themeToggle.innerHTML = isLight ?
+                '<span class="icon">🌙</span> Tema Değiştir' :
+                '<span class="icon">☀️</span> Tema Değiştir';
+        };
+    }
+
     loadSection(0);
 });
 
@@ -32,7 +53,7 @@ function initNavigation() {
         'Fizik & Hareket': ['physics', 'movement', 'collisions'],
         'Görselleştirme': ['visuals', 'groups'],
         'Kontroller & Kamera': ['input', 'camera'],
-        'İleri Seviye': ['advanced']
+        'İleri Seviye': ['advanced', 'extra']
     };
     
     Object.entries(categories).forEach(([category, ids]) => {
@@ -112,17 +133,28 @@ function initializePlaygrounds() {
         const originalCode = codeArea.dataset.original || codeArea.value;
         codeArea.dataset.original = originalCode;
         
-        // Update line numbers and highlighting on input
+        // Update line numbers and highlight on input
         codeArea.addEventListener('input', () => {
             updateLineNumbers(codeArea);
             updateHighlight(codeArea, codeHighlight);
         });
-        
-        // Sync scroll
+
+        // Sync scroll - textarea ile line numbers ve highlight
+        const wrapper = codeArea.closest('.editor-wrapper');
+        const lineNumbers = wrapper?.querySelector('.line-numbers');
+
         codeArea.addEventListener('scroll', () => {
-            syncScroll(codeArea, codeHighlight);
+            if (lineNumbers) {
+                lineNumbers.scrollTop = codeArea.scrollTop;
+            }
+            if (codeHighlight) {
+                codeHighlight.style.transform = `translate(${-codeArea.scrollLeft}px, ${-codeArea.scrollTop}px)`;
+            }
         });
-        
+
+        // Initial highlight
+        updateHighlight(codeArea, codeHighlight);
+
         // Run button handler
         if (runBtn) {
             runBtn.onclick = () => runCode(codeArea.value, previewContainer);
@@ -158,12 +190,6 @@ function initializePlaygrounds() {
             };
         }
         
-        // Initial Prism highlight
-        if (window.Prism && codeHighlight) {
-            const codeEl = codeHighlight.querySelector('code');
-            if (codeEl) Prism.highlightElement(codeEl);
-        }
-        
         // Auto-run on load
         runCode(codeArea.value, previewContainer);
     });
@@ -182,37 +208,25 @@ function updateLineNumbers(textarea) {
 // Update syntax highlighting with Prism
 function updateHighlight(textarea, highlightEl) {
     if (!highlightEl) return;
-    
+
     const codeEl = highlightEl.querySelector('code');
     if (!codeEl) return;
-    
+
     // Escape HTML
     const escaped = textarea.value
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
-    
+
     codeEl.innerHTML = escaped;
-    
+
     // Re-highlight with Prism
     if (window.Prism) {
         Prism.highlightElement(codeEl);
     }
 }
 
-// Sync scroll between textarea, line numbers and highlight
-function syncScroll(textarea, highlightEl) {
-    const wrapper = textarea.closest('.editor-wrapper');
-    const lineNumbers = wrapper?.querySelector('.line-numbers');
-    
-    if (lineNumbers) {
-        lineNumbers.style.transform = `translateY(-${textarea.scrollTop}px)`;
-    }
-    if (highlightEl) {
-        highlightEl.style.transform = `translate(-${textarea.scrollLeft}px, -${textarea.scrollTop}px)`;
-    }
-}
-
+// Run code in preview iframe
 // Run code in preview iframe
 function runCode(code, previewContainer) {
     if (!previewContainer) return;
