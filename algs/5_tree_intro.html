@@ -111,6 +111,30 @@
             text-align: center;
             font-size: 24px;
             color: #667eea;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            padding: 15px 0;
+        }
+
+        .arrow-line {
+            width: 3px;
+            height: 35px;
+            position: relative;
+        }
+
+        .arrow-line::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 10px solid currentColor;
         }
 
         .comparison-grid {
@@ -1146,17 +1170,8 @@ tree.print_tree_info()</code></pre>
             </div>
 
             <div class="hierarchy-arrow">
-                <svg width="200" height="60" style="display: block; margin: 0 auto;">
-                    <defs>
-                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" fill="#667eea" />
-                        </marker>
-                    </defs>
-                    <line x1="100" y1="5" x2="100" y2="40" stroke="#667eea" stroke-width="3"
-                        marker-end="url(#arrowhead)" />
-                </svg>
-                <div
-                    style="background: #fff; padding: 5px 15px; border-radius: 20px; border: 2px solid #667eea; font-size: 13px; font-weight: bold; margin: -15px auto 0; width: fit-content;">
+                <div class="arrow-line" style="background: #667eea; color: #667eea;"></div>
+                <div style="background: #fff; padding: 8px 15px; border-radius: 20px; border: 2px solid #667eea; font-size: 13px; font-weight: bold; margin: 12px 0;">
                     <span style="color: #e74c3c;">❌ Döngü yok</span> + <span style="color: #27ae60;">✅ Bağlı</span>
                 </div>
             </div>
@@ -1179,17 +1194,8 @@ tree.print_tree_info()</code></pre>
             </div>
 
             <div class="hierarchy-arrow">
-                <svg width="200" height="60" style="display: block; margin: 0 auto;">
-                    <defs>
-                        <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" fill="#667eea" />
-                        </marker>
-                    </defs>
-                    <line x1="100" y1="5" x2="100" y2="40" stroke="#667eea" stroke-width="3"
-                        marker-end="url(#arrowhead2)" />
-                </svg>
-                <div
-                    style="background: #fff; padding: 5px 15px; border-radius: 20px; border: 2px solid #667eea; font-size: 13px; font-weight: bold; margin: -15px auto 0; width: fit-content;">
+                <div class="arrow-line" style="background: #667eea; color: #667eea;"></div>
+                <div style="background: #fff; padding: 8px 15px; border-radius: 20px; border: 2px solid #667eea; font-size: 13px; font-weight: bold; margin: 12px 0;">
                     Her düğümde <span style="color: #e74c3c;">❌ Max 2 çocuk</span>
                 </div>
             </div>
@@ -1214,18 +1220,8 @@ tree.print_tree_info()</code></pre>
                 <!-- Sol dal: BST -->
                 <div>
                     <div class="hierarchy-arrow">
-                        <svg width="200" height="55" style="display: block; margin: 0 auto;">
-                            <defs>
-                                <marker id="arrowhead3" markerWidth="10" markerHeight="10" refX="5" refY="3"
-                                    orient="auto">
-                                    <polygon points="0 0, 10 3, 0 6" fill="#27ae60" />
-                                </marker>
-                            </defs>
-                            <line x1="100" y1="5" x2="100" y2="35" stroke="#27ae60" stroke-width="3"
-                                marker-end="url(#arrowhead3)" />
-                        </svg>
-                        <div
-                            style="background: #fff; padding: 5px 12px; border-radius: 20px; border: 2px solid #27ae60; font-size: 12px; font-weight: bold; margin: -12px auto 0; width: fit-content;">
+                        <div class="arrow-line" style="background: #27ae60; color: #27ae60;"></div>
+                        <div style="background: #fff; padding: 6px 12px; border-radius: 20px; border: 2px solid #27ae60; font-size: 12px; font-weight: bold; margin: 12px 0;">
                             + <span style="color: #27ae60;">Sıralama kuralı</span>
                         </div>
                     </div>
@@ -1249,18 +1245,8 @@ tree.print_tree_info()</code></pre>
                     <!-- Sağ dal: Heap -->
                     <div>
                         <div class="hierarchy-arrow">
-                            <svg width="200" height="55" style="display: block; margin: 0 auto;">
-                                <defs>
-                                    <marker id="arrowhead4" markerWidth="10" markerHeight="10" refX="5" refY="3"
-                                        orient="auto">
-                                        <polygon points="0 0, 10 3, 0 6" fill="#ff9800" />
-                                    </marker>
-                                </defs>
-                                <line x1="100" y1="5" x2="100" y2="35" stroke="#ff9800" stroke-width="3"
-                                    marker-end="url(#arrowhead4)" />
-                            </svg>
-                            <div
-                                style="background: #fff; padding: 5px 12px; border-radius: 20px; border: 2px solid #ff9800; font-size: 12px; font-weight: bold; margin: -12px auto 0; width: fit-content;">
+                            <div class="arrow-line" style="background: #ff9800; color: #ff9800;"></div>
+                            <div style="background: #fff; padding: 6px 12px; border-radius: 20px; border: 2px solid #ff9800; font-size: 12px; font-weight: bold; margin: 12px 0;">
                                 + <span style="color: #ff9800;">Complete + Heap kuralı</span>
                             </div>
                         </div>
@@ -1285,17 +1271,8 @@ tree.print_tree_info()</code></pre>
                 </div>
 
                 <div class="hierarchy-arrow" style="margin-top: 20px;">
-                    <svg width="200" height="60" style="display: block; margin: 0 auto;">
-                        <defs>
-                            <marker id="arrowhead5" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto">
-                                <polygon points="0 0, 10 3, 0 6" fill="#2196f3" />
-                            </marker>
-                        </defs>
-                        <line x1="100" y1="5" x2="100" y2="40" stroke="#2196f3" stroke-width="3"
-                            marker-end="url(#arrowhead5)" />
-                    </svg>
-                    <div
-                        style="background: #e3f2fd; padding: 5px 15px; border-radius: 20px; border: 2px solid #2196f3; font-size: 13px; font-weight: bold; margin: -15px auto 0; width: fit-content; color: #1565c0;">
+                    <div class="arrow-line" style="background: #2196f3; color: #2196f3;"></div>
+                    <div style="background: #e3f2fd; padding: 8px 15px; border-radius: 20px; border: 2px solid #2196f3; font-size: 13px; font-weight: bold; margin: 12px 0; color: #1565c0;">
                         <strong>Özel Durum:</strong> Her düğümde sadece 1 çocuk (veya hiç)
                     </div>
                 </div>
