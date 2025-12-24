@@ -182,6 +182,13 @@
                     olacak. Bunu sonraki adımlarda düzelteceğiz.</p>
             </div>
 
+            <details class="collapsible-code">
+                <summary>📄 Adım 1 - Tam Kod</summary>
+                <div class="code-content" id="code-step1">
+                    <p>Kod yükleniyor...</p>
+                </div>
+            </details>
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">👀 Görselleştirme</span>
@@ -392,25 +399,35 @@
 }</pre>
             </div>
 
+            <details class="collapsible-code">
+                <summary>📄 Adım 2 - Tam Kod</summary>
+                <div class="code-content" id="code-step2">
+                    <p>Kod yükleniyor...</p>
+                </div>
+            </details>
+
             <div class="interactive-demo">
                 <div class="demo-header">
-                    <span class="demo-title">🖱️ İnteraktif Demo: İki Kart Seç</span>
-                    <button class="demo-btn" onclick="resetDemo2()">Reset</button>
+                    <span class="demo-title">🖱️ İnteraktif Demo: İki Kart Seç (Counter YOK)</span>
+                    <button class="demo-btn" onclick="resetDemo2Simple()">Oyunu Yeniden Başlat</button>
                 </div>
                 <div class="demo-content">
-                    <div id="step2-state"
+                    <div class="info-box" style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(255, 153, 64, 0.1); border-left: 3px solid var(--accent-orange);">
+                        <p style="margin: 0; font-size: 0.85rem;"><strong>⚠️ Bu versiyonda eksik:</strong> İki kart seçildikten sonra satır/sütun değerleri -1'e dönmüyor! Yeni seçim yapılamıyor. Bunu Adım 3'te counter ile çözeceğiz.</p>
+                    </div>
+                    <div id="step2-state-simple"
                         style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
                         <div><strong>Durum:</strong></div>
-                        <div id="step2-status">Birinci kartı seçin...</div>
+                        <div id="step2-status-simple">Birinci kartı seçin...</div>
                         <div style="margin-top: 0.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                            <div>satir1 = <span id="step2-s1" style="color: var(--accent-orange)">-1</span></div>
-                            <div>sutun1 = <span id="step2-c1" style="color: var(--accent-orange)">-1</span></div>
-                            <div>satir2 = <span id="step2-s2" style="color: var(--accent-orange)">-1</span></div>
-                            <div>sutun2 = <span id="step2-c2" style="color: var(--accent-orange)">-1</span></div>
+                            <div>satir1 = <span id="step2-s1-simple" style="color: var(--accent-orange)">-1</span></div>
+                            <div>sutun1 = <span id="step2-c1-simple" style="color: var(--accent-orange)">-1</span></div>
+                            <div>satir2 = <span id="step2-s2-simple" style="color: var(--accent-orange)">-1</span></div>
+                            <div>sutun2 = <span id="step2-c2-simple" style="color: var(--accent-orange)">-1</span></div>
                         </div>
                     </div>
-                    <div id="demo-step2" class="v5-grid-container"></div>
-                    <div id="console-step2" class="console-output" style="margin-top: 1rem;">
+                    <div id="demo-step2-simple" class="v5-grid-container"></div>
+                    <div id="console-step2-simple" class="console-output" style="margin-top: 1rem;">
                         <div class="console-line dim">// Console Output</div>
                     </div>
                 </div>
@@ -552,6 +569,41 @@
 
 <span class="comment">// getCellLocation, getWordIndex, drawGameBoard fonksiyonları aynı...</span></pre>
             </div>
+
+            <details class="collapsible-code">
+                <summary>📄 Adım 3 - Tam Kod</summary>
+                <div class="code-content" id="code-step3">
+                    <p>Kod yükleniyor...</p>
+                </div>
+            </details>
+
+            <div class="interactive-demo">
+                <div class="demo-header">
+                    <span class="demo-title">🖱️ İnteraktif Demo: Counter ile Kart Seçimi</span>
+                    <button class="demo-btn" onclick="resetDemo3WithCounter()">Oyunu Yeniden Başlat</button>
+                </div>
+                <div class="demo-content">
+                    <div class="info-box" style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(127, 217, 98, 0.1); border-left: 3px solid var(--accent-green);">
+                        <p style="margin: 0; font-size: 0.85rem;"><strong>✅ Bu versiyonda:</strong> İki kart seçildikten sonra counter başlıyor, ~2 saniye bekleyip satır/sütun değerleri otomatik olarak -1'e dönüyor. Yeni seçim yapılabilir!</p>
+                    </div>
+                    <div id="step3-state"
+                        style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+                        <div><strong>Durum:</strong></div>
+                        <div id="step3-status">Birinci kartı seçin...</div>
+                        <div style="margin-top: 0.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <div>satir1 = <span id="step3-s1" style="color: var(--accent-orange)">-1</span></div>
+                            <div>sutun1 = <span id="step3-c1" style="color: var(--accent-orange)">-1</span></div>
+                            <div>satir2 = <span id="step3-s2" style="color: var(--accent-orange)">-1</span></div>
+                            <div>sutun2 = <span id="step3-c2" style="color: var(--accent-orange)">-1</span></div>
+                            <div style="grid-column: span 2;">counter = <span id="step3-counter" style="color: var(--accent-blue)">-1</span></div>
+                        </div>
+                    </div>
+                    <div id="demo-step3" class="v5-grid-container"></div>
+                    <div id="console-step3" class="console-output" style="margin-top: 1rem;">
+                        <div class="console-line dim">// Console Output</div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- STEP 4 -->
@@ -672,6 +724,13 @@
   }
 }</pre>
             </div>
+
+            <details class="collapsible-code">
+                <summary>📄 Adım 4 - Tam Kod</summary>
+                <div class="code-content" id="code-step4">
+                    <p>Kod yükleniyor...</p>
+                </div>
+            </details>
         </section>
 
         <!-- STEP 5 -->
@@ -920,6 +979,13 @@
                     </ul>
                 </div>
             </div>
+
+            <details class="collapsible-code">
+                <summary>📄 Adım 5 - Tam Kod</summary>
+                <div class="code-content" id="code-step5">
+                    <p>Kod yükleniyor...</p>
+                </div>
+            </details>
         </section>
 
         <!-- STEP 6 -->
@@ -1116,6 +1182,13 @@
                     </p>
                 </div>
             </div>
+
+            <details class="collapsible-code">
+                <summary>📄 Adım 6 - Tam Kod</summary>
+                <div class="code-content" id="code-step6">
+                    <p>Kod yükleniyor...</p>
+                </div>
+            </details>
         </section>
 
         <!-- STEP 7 -->
@@ -1272,6 +1345,13 @@
                     </div>
                 </div>
             </div>
+
+            <details class="collapsible-code">
+                <summary>📄 Adım 7 - Tam Kod</summary>
+                <div class="code-content" id="code-step7">
+                    <p>Kod yükleniyor...</p>
+                </div>
+            </details>
         </section>
 
         <!-- STEP 8 -->
@@ -1360,6 +1440,13 @@
   <span class="comment">// ...</span>
 }</pre>
             </div>
+
+            <details class="collapsible-code">
+                <summary>📄 Adım 8 - Tam Kod</summary>
+                <div class="code-content" id="code-step8">
+                    <p>Kod yükleniyor...</p>
+                </div>
+            </details>
         </section>
 
         <!-- STEP 9 -->
@@ -1927,6 +2014,7 @@
     </div>
 
     <script src="app.js"></script>
+    <script src="code-loader.js"></script>
 </body>
 
 </html>

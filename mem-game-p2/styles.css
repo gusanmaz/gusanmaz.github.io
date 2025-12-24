@@ -1580,3 +1580,118 @@ code {
     .nav-dots { display: none; }
 }
 
+/* Collapsible Code Blocks */
+.collapsible-code {
+    margin: 1.5rem 0;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.collapsible-code summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-tertiary);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    transition: background 0.2s;
+    list-style: none;
+}
+
+.collapsible-code summary::-webkit-details-marker {
+    display: none;
+}
+
+.collapsible-code summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+    color: var(--accent-orange);
+}
+
+.collapsible-code[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.collapsible-code summary:hover {
+    background: var(--bg-secondary);
+}
+
+.collapsible-code .code-content {
+    padding: 0;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.collapsible-code .code-content pre {
+    margin: 0;
+    padding: 1.25rem;
+    background: var(--bg-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+
+.collapsible-code .code-content pre code {
+    color: var(--text-primary);
+}
+
+/* Satır numaralı kod blokları */
+.code-with-lines {
+    counter-reset: line;
+    margin: 0;
+    padding: 1rem 0;
+    background: var(--bg-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    overflow-x: auto;
+}
+
+.code-with-lines code {
+    display: block;
+    color: var(--text-primary);
+}
+
+.line-number {
+    display: inline-block;
+    width: 3.5rem;
+    padding-right: 1rem;
+    text-align: right;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    user-select: none;
+    border-right: 1px solid var(--border-color);
+    margin-right: 1rem;
+}
+
+/* Syntax highlighting colors */
+.collapsible-code .keyword {
+    color: var(--accent-purple);
+    font-weight: 600;
+}
+
+.collapsible-code .string {
+    color: var(--accent-green);
+}
+
+.collapsible-code .number {
+    color: var(--accent-orange);
+}
+
+.collapsible-code .comment {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.collapsible-code .function {
+    color: var(--accent-blue);
+}
+

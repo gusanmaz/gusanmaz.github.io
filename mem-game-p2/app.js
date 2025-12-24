@@ -77,23 +77,25 @@ function initStep1Demo() {
     });
 }
 
-// --- Step 2 Demo ---
-let step2State = {
+// ========================================
+// --- Step 2 Demo (BASİT - Counter YOK) ---
+// ========================================
+let step2SimpleState = {
     satir1: -1, sutun1: -1,
     satir2: -1, sutun2: -1,
     mixedWords: [],
     gameBoard: []
 };
 
-function resetDemo2() {
-    const container = document.getElementById('demo-step2');
-    const consoleOut = document.getElementById('console-step2');
+function resetDemo2Simple() {
+    const container = document.getElementById('demo-step2-simple');
+    const consoleOut = document.getElementById('console-step2-simple');
     if (!container) return;
 
-    step2State.mixedWords = shuffle(words);
-    step2State.satir1 = -1; step2State.sutun1 = -1;
-    step2State.satir2 = -1; step2State.sutun2 = -1;
-    step2State.gameBoard = [];
+    step2SimpleState.mixedWords = shuffle(words);
+    step2SimpleState.satir1 = -1; step2SimpleState.sutun1 = -1;
+    step2SimpleState.satir2 = -1; step2SimpleState.sutun2 = -1;
+    step2SimpleState.gameBoard = [];
 
     container.innerHTML = '';
     container.style.display = 'grid';
@@ -105,28 +107,51 @@ function resetDemo2() {
     // Fill gameBoard
     let idx = 0;
     for(let r=0; r<4; r++) {
-        step2State.gameBoard[r] = [];
+        step2SimpleState.gameBoard[r] = [];
         for(let c=0; c<4; c++) {
-            step2State.gameBoard[r][c] = step2State.mixedWords[idx++];
+            step2SimpleState.gameBoard[r][c] = step2SimpleState.mixedWords[idx++];
         }
     }
 
-    // Draw Grid
+    drawStep2SimpleBoard();
+    updateStep2SimpleDisplay();
+}
+
+function drawStep2SimpleBoard() {
+    const container = document.getElementById('demo-step2-simple');
+    if (!container) return;
+
+    container.innerHTML = '';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(4, 80px)';
+    container.style.gap = '5px';
+    container.style.justifyContent = 'center';
+
     for(let r=0; r<4; r++) {
         for(let c=0; c<4; c++) {
             const cell = document.createElement('div');
             cell.className = 'v5-cell';
-            cell.dataset.r = r;
-            cell.dataset.c = c;
-            cell.textContent = step2State.gameBoard[r][c];
-            cell.onclick = () => handleStep2Click(r, c, cell);
+            cell.textContent = step2SimpleState.gameBoard[r][c];
+            cell.onclick = () => handleStep2SimpleClick(r, c);
+
+            // Highlight selections
+            if (step2SimpleState.satir1 === r && step2SimpleState.sutun1 === c) {
+                cell.style.borderColor = 'yellow';
+                cell.style.backgroundColor = 'rgba(255, 229, 133, 0.3)';
+            }
+            if (step2SimpleState.satir2 === r && step2SimpleState.sutun2 === c) {
+                cell.style.borderColor = 'orange';
+                cell.style.backgroundColor = 'rgba(255, 153, 64, 0.3)';
+            }
+
             container.appendChild(cell);
         }
     }
 }
 
-function logStep2(msg, type='info') {
-    const consoleOut = document.getElementById('console-step2');
+function logStep2Simple(msg, type='info') {
+    const consoleOut = document.getElementById('console-step2-simple');
+    if (!consoleOut) return;
     const line = document.createElement('div');
     line.className = `console-line ${type}`;
     line.textContent = `> ${msg}`;
@@ -134,67 +159,255 @@ function logStep2(msg, type='info') {
     consoleOut.scrollTop = consoleOut.scrollHeight;
 }
 
-function updateStep2Display() {
-    const s1 = document.getElementById('step2-s1');
-    const c1 = document.getElementById('step2-c1');
-    const s2 = document.getElementById('step2-s2');
-    const c2 = document.getElementById('step2-c2');
-    const status = document.getElementById('step2-status');
+function updateStep2SimpleDisplay() {
+    const s1 = document.getElementById('step2-s1-simple');
+    const c1 = document.getElementById('step2-c1-simple');
+    const s2 = document.getElementById('step2-s2-simple');
+    const c2 = document.getElementById('step2-c2-simple');
+    const status = document.getElementById('step2-status-simple');
 
-    if (s1) s1.textContent = step2State.satir1;
-    if (c1) c1.textContent = step2State.sutun1;
-    if (s2) s2.textContent = step2State.satir2;
-    if (c2) c2.textContent = step2State.sutun2;
+    if (s1) s1.textContent = step2SimpleState.satir1;
+    if (c1) c1.textContent = step2SimpleState.sutun1;
+    if (s2) s2.textContent = step2SimpleState.satir2;
+    if (c2) c2.textContent = step2SimpleState.sutun2;
 
     if (status) {
-        if (step2State.satir1 === -1) {
+        if (step2SimpleState.satir1 === -1) {
             status.textContent = "Birinci kartı seçin...";
             status.style.color = "var(--accent-blue)";
-        } else if (step2State.satir2 === -1) {
+        } else if (step2SimpleState.satir2 === -1) {
             status.textContent = "İkinci kartı seçin...";
             status.style.color = "var(--accent-orange)";
         } else {
-            status.textContent = "İki kart seçildi! Reset edin.";
+            status.textContent = "⚠️ İki kart seçildi ama değerler -1'e dönmüyor! Yeniden başlatın.";
+            status.style.color = "var(--accent-red)";
+        }
+    }
+}
+
+function handleStep2SimpleClick(r, c) {
+    // BASİT VERSİYON - Counter YOK, değerler -1'e DÖNMÜYOR
+    if (step2SimpleState.satir1 === -1 && step2SimpleState.sutun1 === -1) {
+        step2SimpleState.satir1 = r;
+        step2SimpleState.sutun1 = c;
+        logStep2Simple(`Seçim 1: [${r}, ${c}] - ${step2SimpleState.gameBoard[r][c]}`);
+        drawStep2SimpleBoard();
+        updateStep2SimpleDisplay();
+    } else if (step2SimpleState.satir2 === -1 && step2SimpleState.sutun2 === -1) {
+        step2SimpleState.satir2 = r;
+        step2SimpleState.sutun2 = c;
+        logStep2Simple(`Seçim 2: [${r}, ${c}] - ${step2SimpleState.gameBoard[r][c]}`);
+        drawStep2SimpleBoard();
+
+        // Check match
+        let w1 = step2SimpleState.gameBoard[step2SimpleState.satir1][step2SimpleState.sutun1];
+        let w2 = step2SimpleState.gameBoard[step2SimpleState.satir2][step2SimpleState.sutun2];
+        let ind1 = words.indexOf(w1);
+        let ind2 = words.indexOf(w2);
+
+        logStep2Simple(`ind1 = ${ind1}, floor(${ind1}/2) = ${Math.floor(ind1/2)}`);
+        logStep2Simple(`ind2 = ${ind2}, floor(${ind2}/2) = ${Math.floor(ind2/2)}`);
+
+        if (Math.floor(ind1 / 2) === Math.floor(ind2 / 2)) {
+            logStep2Simple("✓ Pair buldum!", "output");
+        } else {
+            logStep2Simple("✗ Pair bulamadim", "error");
+        }
+
+        // BU VERSİYONDA RESET YOK!
+        logStep2Simple("⚠️ Değerler -1'e dönmedi! Yeni seçim yapılamıyor.", "error");
+        updateStep2SimpleDisplay();
+    }
+}
+
+// ========================================
+// --- Step 3 Demo (COUNTER İLE) ---
+// ========================================
+let step3State = {
+    satir1: -1, sutun1: -1,
+    satir2: -1, sutun2: -1,
+    mixedWords: [],
+    gameBoard: [],
+    counter: -1
+};
+
+let step3Interval = null;
+
+function resetDemo3WithCounter() {
+    const container = document.getElementById('demo-step3');
+    const consoleOut = document.getElementById('console-step3');
+    if (!container) return;
+
+    // Clear any existing interval
+    if (step3Interval) {
+        clearInterval(step3Interval);
+        step3Interval = null;
+    }
+
+    step3State.mixedWords = shuffle(words);
+    step3State.satir1 = -1; step3State.sutun1 = -1;
+    step3State.satir2 = -1; step3State.sutun2 = -1;
+    step3State.gameBoard = [];
+    step3State.counter = -1;
+
+    container.innerHTML = '';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(4, 80px)';
+    container.style.gap = '5px';
+    container.style.justifyContent = 'center';
+    consoleOut.innerHTML = '<div class="console-line dim">// Console Output</div>';
+
+    // Fill gameBoard
+    let idx = 0;
+    for(let r=0; r<4; r++) {
+        step3State.gameBoard[r] = [];
+        for(let c=0; c<4; c++) {
+            step3State.gameBoard[r][c] = step3State.mixedWords[idx++];
+        }
+    }
+
+    drawStep3Board();
+    updateStep3Display();
+
+    // Start game loop for counter
+    step3Interval = setInterval(step3GameLoop, 1000/30); // 30 FPS
+}
+
+function step3GameLoop() {
+    if (step3State.counter !== -1) {
+        step3State.counter++;
+        // Update counter display
+        const counterEl = document.getElementById('step3-counter');
+        if (counterEl) counterEl.textContent = step3State.counter;
+    }
+    if (step3State.counter >= 120) { // ~2 seconds at 60 FPS (gerçek oyundaki gibi)
+        logStep3("✓ Counter 120'ye ulaştı! Kartlar sıfırlanıyor...", "output");
+        step3State.satir1 = -1;
+        step3State.sutun1 = -1;
+        step3State.satir2 = -1;
+        step3State.sutun2 = -1;
+        step3State.counter = -1;
+        drawStep3Board();
+        updateStep3Display();
+    }
+}
+
+function drawStep3Board() {
+    const container = document.getElementById('demo-step3');
+    if (!container) return;
+
+    container.innerHTML = '';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(4, 80px)';
+    container.style.gap = '5px';
+    container.style.justifyContent = 'center';
+
+    for(let r=0; r<4; r++) {
+        for(let c=0; c<4; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'v5-cell';
+            cell.textContent = step3State.gameBoard[r][c];
+            cell.onclick = () => handleStep3Click(r, c);
+
+            // Highlight selections
+            if (step3State.satir1 === r && step3State.sutun1 === c) {
+                cell.style.borderColor = 'yellow';
+                cell.style.backgroundColor = 'rgba(255, 229, 133, 0.3)';
+            }
+            if (step3State.satir2 === r && step3State.sutun2 === c) {
+                cell.style.borderColor = 'orange';
+                cell.style.backgroundColor = 'rgba(255, 153, 64, 0.3)';
+            }
+
+            container.appendChild(cell);
+        }
+    }
+}
+
+function logStep3(msg, type='info') {
+    const consoleOut = document.getElementById('console-step3');
+    if (!consoleOut) return;
+    const line = document.createElement('div');
+    line.className = `console-line ${type}`;
+    line.textContent = `> ${msg}`;
+    consoleOut.appendChild(line);
+    consoleOut.scrollTop = consoleOut.scrollHeight;
+}
+
+function updateStep3Display() {
+    const s1 = document.getElementById('step3-s1');
+    const c1 = document.getElementById('step3-c1');
+    const s2 = document.getElementById('step3-s2');
+    const c2 = document.getElementById('step3-c2');
+    const counterEl = document.getElementById('step3-counter');
+    const status = document.getElementById('step3-status');
+
+    if (s1) s1.textContent = step3State.satir1;
+    if (c1) c1.textContent = step3State.sutun1;
+    if (s2) s2.textContent = step3State.satir2;
+    if (c2) c2.textContent = step3State.sutun2;
+    if (counterEl) counterEl.textContent = step3State.counter;
+
+    if (status) {
+        if (step3State.satir1 === -1) {
+            status.textContent = "Birinci kartı seçin...";
+            status.style.color = "var(--accent-blue)";
+        } else if (step3State.satir2 === -1) {
+            status.textContent = "İkinci kartı seçin...";
+            status.style.color = "var(--accent-orange)";
+        } else if (step3State.counter !== -1) {
+            status.textContent = `Counter çalışıyor... (${step3State.counter}/120)`;
+            status.style.color = "var(--accent-purple)";
+        } else {
+            status.textContent = "Kartlar sıfırlandı! Yeni seçim yapabilirsiniz.";
             status.style.color = "var(--accent-green)";
         }
     }
 }
 
-function handleStep2Click(r, c, cell) {
-    // Simple logic from Snippet 2
-    if (step2State.satir1 === -1 && step2State.sutun1 === -1) {
-        step2State.satir1 = r;
-        step2State.sutun1 = c;
-        cell.style.borderColor = 'yellow';
-        cell.style.backgroundColor = 'rgba(255, 229, 133, 0.2)';
-        logStep2(`Seçim 1: [${r}, ${c}] - ${step2State.gameBoard[r][c]}`);
-        updateStep2Display();
-    } else if (step2State.satir2 === -1 && step2State.sutun2 === -1) {
-        step2State.satir2 = r;
-        step2State.sutun2 = c;
-        cell.style.borderColor = 'orange';
-        cell.style.backgroundColor = 'rgba(255, 153, 64, 0.2)';
-        logStep2(`Seçim 2: [${r}, ${c}] - ${step2State.gameBoard[r][c]}`);
+function handleStep3Click(r, c) {
+    // Counter çalışıyorken tıklama kabul etme
+    if (step3State.counter !== -1) return;
+
+    if (step3State.satir1 === -1 && step3State.sutun1 === -1) {
+        step3State.satir1 = r;
+        step3State.sutun1 = c;
+        logStep3(`Seçim 1: [${r}, ${c}] - ${step3State.gameBoard[r][c]}`);
+        drawStep3Board();
+        updateStep3Display();
+    } else if (step3State.satir2 === -1 && step3State.sutun2 === -1) {
+        step3State.satir2 = r;
+        step3State.sutun2 = c;
+        logStep3(`Seçim 2: [${r}, ${c}] - ${step3State.gameBoard[r][c]}`);
+        drawStep3Board();
 
         // Check match
-        let w1 = step2State.gameBoard[step2State.satir1][step2State.sutun1];
-        let w2 = step2State.gameBoard[step2State.satir2][step2State.sutun2];
+        let w1 = step3State.gameBoard[step3State.satir1][step3State.sutun1];
+        let w2 = step3State.gameBoard[step3State.satir2][step3State.sutun2];
         let ind1 = words.indexOf(w1);
         let ind2 = words.indexOf(w2);
 
-        logStep2(`ind1 = ${ind1}, floor(${ind1}/2) = ${Math.floor(ind1/2)}`);
-        logStep2(`ind2 = ${ind2}, floor(${ind2}/2) = ${Math.floor(ind2/2)}`);
+        logStep3(`ind1 = ${ind1}, floor(${ind1}/2) = ${Math.floor(ind1/2)}`);
+        logStep3(`ind2 = ${ind2}, floor(${ind2}/2) = ${Math.floor(ind2/2)}`);
 
         if (Math.floor(ind1 / 2) === Math.floor(ind2 / 2)) {
-            logStep2("✓ Pair buldum!", "output");
+            logStep3("✓ Pair buldum!", "output");
         } else {
-            logStep2("✗ Pair bulamadim", "error");
+            logStep3("✗ Pair bulamadim", "error");
         }
 
-        updateStep2Display();
-        // Note: In step 2, we don't reset automatically or handle self-click properly yet
-        logStep2("Not: Resetlemek için butona basınız.", "dim");
+        // COUNTER BAŞLAT!
+        step3State.counter = 0;
+        logStep3("Counter başladı (0), 120'ye kadar sayacak...", "dim");
+        updateStep3Display();
     }
+}
+
+// ========================================
+// --- Eski Step 2 (backward compatibility) ---
+// ========================================
+function resetDemo2() {
+    resetDemo2Simple();
 }
 
 // --- Disco Mode Demo ---
@@ -491,7 +704,8 @@ function checkWin() {
 // Initialize
 window.onload = () => {
     initStep1Demo();
-    resetDemo2();
+    resetDemo2Simple();
+    resetDemo3WithCounter();
     resetFinalGame();
 };
 
