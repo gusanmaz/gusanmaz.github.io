@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p5.js ile Connect4 Oyunu - Adım Adım Kodlama</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Temayı Değiştir">🌓</button>
+
+    <div class="hero">
+        <h1>🔴🟡 Connect4 Oyunu</h1>
+        <p>Bir kodun hikayesi: Sıfırdan profesyonel bir oyuna...</p>
+        <div class="story-intro">
+            <span class="chapter-badge">25+ Adım</span>
+            <span class="chapter-badge">Algoritma Odaklı</span>
+            <span class="chapter-badge">OOP & Animasyon</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- PROLOGUE -->
+        <section id="prologue" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Giriş</span>
+                <h2>Ne Yapıyoruz?</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Connect4 (Dörtlü Bağla), iki oyuncunun sırayla taş düşürdüğü klasik bir strateji oyunudur. Amaç: Yatay, dikey veya çapraz olarak <span class="highlight">4 taşı yan yana</span> getirmek!</p>
+                
+                <p>Bu tutorial'da p5.js kullanarak <strong>adım adım</strong> tam fonksiyonel bir Connect4 oyunu yapacağız:</p>
+            </div>
+            
+            <div class="roadmap">
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">📐</div>
+                    <div class="roadmap-text">
+                        <strong>Bölüm 1:</strong> Grid çizimi ve temel yapı
+                    </div>
+                </div>
+                <div class="roadmap-arrow">→</div>
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">🖱️</div>
+                    <div class="roadmap-text">
+                        <strong>Bölüm 2:</strong> Tıklama ve taş düşürme
+                    </div>
+                </div>
+                <div class="roadmap-arrow">→</div>
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">🧮</div>
+                    <div class="roadmap-text">
+                        <strong>Bölüm 3:</strong> Kazanma algoritması
+                    </div>
+                </div>
+                <div class="roadmap-arrow">→</div>
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">⚙️</div>
+                    <div class="roadmap-text">
+                        <strong>Bölüm 4:</strong> Parametrik yapı
+                    </div>
+                </div>
+                <div class="roadmap-arrow">→</div>
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">🎨</div>
+                    <div class="roadmap-text">
+                        <strong>Bölüm 5:</strong> Animasyon ve görsel efektler
+                    </div>
+                </div>
+                <div class="roadmap-arrow">→</div>
+                <div class="roadmap-item final-item">
+                    <div class="roadmap-icon">🏆</div>
+                    <div class="roadmap-text">
+                        <strong>Final:</strong> Skor sistemi ve OOP
+                    </div>
+                </div>
+            </div>
+            
+            <div class="final-goal">
+                <h3>🎯 Hedef: 7x6 Connect4 Oyunu</h3>
+                <div class="connect4-preview" id="preview-grid"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="legend-box player1-box"></span>
+                        <span>Oyuncu 1 (Kırmızı)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-box player2-box"></span>
+                        <span>Oyuncu 2 (Sarı)</span>
+                    </div>
+                </div>
+                <button class="demo-btn" onclick="resetPreview()">Yeni Oyun</button>
+            </div>
+        </section>
+
+        <!-- STEP 1: Basic Canvas -->
+        <section id="step1" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 1</span>
+                <h2>Canvas Oluşturma</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Her p5.js projesinde olduğu gibi, önce canvas'ımızı oluşturuyoruz. Connect4 için 7 sütun ve 6 satır gerekiyor.</p>
+                
+                <h3>📐 Boyut Hesabı</h3>
+                <ul>
+                    <li>Her hücre: 80x80 piksel</li>
+                    <li>7 sütun × 80 = <strong>560 piksel genişlik</strong></li>
+                    <li>6 satır × 80 = <strong>480 piksel yükseklik</strong></li>
+                </ul>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 1</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">setup</span>() {
+    <span class="function">createCanvas</span>(<span class="number">560</span>, <span class="number">480</span>);
+}
+
+<span class="keyword">function</span> <span class="function">draw</span>() {
+    <span class="function">background</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">200</span>); <span class="comment">// Mavi arka plan</span>
+}</pre>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 Neden Mavi?</strong>
+                <p>Gerçek Connect4 oyun tahtaları genellikle mavi plastikten yapılır. Bu renk seçimi oyuna otantik bir görünüm kazandırır.</p>
+            </div>
+        </section>
+
+        <!-- STEP 2: Drawing Grid -->
+        <section id="step2" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 2</span>
+                <h2>Grid Çizimi - İç İçe Döngüler</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Şimdi 7x6'lık grid'imizi çizelim. Her hücre için bir daire çizeceğiz.</p>
+                
+                <h3>🔄 İç İçe Döngü Mantığı</h3>
+                <p>2D grid çizmek için iki döngü kullanıyoruz:</p>
+            </div>
+            
+            <div class="concept-box">
+                <div class="flow-diagram">
+                    <div class="flow-box setup-box">
+                        <span class="flow-label">Dış Döngü (satır)</span>
+                        <span class="flow-desc">satır: 0, 1, 2, 3, 4, 5</span>
+                    </div>
+                    <div class="flow-arrow-down">↓</div>
+                    <div class="flow-box draw-box">
+                        <span class="flow-label">İç Döngü (sütun)</span>
+                        <span class="flow-desc">Her satır için: sütun: 0, 1, 2, 3, 4, 5, 6</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 2</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">setup</span>() {
+    <span class="function">createCanvas</span>(<span class="number">560</span>, <span class="number">480</span>);
+}
+
+<span class="keyword">function</span> <span class="function">draw</span>() {
+    <span class="function">background</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">200</span>);
+    
+    <span class="comment">// Grid çizimi</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">satir</span> = <span class="number">0</span>; <span class="variable">satir</span> < <span class="number">6</span>; <span class="variable">satir</span>++) {
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">sutun</span> = <span class="number">0</span>; <span class="variable">sutun</span> < <span class="number">7</span>; <span class="variable">sutun</span>++) {
+            <span class="function">fill</span>(<span class="number">255</span>); <span class="comment">// Beyaz</span>
+            <span class="keyword">let</span> <span class="variable">x</span> = <span class="variable">sutun</span> * <span class="number">80</span> + <span class="number">40</span>;
+            <span class="keyword">let</span> <span class="variable">y</span> = <span class="variable">satir</span> * <span class="number">80</span> + <span class="number">40</span>;
+            <span class="function">ellipse</span>(<span class="variable">x</span>, <span class="variable">y</span>, <span class="number">70</span>, <span class="number">70</span>);
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="interactive-demo">
+                <div class="demo-header">
+                    <span class="demo-title">📐 Koordinat Hesabı</span>
+                </div>
+                <div class="demo-content">
+                    <div class="calculator-v4">
+                        <div class="calc-slider">
+                            <label>Sütun (0-6):</label>
+                            <input type="range" id="step2-col" min="0" max="6" value="0" oninput="updateStep2Calc()">
+                            <span class="calc-i-value" id="step2-col-val">0</span>
+                        </div>
+                        <div class="calc-slider">
+                            <label>Satır (0-5):</label>
+                            <input type="range" id="step2-row" min="0" max="5" value="0" oninput="updateStep2Calc()">
+                            <span class="calc-i-value" id="step2-row-val">0</span>
+                        </div>
+                        <div class="calc-formulas">
+                            <div class="calc-formula-box">
+                                <span class="calc-formula-label">x = sütun × 80 + 40</span>
+                                <span class="calc-formula-result">= <strong id="step2-x">40</strong></span>
+                            </div>
+                            <div class="calc-formula-box">
+                                <span class="calc-formula-label">y = satır × 80 + 40</span>
+                                <span class="calc-formula-result">= <strong id="step2-y">40</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="demo-explanation">+40 ekleyerek dairenin merkezini hücrenin ortasına getiriyoruz (80/2 = 40)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3: Game Board Array -->
+        <section id="step3" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 3</span>
+                <h2>Oyun Tahtası Dizisi (2D Array)</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Görsel grid'i çizdik, ama oyun durumunu nerede tutacağız? Bunun için 2 boyutlu bir dizi (2D array) kullanacağız.</p>
+                
+                <h3>🎲 gameBoard Dizisi</h3>
+                <p>Her hücre 3 durumdan birinde olabilir:</p>
+                <ul>
+                    <li><code>0</code> = Boş hücre</li>
+                    <li><code>1</code> = Oyuncu 1 (Kırmızı)</li>
+                    <li><code>2</code> = Oyuncu 2 (Sarı)</li>
+                </ul>
+            </div>
+            
+            <div class="array-explanation">
+                <div class="array-box">
+                    <h4>📦 gameBoard Yapısı</h4>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; line-height: 1.8;">
+                        <div>gameBoard = [</div>
+                        <div style="margin-left: 1rem;">[0, 0, 0, 0, 0, 0, 0], <span class="comment">// Satır 0 (en üst)</span></div>
+                        <div style="margin-left: 1rem;">[0, 0, 0, 0, 0, 0, 0], <span class="comment">// Satır 1</span></div>
+                        <div style="margin-left: 1rem;">[0, 0, 0, 0, 0, 0, 0], <span class="comment">// Satır 2</span></div>
+                        <div style="margin-left: 1rem;">[0, 0, 0, 0, 0, 0, 0], <span class="comment">// Satır 3</span></div>
+                        <div style="margin-left: 1rem;">[0, 0, 0, 0, 0, 0, 0], <span class="comment">// Satır 4</span></div>
+                        <div style="margin-left: 1rem;">[0, 0, 0, 0, 0, 0, 0]  <span class="comment">// Satır 5 (en alt)</span></div>
+                        <div>]</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 3</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">let</span> <span class="variable">gameBoard</span> = [];
+
+<span class="keyword">function</span> <span class="function">setup</span>() {
+    <span class="function">createCanvas</span>(<span class="number">560</span>, <span class="number">480</span>);
+    
+    <span class="comment">// 6 satır, 7 sütunluk boş tahta oluştur</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">satir</span> = <span class="number">0</span>; <span class="variable">satir</span> < <span class="number">6</span>; <span class="variable">satir</span>++) {
+        <span class="variable">gameBoard</span>[<span class="variable">satir</span>] = [];
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">sutun</span> = <span class="number">0</span>; <span class="variable">sutun</span> < <span class="number">7</span>; <span class="variable">sutun</span>++) {
+            <span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] = <span class="number">0</span>; <span class="comment">// Başlangıçta boş</span>
+        }
+    }
+    
+    <span class="function">print</span>(<span class="variable">gameBoard</span>);
+}
+
+<span class="keyword">function</span> <span class="function">draw</span>() {
+    <span class="function">background</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">200</span>);
+    <span class="function">drawBoard</span>();
+}
+
+<span class="keyword">function</span> <span class="function">drawBoard</span>() {
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">satir</span> = <span class="number">0</span>; <span class="variable">satir</span> < <span class="number">6</span>; <span class="variable">satir</span>++) {
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">sutun</span> = <span class="number">0</span>; <span class="variable">sutun</span> < <span class="number">7</span>; <span class="variable">sutun</span>++) {
+            <span class="keyword">let</span> <span class="variable">x</span> = <span class="variable">sutun</span> * <span class="number">80</span> + <span class="number">40</span>;
+            <span class="keyword">let</span> <span class="variable">y</span> = <span class="variable">satir</span> * <span class="number">80</span> + <span class="number">40</span>;
+            
+            <span class="comment">// Hücre durumuna göre renk seç</span>
+            <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] == <span class="number">0</span>) {
+                <span class="function">fill</span>(<span class="number">255</span>); <span class="comment">// Beyaz (boş)</span>
+            } <span class="keyword">else if</span> (<span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] == <span class="number">1</span>) {
+                <span class="function">fill</span>(<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>); <span class="comment">// Kırmızı</span>
+            } <span class="keyword">else</span> {
+                <span class="function">fill</span>(<span class="number">255</span>, <span class="number">255</span>, <span class="number">0</span>); <span class="comment">// Sarı</span>
+            }
+            
+            <span class="function">ellipse</span>(<span class="variable">x</span>, <span class="variable">y</span>, <span class="number">70</span>, <span class="number">70</span>);
+        }
+    }
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 4: Mouse Click Detection -->
+        <section id="step4" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 4</span>
+                <h2>Tıklama Algılama</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Oyuncunun hangi sütuna tıkladığını algılamamız gerekiyor. <code>mousePressed()</code> fonksiyonu ve <code>mouseX</code> değişkeni bunu sağlar.</p>
+                
+                <h3>🖱️ Sütun Hesaplama</h3>
+                <p>Mouse X koordinatından sütun numarasını bulmak için:</p>
+            </div>
+            
+            <div class="concept-box">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; padding: 1rem; background: var(--bg-primary); border-radius: 6px;">
+                    <div><span class="variable">sutun</span> = <span class="function">floor</span>(<span class="variable">mouseX</span> / <span class="number">80</span>)</div>
+                    <br>
+                    <div style="color: var(--text-secondary); font-size: 0.85rem;">
+                        <div>Örnek: mouseX = 250</div>
+                        <div>sutun = floor(250 / 80) = floor(3.125) = <strong>3</strong></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 4</span>
+                    sketch.js
+                </div>
+<pre><span class="comment">// ... önceki kod ...</span>
+
+<span class="keyword">function</span> <span class="function">mousePressed</span>() {
+    <span class="keyword">let</span> <span class="variable">sutun</span> = <span class="function">floor</span>(<span class="variable">mouseX</span> / <span class="number">80</span>);
+    <span class="function">print</span>(<span class="string">"Tıklanan sütun:"</span>, <span class="variable">sutun</span>);
+}</pre>
+            </div>
+            
+            <div class="interactive-demo">
+                <div class="demo-header">
+                    <span class="demo-title">🖱️ Sütun Algılama Demo</span>
+                </div>
+                <div class="demo-content">
+                    <div id="step4-demo" class="click-demo-grid"></div>
+                    <div id="step4-info" class="click-info">Bir sütuna tıklayın!</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 5: Dropping Piece -->
+        <section id="step5" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 5</span>
+                <h2>Taş Düşürme Mantığı</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Connect4'te taşlar yukarıdan düşer ve <strong>en alttaki boş hücreye</strong> yerleşir. Bu mantığı kodlamamız gerekiyor.</p>
+                
+                <h3>⬇️ Düşürme Algoritması</h3>
+                <ol>
+                    <li>Seçilen sütunun <strong>en altından</strong> başla (satır 5)</li>
+                    <li>Yukarı doğru ilerle (satır 4, 3, 2, 1, 0)</li>
+                    <li>İlk boş hücreyi (değeri 0 olan) bul</li>
+                    <li>O hücreye taşı yerleştir</li>
+                </ol>
+            </div>
+            
+            <div class="concept-box">
+                <div class="flow-diagram">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                        <div class="flow-box" style="border-color: var(--accent-orange);">
+                            <span class="flow-label">Satır 5 (en alt)</span>
+                            <span class="flow-desc">Boş mu? → Hayır (dolu)</span>
+                        </div>
+                        <div class="flow-box" style="border-color: var(--accent-orange);">
+                            <span class="flow-label">Satır 4</span>
+                            <span class="flow-desc">Boş mu? → Hayır (dolu)</span>
+                        </div>
+                        <div class="flow-box" style="border-color: var(--accent-green);">
+                            <span class="flow-label">Satır 3</span>
+                            <span class="flow-desc">Boş mu? → EVET! Buraya koy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 5</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">let</span> <span class="variable">gameBoard</span> = [];
+<span class="keyword">let</span> <span class="variable">currentPlayer</span> = <span class="number">1</span>; <span class="comment">// 1 veya 2</span>
+
+<span class="keyword">function</span> <span class="function">setup</span>() {
+    <span class="function">createCanvas</span>(<span class="number">560</span>, <span class="number">480</span>);
+    <span class="function">initBoard</span>();
+}
+
+<span class="keyword">function</span> <span class="function">initBoard</span>() {
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">satir</span> = <span class="number">0</span>; <span class="variable">satir</span> < <span class="number">6</span>; <span class="variable">satir</span>++) {
+        <span class="variable">gameBoard</span>[<span class="variable">satir</span>] = [];
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">sutun</span> = <span class="number">0</span>; <span class="variable">sutun</span> < <span class="number">7</span>; <span class="variable">sutun</span>++) {
+            <span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] = <span class="number">0</span>;
+        }
+    }
+}
+
+<span class="keyword">function</span> <span class="function">draw</span>() {
+    <span class="function">background</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">200</span>);
+    <span class="function">drawBoard</span>();
+}
+
+<span class="keyword">function</span> <span class="function">mousePressed</span>() {
+    <span class="keyword">let</span> <span class="variable">sutun</span> = <span class="function">floor</span>(<span class="variable">mouseX</span> / <span class="number">80</span>);
+    
+    <span class="comment">// Sütun geçerli mi kontrol et</span>
+    <span class="keyword">if</span> (<span class="variable">sutun</span> >= <span class="number">0</span> && <span class="variable">sutun</span> < <span class="number">7</span>) {
+        <span class="function">dropPiece</span>(<span class="variable">sutun</span>);
+    }
+}
+
+<span class="keyword">function</span> <span class="function">dropPiece</span>(<span class="variable">sutun</span>) {
+    <span class="comment">// En alttan başlayarak yukarı doğru boş hücre ara</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">satir</span> = <span class="number">5</span>; <span class="variable">satir</span> >= <span class="number">0</span>; <span class="variable">satir</span>--) {
+        <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] == <span class="number">0</span>) {
+            <span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] = <span class="variable">currentPlayer</span>;
+            
+            <span class="comment">// Sırayı değiştir</span>
+            <span class="keyword">if</span> (<span class="variable">currentPlayer</span> == <span class="number">1</span>) {
+                <span class="variable">currentPlayer</span> = <span class="number">2</span>;
+            } <span class="keyword">else</span> {
+                <span class="variable">currentPlayer</span> = <span class="number">1</span>;
+            }
+            
+            <span class="keyword">return</span>; <span class="comment">// Taş yerleşti, fonksiyondan çık</span>
+        }
+    }
+    <span class="comment">// Buraya gelirse sütun dolu demektir</span>
+    <span class="function">print</span>(<span class="string">"Sütun dolu!"</span>);
+}
+
+<span class="comment">// drawBoard fonksiyonu aynı...</span></pre>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 return Kullanımı</strong>
+                <p><code>return;</code> komutu fonksiyonu hemen sonlandırır. Boş hücre bulunduğunda taşı yerleştirip çıkıyoruz - böylece döngü devam etmiyor ve taş sadece bir yere konuyor.</p>
+            </div>
+        </section>
+
+        <!-- STEP 6: Player Turn Display -->
+        <section id="step6" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 6</span>
+                <h2>Sıra Göstergesi</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Oyuncuların sıranın kimde olduğunu bilmesi gerekiyor. Ekrana bir metin ekleyelim.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 6</span>
+                    sketch.js - draw() güncellendi
+                </div>
+<pre><span class="keyword">function</span> <span class="function">draw</span>() {
+    <span class="function">background</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">200</span>);
+    <span class="function">drawBoard</span>();
+    
+    <span class="comment">// Sıra göstergesi</span>
+    <span class="function">fill</span>(<span class="number">255</span>);
+    <span class="function">textSize</span>(<span class="number">20</span>);
+    <span class="function">textAlign</span>(<span class="variable">LEFT</span>);
+    <span class="keyword">if</span> (<span class="variable">currentPlayer</span> == <span class="number">1</span>) {
+        <span class="function">text</span>(<span class="string">"Sıra: Kırmızı"</span>, <span class="number">10</span>, <span class="number">470</span>);
+    } <span class="keyword">else</span> {
+        <span class="function">text</span>(<span class="string">"Sıra: Sarı"</span>, <span class="number">10</span>, <span class="number">470</span>);
+    }
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 7: Win Check Introduction -->
+        <section id="step7" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 7</span>
+                <h2>Kazanma Kontrolü - Giriş</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Şimdi en kritik kısma geldik: <strong>4 taşın yan yana olup olmadığını kontrol etmek</strong>.</p>
+                
+                <h3>🎯 4 Yön Kontrolü</h3>
+                <p>Kazanma 4 farklı yönde olabilir:</p>
+            </div>
+            
+            <div class="four-directions">
+                <div class="direction-card">
+                    <div class="direction-icon">➡️</div>
+                    <div class="direction-name">Yatay</div>
+                    <div class="direction-visual">🔴🔴🔴🔴</div>
+                </div>
+                <div class="direction-card">
+                    <div class="direction-icon">⬇️</div>
+                    <div class="direction-name">Dikey</div>
+                    <div class="direction-visual">
+                        🔴<br>🔴<br>🔴<br>🔴
+                    </div>
+                </div>
+                <div class="direction-card">
+                    <div class="direction-icon">↘️</div>
+                    <div class="direction-name">Çapraz (sağ-aşağı)</div>
+                    <div class="direction-visual diagonal">
+                        🔴<br>&nbsp;🔴<br>&nbsp;&nbsp;🔴<br>&nbsp;&nbsp;&nbsp;🔴
+                    </div>
+                </div>
+                <div class="direction-card">
+                    <div class="direction-icon">↙️</div>
+                    <div class="direction-name">Çapraz (sol-aşağı)</div>
+                    <div class="direction-visual diagonal-reverse">
+                        &nbsp;&nbsp;&nbsp;🔴<br>&nbsp;&nbsp;🔴<br>&nbsp;🔴<br>🔴
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box" style="background: rgba(255, 153, 64, 0.1); border-left-color: var(--accent-orange);">
+                <strong>⚡ Verimlilik İpucu</strong>
+                <p>Tüm tahtayı her seferinde kontrol etmek yerine, <strong>sadece son hamlenin etrafını</strong> kontrol etmek yeterli! Çünkü kazanma ancak son konulan taşla oluşabilir.</p>
+            </div>
+        </section>
+
+        <!-- STEP 8: Horizontal Check -->
+        <section id="step8" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 8</span>
+                <h2>Yatay Kontrol</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Önce en basit kontrolle başlayalım: Yatay (aynı satırda 4 taş).</p>
+                
+                <h3>➡️ Algoritma</h3>
+                <p>Son konulan taşın satırında, soldan sağa doğru ardışık aynı renk taşları sayıyoruz.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 8</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">checkHorizontal</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>) {
+    <span class="keyword">let</span> <span class="variable">count</span> = <span class="number">0</span>;
+    
+    <span class="comment">// Satırdaki tüm sütunları kontrol et</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">c</span> = <span class="number">0</span>; <span class="variable">c</span> < <span class="number">7</span>; <span class="variable">c</span>++) {
+        <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">c</span>] == <span class="variable">player</span>) {
+            <span class="variable">count</span>++;
+            <span class="keyword">if</span> (<span class="variable">count</span> >= <span class="number">4</span>) {
+                <span class="keyword">return</span> <span class="keyword">true</span>; <span class="comment">// Kazandı!</span>
+            }
+        } <span class="keyword">else</span> {
+            <span class="variable">count</span> = <span class="number">0</span>; <span class="comment">// Seri bozuldu, sıfırla</span>
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">false</span>;
+}</pre>
+            </div>
+            
+            <div class="interactive-demo">
+                <div class="demo-header">
+                    <span class="demo-title">➡️ Yatay Kontrol Simülasyonu</span>
+                    <button class="demo-btn" onclick="runHorizontalDemo()">Çalıştır</button>
+                </div>
+                <div class="demo-content">
+                    <div id="horizontal-demo" class="win-check-demo"></div>
+                    <div id="horizontal-console" class="console-output">
+                        <div class="console-line dim">> Simülasyonu başlat</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 9: Vertical Check -->
+        <section id="step9" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 9</span>
+                <h2>Dikey Kontrol</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Dikey kontrol yataya çok benzer, sadece sütun yerine satırları tarıyoruz.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 9</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">checkVertical</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>) {
+    <span class="keyword">let</span> <span class="variable">count</span> = <span class="number">0</span>;
+    
+    <span class="comment">// Sütundaki tüm satırları kontrol et</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">r</span> = <span class="number">0</span>; <span class="variable">r</span> < <span class="number">6</span>; <span class="variable">r</span>++) {
+        <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="variable">r</span>][<span class="variable">sutun</span>] == <span class="variable">player</span>) {
+            <span class="variable">count</span>++;
+            <span class="keyword">if</span> (<span class="variable">count</span> >= <span class="number">4</span>) {
+                <span class="keyword">return</span> <span class="keyword">true</span>;
+            }
+        } <span class="keyword">else</span> {
+            <span class="variable">count</span> = <span class="number">0</span>;
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">false</span>;
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 10: Diagonal Check -->
+        <section id="step10" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 10</span>
+                <h2>Çapraz Kontrol (Zor Kısım!)</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Çapraz kontrol biraz daha karmaşık. İki yön var: sağ-aşağı (↘) ve sol-aşağı (↙).</p>
+                
+                <h3>↘️ Sağ-Aşağı Çapraz</h3>
+                <p>Her adımda hem satır hem sütun 1 artar.</p>
+            </div>
+            
+            <div class="concept-box">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+                    <div style="margin-bottom: 1rem;">Başlangıç noktası: (satir, sutun)</div>
+                    <div>Sonraki noktalar:</div>
+                    <div style="margin-left: 1rem; color: var(--accent-green);">
+                        (satir+1, sutun+1)<br>
+                        (satir+2, sutun+2)<br>
+                        (satir+3, sutun+3)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 10</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">checkDiagonal1</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>) {
+    <span class="comment">// Sağ-aşağı çapraz (↘)</span>
+    <span class="comment">// Önce çaprazın başlangıç noktasını bul</span>
+    <span class="keyword">let</span> <span class="variable">startRow</span> = <span class="variable">satir</span>;
+    <span class="keyword">let</span> <span class="variable">startCol</span> = <span class="variable">sutun</span>;
+    
+    <span class="comment">// Sol-üst köşeye git</span>
+    <span class="keyword">while</span> (<span class="variable">startRow</span> > <span class="number">0</span> && <span class="variable">startCol</span> > <span class="number">0</span>) {
+        <span class="variable">startRow</span>--;
+        <span class="variable">startCol</span>--;
+    }
+    
+    <span class="comment">// Şimdi sağ-aşağı doğru say</span>
+    <span class="keyword">let</span> <span class="variable">count</span> = <span class="number">0</span>;
+    <span class="keyword">while</span> (<span class="variable">startRow</span> < <span class="number">6</span> && <span class="variable">startCol</span> < <span class="number">7</span>) {
+        <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="variable">startRow</span>][<span class="variable">startCol</span>] == <span class="variable">player</span>) {
+            <span class="variable">count</span>++;
+            <span class="keyword">if</span> (<span class="variable">count</span> >= <span class="number">4</span>) <span class="keyword">return</span> <span class="keyword">true</span>;
+        } <span class="keyword">else</span> {
+            <span class="variable">count</span> = <span class="number">0</span>;
+        }
+        <span class="variable">startRow</span>++;
+        <span class="variable">startCol</span>++;
+    }
+    <span class="keyword">return</span> <span class="keyword">false</span>;
+}
+
+<span class="keyword">function</span> <span class="function">checkDiagonal2</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>) {
+    <span class="comment">// Sol-aşağı çapraz (↙)</span>
+    <span class="keyword">let</span> <span class="variable">startRow</span> = <span class="variable">satir</span>;
+    <span class="keyword">let</span> <span class="variable">startCol</span> = <span class="variable">sutun</span>;
+    
+    <span class="comment">// Sağ-üst köşeye git</span>
+    <span class="keyword">while</span> (<span class="variable">startRow</span> > <span class="number">0</span> && <span class="variable">startCol</span> < <span class="number">6</span>) {
+        <span class="variable">startRow</span>--;
+        <span class="variable">startCol</span>++;
+    }
+    
+    <span class="comment">// Şimdi sol-aşağı doğru say</span>
+    <span class="keyword">let</span> <span class="variable">count</span> = <span class="number">0</span>;
+    <span class="keyword">while</span> (<span class="variable">startRow</span> < <span class="number">6</span> && <span class="variable">startCol</span> >= <span class="number">0</span>) {
+        <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="variable">startRow</span>][<span class="variable">startCol</span>] == <span class="variable">player</span>) {
+            <span class="variable">count</span>++;
+            <span class="keyword">if</span> (<span class="variable">count</span> >= <span class="number">4</span>) <span class="keyword">return</span> <span class="keyword">true</span>;
+        } <span class="keyword">else</span> {
+            <span class="variable">count</span> = <span class="number">0</span>;
+        }
+        <span class="variable">startRow</span>++;
+        <span class="variable">startCol</span>--;
+    }
+    <span class="keyword">return</span> <span class="keyword">false</span>;
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 11: Combined Win Check -->
+        <section id="step11" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 11</span>
+                <h2>Tüm Kontrolleri Birleştirme</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Şimdi tüm kontrol fonksiyonlarını tek bir <code>checkWin()</code> fonksiyonunda birleştirelim.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 11</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">let</span> <span class="variable">gameOver</span> = <span class="keyword">false</span>;
+<span class="keyword">let</span> <span class="variable">winner</span> = <span class="number">0</span>;
+
+<span class="keyword">function</span> <span class="function">checkWin</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>) {
+    <span class="keyword">if</span> (<span class="function">checkHorizontal</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>) ||
+        <span class="function">checkVertical</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>) ||
+        <span class="function">checkDiagonal1</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>) ||
+        <span class="function">checkDiagonal2</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">player</span>)) {
+        <span class="keyword">return</span> <span class="keyword">true</span>;
+    }
+    <span class="keyword">return</span> <span class="keyword">false</span>;
+}
+
+<span class="keyword">function</span> <span class="function">dropPiece</span>(<span class="variable">sutun</span>) {
+    <span class="keyword">if</span> (<span class="variable">gameOver</span>) <span class="keyword">return</span>; <span class="comment">// Oyun bittiyse hamle yapma</span>
+    
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">satir</span> = <span class="number">5</span>; <span class="variable">satir</span> >= <span class="number">0</span>; <span class="variable">satir</span>--) {
+        <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] == <span class="number">0</span>) {
+            <span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] = <span class="variable">currentPlayer</span>;
+            
+            <span class="comment">// Kazanma kontrolü</span>
+            <span class="keyword">if</span> (<span class="function">checkWin</span>(<span class="variable">satir</span>, <span class="variable">sutun</span>, <span class="variable">currentPlayer</span>)) {
+                <span class="variable">gameOver</span> = <span class="keyword">true</span>;
+                <span class="variable">winner</span> = <span class="variable">currentPlayer</span>;
+                <span class="function">print</span>(<span class="string">"Oyuncu"</span>, <span class="variable">currentPlayer</span>, <span class="string">"kazandı!"</span>);
+            }
+            
+            <span class="comment">// Sırayı değiştir</span>
+            <span class="variable">currentPlayer</span> = (<span class="variable">currentPlayer</span> == <span class="number">1</span>) ? <span class="number">2</span> : <span class="number">1</span>;
+            <span class="keyword">return</span>;
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 Ternary Operator</strong>
+                <p><code>currentPlayer = (currentPlayer == 1) ? 2 : 1;</code></p>
+                <p>Bu kısa yazım şu anlama gelir: "Eğer currentPlayer 1 ise 2 yap, değilse 1 yap."</p>
+            </div>
+        </section>
+
+        <!-- STEP 12: Game Over Display -->
+        <section id="step12" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 12</span>
+                <h2>Oyun Sonu Ekranı</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Kazanan belli olduğunda bunu ekranda gösterelim.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 12</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">draw</span>() {
+    <span class="function">background</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">200</span>);
+    <span class="function">drawBoard</span>();
+    
+    <span class="keyword">if</span> (<span class="variable">gameOver</span>) {
+        <span class="comment">// Yarı saydam siyah overlay</span>
+        <span class="function">fill</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">150</span>);
+        <span class="function">rect</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="variable">width</span>, <span class="variable">height</span>);
+        
+        <span class="comment">// Kazanan mesajı</span>
+        <span class="function">fill</span>(<span class="number">255</span>);
+        <span class="function">textSize</span>(<span class="number">40</span>);
+        <span class="function">textAlign</span>(<span class="variable">CENTER</span>, <span class="variable">CENTER</span>);
+        <span class="keyword">if</span> (<span class="variable">winner</span> == <span class="number">1</span>) {
+            <span class="function">text</span>(<span class="string">"KIRMIZI KAZANDI!"</span>, <span class="variable">width</span>/<span class="number">2</span>, <span class="variable">height</span>/<span class="number">2</span>);
+        } <span class="keyword">else</span> {
+            <span class="function">text</span>(<span class="string">"SARI KAZANDI!"</span>, <span class="variable">width</span>/<span class="number">2</span>, <span class="variable">height</span>/<span class="number">2</span>);
+        }
+        
+        <span class="function">textSize</span>(<span class="number">20</span>);
+        <span class="function">text</span>(<span class="string">"Yeniden başlamak için tıklayın"</span>, <span class="variable">width</span>/<span class="number">2</span>, <span class="variable">height</span>/<span class="number">2</span> + <span class="number">50</span>);
+    } <span class="keyword">else</span> {
+        <span class="comment">// Sıra göstergesi</span>
+        <span class="function">fill</span>(<span class="number">255</span>);
+        <span class="function">textSize</span>(<span class="number">20</span>);
+        <span class="function">textAlign</span>(<span class="variable">LEFT</span>);
+        <span class="keyword">let</span> <span class="variable">playerText</span> = (<span class="variable">currentPlayer</span> == <span class="number">1</span>) ? <span class="string">"Kırmızı"</span> : <span class="string">"Sarı"</span>;
+        <span class="function">text</span>(<span class="string">"Sıra: "</span> + <span class="variable">playerText</span>, <span class="number">10</span>, <span class="number">470</span>);
+    }
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 13: Reset Game -->
+        <section id="step13" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 13</span>
+                <h2>Oyunu Sıfırlama</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Oyun bittiğinde tıklayarak yeni oyun başlatabilmeliyiz.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 13</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">mousePressed</span>() {
+    <span class="keyword">if</span> (<span class="variable">gameOver</span>) {
+        <span class="comment">// Oyunu sıfırla</span>
+        <span class="function">resetGame</span>();
+        <span class="keyword">return</span>;
+    }
+    
+    <span class="keyword">let</span> <span class="variable">sutun</span> = <span class="function">floor</span>(<span class="variable">mouseX</span> / <span class="number">80</span>);
+    <span class="keyword">if</span> (<span class="variable">sutun</span> >= <span class="number">0</span> && <span class="variable">sutun</span> < <span class="number">7</span>) {
+        <span class="function">dropPiece</span>(<span class="variable">sutun</span>);
+    }
+}
+
+<span class="keyword">function</span> <span class="function">resetGame</span>() {
+    <span class="function">initBoard</span>();
+    <span class="variable">currentPlayer</span> = <span class="number">1</span>;
+    <span class="variable">gameOver</span> = <span class="keyword">false</span>;
+    <span class="variable">winner</span> = <span class="number">0</span>;
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 14: Draw Check -->
+        <section id="step14" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 14</span>
+                <h2>Beraberlik Kontrolü</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Tahta dolduğunda ve kimse kazanmadığında beraberlik olur.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 14</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">checkDraw</span>() {
+    <span class="comment">// En üst satırda boş hücre var mı kontrol et</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">c</span> = <span class="number">0</span>; <span class="variable">c</span> < <span class="number">7</span>; <span class="variable">c</span>++) {
+        <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="number">0</span>][<span class="variable">c</span>] == <span class="number">0</span>) {
+            <span class="keyword">return</span> <span class="keyword">false</span>; <span class="comment">// Hala boş yer var</span>
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">true</span>; <span class="comment">// Tahta dolu</span>
+}
+
+<span class="comment">// dropPiece içinde kazanma kontrolünden sonra:</span>
+<span class="keyword">if</span> (!<span class="variable">gameOver</span> && <span class="function">checkDraw</span>()) {
+    <span class="variable">gameOver</span> = <span class="keyword">true</span>;
+    <span class="variable">winner</span> = <span class="number">0</span>; <span class="comment">// 0 = beraberlik</span>
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 15: Parametric Constants -->
+        <section id="step15" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 15</span>
+                <h2>Parametrik Yapı - Sabitler</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Kodumuzda çok fazla "sihirli sayı" (magic number) var: 6, 7, 80, 40... Bunları değişkenlere çevirelim.</p>
+                
+                <h3>🔧 Neden Parametrik?</h3>
+                <ul>
+                    <li>Kod daha okunabilir olur</li>
+                    <li>Değişiklik yapmak kolaylaşır (örn: 8x8 tahta)</li>
+                    <li>Hatalar azalır</li>
+                </ul>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 15</span>
+                    sketch.js
+                </div>
+<pre><span class="comment">// Sabitler (en üstte tanımla)</span>
+<span class="keyword">const</span> <span class="variable">ROWS</span> = <span class="number">6</span>;
+<span class="keyword">const</span> <span class="variable">COLS</span> = <span class="number">7</span>;
+<span class="keyword">const</span> <span class="variable">CELL_SIZE</span> = <span class="number">80</span>;
+<span class="keyword">const</span> <span class="variable">PIECE_SIZE</span> = <span class="number">70</span>;
+
+<span class="comment">// Değişkenler</span>
+<span class="keyword">let</span> <span class="variable">gameBoard</span> = [];
+<span class="keyword">let</span> <span class="variable">currentPlayer</span> = <span class="number">1</span>;
+<span class="keyword">let</span> <span class="variable">gameOver</span> = <span class="keyword">false</span>;
+<span class="keyword">let</span> <span class="variable">winner</span> = <span class="number">0</span>;
+
+<span class="keyword">function</span> <span class="function">setup</span>() {
+    <span class="function">createCanvas</span>(<span class="variable">COLS</span> * <span class="variable">CELL_SIZE</span>, <span class="variable">ROWS</span> * <span class="variable">CELL_SIZE</span>);
+    <span class="function">initBoard</span>();
+}
+
+<span class="keyword">function</span> <span class="function">initBoard</span>() {
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">r</span> = <span class="number">0</span>; <span class="variable">r</span> < <span class="variable">ROWS</span>; <span class="variable">r</span>++) {
+        <span class="variable">gameBoard</span>[<span class="variable">r</span>] = [];
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">c</span> = <span class="number">0</span>; <span class="variable">c</span> < <span class="variable">COLS</span>; <span class="variable">c</span>++) {
+            <span class="variable">gameBoard</span>[<span class="variable">r</span>][<span class="variable">c</span>] = <span class="number">0</span>;
+        }
+    }
+}
+
+<span class="keyword">function</span> <span class="function">drawBoard</span>() {
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">r</span> = <span class="number">0</span>; <span class="variable">r</span> < <span class="variable">ROWS</span>; <span class="variable">r</span>++) {
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">c</span> = <span class="number">0</span>; <span class="variable">c</span> < <span class="variable">COLS</span>; <span class="variable">c</span>++) {
+            <span class="keyword">let</span> <span class="variable">x</span> = <span class="variable">c</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">CELL_SIZE</span> / <span class="number">2</span>;
+            <span class="keyword">let</span> <span class="variable">y</span> = <span class="variable">r</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">CELL_SIZE</span> / <span class="number">2</span>;
+            
+            <span class="comment">// Renk seçimi...</span>
+            <span class="function">ellipse</span>(<span class="variable">x</span>, <span class="variable">y</span>, <span class="variable">PIECE_SIZE</span>, <span class="variable">PIECE_SIZE</span>);
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="success-box">
+                <div class="success-header">
+                    <span>✨</span>
+                    <h3>Artık Kolayca Değiştirebilirsiniz!</h3>
+                </div>
+                <div class="success-content">
+                    <p>Sadece sabitleri değiştirerek:</p>
+                    <ul>
+                        <li><code>ROWS = 8, COLS = 8</code> → 8x8 tahta</li>
+                        <li><code>CELL_SIZE = 60</code> → Daha küçük hücreler</li>
+                        <li><code>PIECE_SIZE = 50</code> → Daha küçük taşlar</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 16: Offset for Positioning -->
+        <section id="step16" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 16</span>
+                <h2>Offset ile Konumlandırma</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Tahtayı ekranın ortasına veya belirli bir konuma yerleştirmek isteyebiliriz. Bunun için offset (kaydırma) değerleri kullanırız.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 16</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">const</span> <span class="variable">OFFSET_X</span> = <span class="number">50</span>; <span class="comment">// Soldan boşluk</span>
+<span class="keyword">const</span> <span class="variable">OFFSET_Y</span> = <span class="number">50</span>; <span class="comment">// Üstten boşluk</span>
+
+<span class="keyword">function</span> <span class="function">setup</span>() {
+    <span class="comment">// Canvas boyutunu offset'lerle birlikte hesapla</span>
+    <span class="keyword">let</span> <span class="variable">canvasWidth</span> = <span class="variable">COLS</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">OFFSET_X</span> * <span class="number">2</span>;
+    <span class="keyword">let</span> <span class="variable">canvasHeight</span> = <span class="variable">ROWS</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">OFFSET_Y</span> * <span class="number">2</span>;
+    <span class="function">createCanvas</span>(<span class="variable">canvasWidth</span>, <span class="variable">canvasHeight</span>);
+    <span class="function">initBoard</span>();
+}
+
+<span class="keyword">function</span> <span class="function">drawBoard</span>() {
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">r</span> = <span class="number">0</span>; <span class="variable">r</span> < <span class="variable">ROWS</span>; <span class="variable">r</span>++) {
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">c</span> = <span class="number">0</span>; <span class="variable">c</span> < <span class="variable">COLS</span>; <span class="variable">c</span>++) {
+            <span class="keyword">let</span> <span class="variable">x</span> = <span class="variable">c</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">CELL_SIZE</span>/<span class="number">2</span> + <span class="variable">OFFSET_X</span>;
+            <span class="keyword">let</span> <span class="variable">y</span> = <span class="variable">r</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">CELL_SIZE</span>/<span class="number">2</span> + <span class="variable">OFFSET_Y</span>;
+            <span class="comment">// ...</span>
+        }
+    }
+}
+
+<span class="keyword">function</span> <span class="function">mousePressed</span>() {
+    <span class="comment">// Mouse koordinatından offset'i çıkar</span>
+    <span class="keyword">let</span> <span class="variable">adjustedX</span> = <span class="variable">mouseX</span> - <span class="variable">OFFSET_X</span>;
+    <span class="keyword">let</span> <span class="variable">sutun</span> = <span class="function">floor</span>(<span class="variable">adjustedX</span> / <span class="variable">CELL_SIZE</span>);
+    <span class="comment">// ...</span>
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 17: Hover Effect -->
+        <section id="step17" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 17</span>
+                <h2>Hover Efekti - Önizleme</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Oyuncunun hangi sütuna taş koyacağını görmesi için mouse'un üzerinde olduğu sütunda bir önizleme gösterelim.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 17</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">function</span> <span class="function">draw</span>() {
+    <span class="function">background</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">200</span>);
+    
+    <span class="comment">// Hover önizlemesi (oyun devam ediyorsa)</span>
+    <span class="keyword">if</span> (!<span class="variable">gameOver</span>) {
+        <span class="function">drawHoverPreview</span>();
+    }
+    
+    <span class="function">drawBoard</span>();
+    <span class="comment">// ... diğer çizimler</span>
+}
+
+<span class="keyword">function</span> <span class="function">drawHoverPreview</span>() {
+    <span class="keyword">let</span> <span class="variable">adjustedX</span> = <span class="variable">mouseX</span> - <span class="variable">OFFSET_X</span>;
+    <span class="keyword">let</span> <span class="variable">sutun</span> = <span class="function">floor</span>(<span class="variable">adjustedX</span> / <span class="variable">CELL_SIZE</span>);
+    
+    <span class="keyword">if</span> (<span class="variable">sutun</span> >= <span class="number">0</span> && <span class="variable">sutun</span> < <span class="variable">COLS</span>) {
+        <span class="comment">// Yarı saydam renk</span>
+        <span class="keyword">if</span> (<span class="variable">currentPlayer</span> == <span class="number">1</span>) {
+            <span class="function">fill</span>(<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">100</span>);
+        } <span class="keyword">else</span> {
+            <span class="function">fill</span>(<span class="number">255</span>, <span class="number">255</span>, <span class="number">0</span>, <span class="number">100</span>);
+        }
+        
+        <span class="comment">// Tahtanın üstünde önizleme taşı</span>
+        <span class="keyword">let</span> <span class="variable">x</span> = <span class="variable">sutun</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">CELL_SIZE</span>/<span class="number">2</span> + <span class="variable">OFFSET_X</span>;
+        <span class="keyword">let</span> <span class="variable">y</span> = <span class="variable">OFFSET_Y</span> / <span class="number">2</span>;
+        <span class="function">ellipse</span>(<span class="variable">x</span>, <span class="variable">y</span>, <span class="variable">PIECE_SIZE</span>, <span class="variable">PIECE_SIZE</span>);
+    }
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 18: Drop Animation -->
+        <section id="step18" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 18</span>
+                <h2>Düşme Animasyonu</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Taşların aniden yerleşmesi yerine, yukarıdan aşağı düşme animasyonu ekleyelim.</p>
+                
+                <h3>🎬 Animasyon Mantığı</h3>
+                <ul>
+                    <li>Taş düşürüldüğünde hemen yerleştirme</li>
+                    <li>Bunun yerine: animasyon değişkenleri ayarla</li>
+                    <li>Her frame'de taşı biraz aşağı hareket ettir</li>
+                    <li>Hedef konuma ulaşınca tahtaya yerleştir</li>
+                </ul>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 18</span>
+                    sketch.js
+                </div>
+<pre><span class="comment">// Animasyon değişkenleri</span>
+<span class="keyword">let</span> <span class="variable">isAnimating</span> = <span class="keyword">false</span>;
+<span class="keyword">let</span> <span class="variable">animPiece</span> = {
+    <span class="variable">col</span>: <span class="number">0</span>,
+    <span class="variable">targetRow</span>: <span class="number">0</span>,
+    <span class="variable">currentY</span>: <span class="number">0</span>,
+    <span class="variable">player</span>: <span class="number">0</span>
+};
+<span class="keyword">const</span> <span class="variable">DROP_SPEED</span> = <span class="number">15</span>; <span class="comment">// Piksel/frame</span>
+
+<span class="keyword">function</span> <span class="function">dropPiece</span>(<span class="variable">sutun</span>) {
+    <span class="keyword">if</span> (<span class="variable">gameOver</span> || <span class="variable">isAnimating</span>) <span class="keyword">return</span>;
+    
+    <span class="comment">// Boş satırı bul</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">satir</span> = <span class="variable">ROWS</span> - <span class="number">1</span>; <span class="variable">satir</span> >= <span class="number">0</span>; <span class="variable">satir</span>--) {
+        <span class="keyword">if</span> (<span class="variable">gameBoard</span>[<span class="variable">satir</span>][<span class="variable">sutun</span>] == <span class="number">0</span>) {
+            <span class="comment">// Animasyonu başlat</span>
+            <span class="variable">isAnimating</span> = <span class="keyword">true</span>;
+            <span class="variable">animPiece</span>.<span class="variable">col</span> = <span class="variable">sutun</span>;
+            <span class="variable">animPiece</span>.<span class="variable">targetRow</span> = <span class="variable">satir</span>;
+            <span class="variable">animPiece</span>.<span class="variable">currentY</span> = <span class="number">0</span>; <span class="comment">// Üstten başla</span>
+            <span class="variable">animPiece</span>.<span class="variable">player</span> = <span class="variable">currentPlayer</span>;
+            <span class="keyword">return</span>;
+        }
+    }
+}
+
+<span class="keyword">function</span> <span class="function">updateAnimation</span>() {
+    <span class="keyword">if</span> (!<span class="variable">isAnimating</span>) <span class="keyword">return</span>;
+    
+    <span class="keyword">let</span> <span class="variable">targetY</span> = <span class="variable">animPiece</span>.<span class="variable">targetRow</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">CELL_SIZE</span>/<span class="number">2</span> + <span class="variable">OFFSET_Y</span>;
+    
+    <span class="keyword">if</span> (<span class="variable">animPiece</span>.<span class="variable">currentY</span> < <span class="variable">targetY</span>) {
+        <span class="variable">animPiece</span>.<span class="variable">currentY</span> += <span class="variable">DROP_SPEED</span>;
+    } <span class="keyword">else</span> {
+        <span class="comment">// Animasyon bitti, taşı yerleştir</span>
+        <span class="variable">gameBoard</span>[<span class="variable">animPiece</span>.<span class="variable">targetRow</span>][<span class="variable">animPiece</span>.<span class="variable">col</span>] = <span class="variable">animPiece</span>.<span class="variable">player</span>;
+        <span class="variable">isAnimating</span> = <span class="keyword">false</span>;
+        
+        <span class="comment">// Kazanma kontrolü</span>
+        <span class="keyword">if</span> (<span class="function">checkWin</span>(<span class="variable">animPiece</span>.<span class="variable">targetRow</span>, <span class="variable">animPiece</span>.<span class="variable">col</span>, <span class="variable">animPiece</span>.<span class="variable">player</span>)) {
+            <span class="variable">gameOver</span> = <span class="keyword">true</span>;
+            <span class="variable">winner</span> = <span class="variable">animPiece</span>.<span class="variable">player</span>;
+        } <span class="keyword">else</span> {
+            <span class="variable">currentPlayer</span> = (<span class="variable">currentPlayer</span> == <span class="number">1</span>) ? <span class="number">2</span> : <span class="number">1</span>;
+        }
+    }
+}
+
+<span class="keyword">function</span> <span class="function">drawAnimatingPiece</span>() {
+    <span class="keyword">if</span> (!<span class="variable">isAnimating</span>) <span class="keyword">return</span>;
+    
+    <span class="keyword">if</span> (<span class="variable">animPiece</span>.<span class="variable">player</span> == <span class="number">1</span>) {
+        <span class="function">fill</span>(<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>);
+    } <span class="keyword">else</span> {
+        <span class="function">fill</span>(<span class="number">255</span>, <span class="number">255</span>, <span class="number">0</span>);
+    }
+    
+    <span class="keyword">let</span> <span class="variable">x</span> = <span class="variable">animPiece</span>.<span class="variable">col</span> * <span class="variable">CELL_SIZE</span> + <span class="variable">CELL_SIZE</span>/<span class="number">2</span> + <span class="variable">OFFSET_X</span>;
+    <span class="function">ellipse</span>(<span class="variable">x</span>, <span class="variable">animPiece</span>.<span class="variable">currentY</span>, <span class="variable">PIECE_SIZE</span>, <span class="variable">PIECE_SIZE</span>);
+}
+
+<span class="keyword">function</span> <span class="function">draw</span>() {
+    <span class="function">background</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">200</span>);
+    
+    <span class="function">updateAnimation</span>();
+    <span class="function">drawAnimatingPiece</span>();
+    <span class="function">drawBoard</span>();
+    <span class="comment">// ...</span>
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 19: Score System -->
+        <section id="step19" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 19</span>
+                <h2>Skor Sistemi</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Oyuncuların kazanma sayılarını takip edelim.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 19</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">let</span> <span class="variable">score</span> = {
+    <span class="variable">player1</span>: <span class="number">0</span>,
+    <span class="variable">player2</span>: <span class="number">0</span>
+};
+
+<span class="comment">// Kazanma durumunda:</span>
+<span class="keyword">if</span> (<span class="variable">winner</span> == <span class="number">1</span>) {
+    <span class="variable">score</span>.<span class="variable">player1</span>++;
+} <span class="keyword">else if</span> (<span class="variable">winner</span> == <span class="number">2</span>) {
+    <span class="variable">score</span>.<span class="variable">player2</span>++;
+}
+
+<span class="comment">// Skoru göster:</span>
+<span class="keyword">function</span> <span class="function">drawScore</span>() {
+    <span class="function">fill</span>(<span class="number">255</span>);
+    <span class="function">textSize</span>(<span class="number">18</span>);
+    <span class="function">textAlign</span>(<span class="variable">CENTER</span>);
+    <span class="function">text</span>(<span class="string">"Kırmızı: "</span> + <span class="variable">score</span>.<span class="variable">player1</span> + <span class="string">" - Sarı: "</span> + <span class="variable">score</span>.<span class="variable">player2</span>, 
+         <span class="variable">width</span>/<span class="number">2</span>, <span class="number">25</span>);
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 20: Winning Line Highlight -->
+        <section id="step20" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 20</span>
+                <h2>Kazanan Çizgiyi Vurgulama</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Kazanan 4'lü çizgiyi görsel olarak vurgulayalım.</p>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 20</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">let</span> <span class="variable">winningCells</span> = []; <span class="comment">// Kazanan hücrelerin koordinatları</span>
+
+<span class="comment">// checkHorizontal içinde kazanma bulunduğunda:</span>
+<span class="keyword">if</span> (<span class="variable">count</span> >= <span class="number">4</span>) {
+    <span class="comment">// Kazanan hücreleri kaydet</span>
+    <span class="variable">winningCells</span> = [];
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">i</span> = <span class="number">0</span>; <span class="variable">i</span> < <span class="number">4</span>; <span class="variable">i</span>++) {
+        <span class="variable">winningCells</span>.<span class="function">push</span>({<span class="variable">row</span>: <span class="variable">satir</span>, <span class="variable">col</span>: <span class="variable">c</span> - <span class="variable">i</span>});
+    }
+    <span class="keyword">return</span> <span class="keyword">true</span>;
+}
+
+<span class="comment">// drawBoard içinde:</span>
+<span class="keyword">function</span> <span class="function">isWinningCell</span>(<span class="variable">r</span>, <span class="variable">c</span>) {
+    <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">cell</span> <span class="keyword">of</span> <span class="variable">winningCells</span>) {
+        <span class="keyword">if</span> (<span class="variable">cell</span>.<span class="variable">row</span> == <span class="variable">r</span> && <span class="variable">cell</span>.<span class="variable">col</span> == <span class="variable">c</span>) {
+            <span class="keyword">return</span> <span class="keyword">true</span>;
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">false</span>;
+}
+
+<span class="comment">// Kazanan hücrelere parlama efekti:</span>
+<span class="keyword">if</span> (<span class="function">isWinningCell</span>(<span class="variable">r</span>, <span class="variable">c</span>)) {
+    <span class="function">strokeWeight</span>(<span class="number">4</span>);
+    <span class="function">stroke</span>(<span class="number">255</span>); <span class="comment">// Beyaz çerçeve</span>
+} <span class="keyword">else</span> {
+    <span class="function">noStroke</span>();
+}</pre>
+            </div>
+        </section>
+
+        <!-- STEP 21: OOP Introduction -->
+        <section id="step21" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Adım 21</span>
+                <h2>OOP'ye Giriş - Game Class</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Kodumuzu daha organize etmek için Object-Oriented Programming (OOP) kullanabiliriz. Tüm oyun mantığını bir sınıf içinde toplayalım.</p>
+                
+                <h3>🏗️ Neden OOP?</h3>
+                <ul>
+                    <li>Kod daha organize ve okunabilir</li>
+                    <li>Değişkenler ve fonksiyonlar bir arada</li>
+                    <li>Birden fazla oyun örneği oluşturulabilir</li>
+                    <li>Test etmesi daha kolay</li>
+                </ul>
+            </div>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <span class="version-badge">ADIM 21</span>
+                    sketch.js
+                </div>
+<pre><span class="keyword">class</span> <span class="function">Connect4Game</span> {
+    <span class="function">constructor</span>(<span class="variable">rows</span>, <span class="variable">cols</span>, <span class="variable">cellSize</span>) {
+        <span class="keyword">this</span>.<span class="variable">ROWS</span> = <span class="variable">rows</span>;
+        <span class="keyword">this</span>.<span class="variable">COLS</span> = <span class="variable">cols</span>;
+        <span class="keyword">this</span>.<span class="variable">CELL_SIZE</span> = <span class="variable">cellSize</span>;
+        <span class="keyword">this</span>.<span class="variable">PIECE_SIZE</span> = <span class="variable">cellSize</span> * <span class="number">0.875</span>;
+        
+        <span class="keyword">this</span>.<span class="variable">board</span> = [];
+        <span class="keyword">this</span>.<span class="variable">currentPlayer</span> = <span class="number">1</span>;
+        <span class="keyword">this</span>.<span class="variable">gameOver</span> = <span class="keyword">false</span>;
+        <span class="keyword">this</span>.<span class="variable">winner</span> = <span class="number">0</span>;
+        <span class="keyword">this</span>.<span class="variable">score</span> = {<span class="variable">p1</span>: <span class="number">0</span>, <span class="variable">p2</span>: <span class="number">0</span>};
+        
+        <span class="keyword">this</span>.<span class="function">initBoard</span>();
+    }
+    
+    <span class="function">initBoard</span>() {
+        <span class="keyword">this</span>.<span class="variable">board</span> = [];
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">r</span> = <span class="number">0</span>; <span class="variable">r</span> < <span class="keyword">this</span>.<span class="variable">ROWS</span>; <span class="variable">r</span>++) {
+            <span class="keyword">this</span>.<span class="variable">board</span>[<span class="variable">r</span>] = [];
+            <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">c</span> = <span class="number">0</span>; <span class="variable">c</span> < <span class="keyword">this</span>.<span class="variable">COLS</span>; <span class="variable">c</span>++) {
+                <span class="keyword">this</span>.<span class="variable">board</span>[<span class="variable">r</span>][<span class="variable">c</span>] = <span class="number">0</span>;
+            }
+        }
+    }
+    
+    <span class="function">dropPiece</span>(<span class="variable">col</span>) {
+        <span class="keyword">if</span> (<span class="keyword">this</span>.<span class="variable">gameOver</span>) <span class="keyword">return</span> <span class="keyword">false</span>;
+        
+        <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">r</span> = <span class="keyword">this</span>.<span class="variable">ROWS</span> - <span class="number">1</span>; <span class="variable">r</span> >= <span class="number">0</span>; <span class="variable">r</span>--) {
+            <span class="keyword">if</span> (<span class="keyword">this</span>.<span class="variable">board</span>[<span class="variable">r</span>][<span class="variable">col</span>] == <span class="number">0</span>) {
+                <span class="keyword">this</span>.<span class="variable">board</span>[<span class="variable">r</span>][<span class="variable">col</span>] = <span class="keyword">this</span>.<span class="variable">currentPlayer</span>;
+                
+                <span class="keyword">if</span> (<span class="keyword">this</span>.<span class="function">checkWin</span>(<span class="variable">r</span>, <span class="variable">col</span>)) {
+                    <span class="keyword">this</span>.<span class="variable">gameOver</span> = <span class="keyword">true</span>;
+                    <span class="keyword">this</span>.<span class="variable">winner</span> = <span class="keyword">this</span>.<span class="variable">currentPlayer</span>;
+                } <span class="keyword">else</span> {
+                    <span class="keyword">this</span>.<span class="variable">currentPlayer</span> = (<span class="keyword">this</span>.<span class="variable">currentPlayer</span> == <span class="number">1</span>) ? <span class="number">2</span> : <span class="number">1</span>;
+                }
+                <span class="keyword">return</span> <span class="keyword">true</span>;
+            }
+        }
+        <span class="keyword">return</span> <span class="keyword">false</span>;
+    }
+    
+    <span class="function">checkWin</span>(<span class="variable">row</span>, <span class="variable">col</span>) {
+        <span class="keyword">let</span> <span class="variable">player</span> = <span class="keyword">this</span>.<span class="variable">board</span>[<span class="variable">row</span>][<span class="variable">col</span>];
+        <span class="keyword">return</span> <span class="keyword">this</span>.<span class="function">checkHorizontal</span>(<span class="variable">row</span>, <span class="variable">player</span>) ||
+               <span class="keyword">this</span>.<span class="function">checkVertical</span>(<span class="variable">col</span>, <span class="variable">player</span>) ||
+               <span class="keyword">this</span>.<span class="function">checkDiagonals</span>(<span class="variable">row</span>, <span class="variable">col</span>, <span class="variable">player</span>);
+    }
+    
+    <span class="comment">// ... diğer metodlar</span>
+    
+    <span class="function">reset</span>() {
+        <span class="keyword">this</span>.<span class="function">initBoard</span>();
+        <span class="keyword">this</span>.<span class="variable">currentPlayer</span> = <span class="number">1</span>;
+        <span class="keyword">this</span>.<span class="variable">gameOver</span> = <span class="keyword">false</span>;
+        <span class="keyword">this</span>.<span class="variable">winner</span> = <span class="number">0</span>;
+    }
+}
+
+<span class="comment">// Kullanım:</span>
+<span class="keyword">let</span> <span class="variable">game</span>;
+
+<span class="keyword">function</span> <span class="function">setup</span>() {
+    <span class="variable">game</span> = <span class="keyword">new</span> <span class="function">Connect4Game</span>(<span class="number">6</span>, <span class="number">7</span>, <span class="number">80</span>);
+    <span class="function">createCanvas</span>(<span class="variable">game</span>.<span class="variable">COLS</span> * <span class="variable">game</span>.<span class="variable">CELL_SIZE</span>, 
+                 <span class="variable">game</span>.<span class="variable">ROWS</span> * <span class="variable">game</span>.<span class="variable">CELL_SIZE</span>);
+}</pre>
+            </div>
+        </section>
+
+        <!-- FINAL DEMO -->
+        <section id="final" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Final</span>
+                <h2>🎮 Çalışan Oyun</h2>
+            </div>
+            
+            <div class="story-text">
+                <p>Tüm adımların sonunda, tam fonksiyonel bir Connect4 oyunumuz oldu!</p>
+            </div>
+            
+            <div class="interactive-demo">
+                <div class="demo-header">
+                    <span class="demo-title">🎮 Connect4 - Final Demo</span>
+                    <button class="demo-btn" onclick="resetFinalGame()">Yeni Oyun</button>
+                </div>
+                <div class="demo-content">
+                    <div id="final-score" class="score-display">
+                        <span class="player1-score">Kırmızı: <span id="p1-score">0</span></span>
+                        <span class="player2-score">Sarı: <span id="p2-score">0</span></span>
+                    </div>
+                    <div id="final-grid" class="connect4-grid"></div>
+                    <div id="final-status" class="game-status">Sıra: Kırmızı</div>
+                    <div id="final-message" class="game-message"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUMMARY -->
+        <section id="summary" class="story-section">
+            <div class="chapter-header">
+                <span class="chapter-number">Özet</span>
+                <h2>🎓 Neler Öğrendik?</h2>
+            </div>
+            
+            <div class="lessons-learned">
+                <h3>Teknik Beceriler:</h3>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Konu</th>
+                            <th>Öğrenim</th>
+                            <th>Örnek</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>2D Diziler</strong></td>
+                            <td>Grid tabanlı oyun tahtası</td>
+                            <td>gameBoard[satir][sutun]</td>
+                        </tr>
+                        <tr>
+                            <td><strong>İç İçe Döngüler</strong></td>
+                            <td>2D yapıları tarama</td>
+                            <td>for satır { for sütun { } }</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Algoritma Tasarımı</strong></td>
+                            <td>Kazanma kontrolü</td>
+                            <td>Yatay, dikey, çapraz kontrol</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Verimlilik</strong></td>
+                            <td>Sadece gerekli kontroller</td>
+                            <td>Son hamle etrafını kontrol</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Parametrik Kod</strong></td>
+                            <td>Sabitler ve değişkenler</td>
+                            <td>ROWS, COLS, CELL_SIZE</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Animasyon</strong></td>
+                            <td>Frame tabanlı hareket</td>
+                            <td>currentY += DROP_SPEED</td>
+                        </tr>
+                        <tr>
+                            <td><strong>OOP</strong></td>
+                            <td>Sınıf tabanlı organizasyon</td>
+                            <td>class Connect4Game { }</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="evolution-timeline">
+                <div class="timeline-item">
+                    <div class="timeline-version">1-3</div>
+                    <div class="timeline-content">
+                        <h4>Temel Yapı</h4>
+                        <p>Canvas, Grid, 2D Dizi</p>
+                    </div>
+                </div>
+                <div class="timeline-arrow">→</div>
+                <div class="timeline-item">
+                    <div class="timeline-version">4-6</div>
+                    <div class="timeline-content">
+                        <h4>Etkileşim</h4>
+                        <p>Tıklama, Taş Düşürme</p>
+                    </div>
+                </div>
+                <div class="timeline-arrow">→</div>
+                <div class="timeline-item">
+                    <div class="timeline-version">7-14</div>
+                    <div class="timeline-content">
+                        <h4>Oyun Mantığı</h4>
+                        <p>Kazanma Algoritması</p>
+                    </div>
+                </div>
+                <div class="timeline-arrow">→</div>
+                <div class="timeline-item">
+                    <div class="timeline-version">15-18</div>
+                    <div class="timeline-content">
+                        <h4>İyileştirmeler</h4>
+                        <p>Parametrik, Animasyon</p>
+                    </div>
+                </div>
+                <div class="timeline-arrow">→</div>
+                <div class="timeline-item final">
+                    <div class="timeline-version">19-21</div>
+                    <div class="timeline-content">
+                        <h4>Profesyonel</h4>
+                        <p>Skor, OOP</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="whats-next">
+                <h3>🚀 Sonraki Adımlar</h3>
+                <ul>
+                    <li><strong>AI Rakip:</strong> Minimax algoritması ile bilgisayar rakibi</li>
+                    <li><strong>Ses Efektleri:</strong> Taş düşme, kazanma sesleri</li>
+                    <li><strong>Tema Seçimi:</strong> Farklı renk şemaları</li>
+                    <li><strong>Online Multiplayer:</strong> Socket.io ile çok oyunculu</li>
+                    <li><strong>Mobil Uyumluluk:</strong> Touch events</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-dots">
+        <div class="nav-dot" onclick="scrollToSection('prologue')" title="Giriş"></div>
+        <div class="nav-dot" onclick="scrollToSection('step1')" title="Adım 1"></div>
+        <div class="nav-dot" onclick="scrollToSection('step2')" title="Adım 2"></div>
+        <div class="nav-dot" onclick="scrollToSection('step3')" title="Adım 3"></div>
+        <div class="nav-dot" onclick="scrollToSection('step4')" title="Adım 4"></div>
+        <div class="nav-dot" onclick="scrollToSection('step5')" title="Adım 5"></div>
+        <div class="nav-dot" onclick="scrollToSection('step7')" title="Adım 7"></div>
+        <div class="nav-dot" onclick="scrollToSection('step8')" title="Adım 8"></div>
+        <div class="nav-dot" onclick="scrollToSection('step10')" title="Adım 10"></div>
+        <div class="nav-dot" onclick="scrollToSection('step15')" title="Adım 15"></div>
+        <div class="nav-dot" onclick="scrollToSection('step18')" title="Adım 18"></div>
+        <div class="nav-dot" onclick="scrollToSection('step21')" title="Adım 21"></div>
+        <div class="nav-dot" onclick="scrollToSection('final')" title="Final"></div>
+        <div class="nav-dot" onclick="scrollToSection('summary')" title="Özet"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
