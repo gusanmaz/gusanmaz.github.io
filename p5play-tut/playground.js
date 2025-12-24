@@ -1,14 +1,14 @@
-// Code Playground Generator
+// Code Playground Generator - CodeMirror Edition
 // Bu dosya içerik dosyalarından ÖNCE yüklenmeli
 
 window.createPlayground = function(code, title = 'Kod Editörü') {
     // Kod girintilerini temizle
     const lines = code.split('\n');
-    
+
     // Boş satırları baştan ve sondan kaldır
     while (lines.length && lines[0].trim() === '') lines.shift();
     while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
-    
+
     // Minimum girintiyi bul
     let minIndent = Infinity;
     for (const line of lines) {
@@ -17,30 +17,23 @@ window.createPlayground = function(code, title = 'Kod Editörü') {
         minIndent = Math.min(minIndent, indent);
     }
     if (minIndent === Infinity) minIndent = 0;
-    
+
     // Girintiyi kaldır
     const cleanCode = lines.map(line => {
         if (line.trim() === '') return '';
         return line.slice(minIndent);
     }).join('\n');
-    
-    // Satır sayısı
-    const lineCount = cleanCode.split('\n').length;
-    const lineNumbers = Array.from({ length: lineCount }, (_, i) => `<span>${i + 1}</span>`).join('');
-    
-    // HTML escape for display
-    const escapedForDisplay = cleanCode
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    
+
     // Escape for data attribute
     const escapedForAttr = cleanCode
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
-    
+
+    // Benzersiz ID oluştur
+    const uniqueId = 'editor-' + Math.random().toString(36).substr(2, 9);
+
     return `
     <div class="code-playground">
         <div class="playground-header">
@@ -59,11 +52,7 @@ window.createPlayground = function(code, title = 'Kod Editörü') {
         <div class="playground-body">
             <div class="editor-panel">
                 <div class="editor-wrapper">
-                    <div class="line-numbers">${lineNumbers}</div>
-                    <div class="code-editor-container">
-                        <pre class="code-highlight"><code class="language-javascript">${escapedForDisplay}</code></pre>
-                        <textarea class="code-editor" spellcheck="false" data-original="${escapedForAttr}">${cleanCode}</textarea>
-                    </div>
+                    <textarea class="code-editor-source" id="${uniqueId}" data-original="${escapedForAttr}">${cleanCode}</textarea>
                 </div>
             </div>
             <div class="preview-panel">
@@ -78,3 +67,4 @@ window.createPlayground = function(code, title = 'Kod Editörü') {
         </div>
     </div>`;
 };
+

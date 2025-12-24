@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
             themeToggle.innerHTML = isLight ?
                 '<span class="icon">🌙</span> Tema Değiştir' :
                 '<span class="icon">☀️</span> Tema Değiştir';
+
+            // CodeMirror temalarını güncelle
+            updateEditorThemes(!isLight);
         };
     }
 
@@ -116,56 +119,54 @@ function loadSection(index) {
     console.log('Section loaded:', lesson.title);
 }
 
-// Initialize code playgrounds
+// Store CodeMirror instances
+const cmEditors = new Map();
+
+// Initialize code playgrounds with CodeMirror
 function initializePlaygrounds() {
     const playgrounds = document.querySelectorAll('.code-playground');
     
     playgrounds.forEach((playground, idx) => {
-        const codeArea = playground.querySelector('.code-editor');
-        const codeHighlight = playground.querySelector('pre.code-highlight');
+        const sourceArea = playground.querySelector('.code-editor-source');
         const previewContainer = playground.querySelector('.preview-container');
         const runBtn = playground.querySelector('.btn-run');
         const resetBtn = playground.querySelector('.btn-reset');
         const copyBtn = playground.querySelector('.btn-copy');
         
-        if (!codeArea) return;
-        
-        const originalCode = codeArea.dataset.original || codeArea.value;
-        codeArea.dataset.original = originalCode;
-        
-        // Update line numbers and highlight on input
-        codeArea.addEventListener('input', () => {
-            updateLineNumbers(codeArea);
-            updateHighlight(codeArea, codeHighlight);
+        if (!sourceArea) return;
+
+        const originalCode = sourceArea.dataset.original || sourceArea.value;
+        sourceArea.dataset.original = originalCode;
+
+        // CodeMirror editör oluştur
+        const editor = CodeMirror.fromTextArea(sourceArea, {
+            mode: 'javascript',
+            theme: document.body.classList.contains('light-mode') ? 'default' : 'dracula',
+            lineNumbers: true,
+            tabSize: 2,
+            indentWithTabs: false,
+            lineWrapping: false,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            styleActiveLine: true,
+            scrollbarStyle: 'native'
         });
 
-        // Sync scroll - textarea ile line numbers ve highlight
-        const wrapper = codeArea.closest('.editor-wrapper');
-        const lineNumbers = wrapper?.querySelector('.line-numbers');
+        // Editör yüksekliğini ayarla
+        editor.setSize('100%', '100%');
 
-        codeArea.addEventListener('scroll', () => {
-            if (lineNumbers) {
-                lineNumbers.scrollTop = codeArea.scrollTop;
-            }
-            if (codeHighlight) {
-                codeHighlight.style.transform = `translate(${-codeArea.scrollLeft}px, ${-codeArea.scrollTop}px)`;
-            }
-        });
-
-        // Initial highlight
-        updateHighlight(codeArea, codeHighlight);
+        // Editörü sakla
+        cmEditors.set(sourceArea.id, editor);
 
         // Run button handler
         if (runBtn) {
-            runBtn.onclick = () => runCode(codeArea.value, previewContainer);
+            runBtn.onclick = () => runCode(editor.getValue(), previewContainer);
         }
         
         // Reset button handler
         if (resetBtn) {
             resetBtn.onclick = () => {
-                codeArea.value = originalCode;
-                updateLineNumbers(codeArea);
-                updateHighlight(codeArea, codeHighlight);
+                editor.setValue(originalCode);
                 runCode(originalCode, previewContainer);
             };
         }
@@ -174,7 +175,7 @@ function initializePlaygrounds() {
         if (copyBtn) {
             copyBtn.onclick = async () => {
                 try {
-                    await navigator.clipboard.writeText(codeArea.value);
+                    await navigator.clipboard.writeText(editor.getValue());
                     const originalText = copyBtn.textContent;
                     copyBtn.textContent = '✓ Kopyalandı!';
                     copyBtn.style.background = '#00ff88';
@@ -191,42 +192,17 @@ function initializePlaygrounds() {
         }
         
         // Auto-run on load
-        runCode(codeArea.value, previewContainer);
+        runCode(editor.getValue(), previewContainer);
     });
 }
 
-// Update line numbers
-function updateLineNumbers(textarea) {
-    const wrapper = textarea.closest('.editor-wrapper');
-    const lineNumbers = wrapper?.querySelector('.line-numbers');
-    if (!lineNumbers) return;
-    
-    const lines = textarea.value.split('\n').length;
-    lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => `<span>${i + 1}</span>`).join('');
+// Update CodeMirror themes when theme changes
+function updateEditorThemes(isDark) {
+    cmEditors.forEach(editor => {
+        editor.setOption('theme', isDark ? 'dracula' : 'default');
+    });
 }
 
-// Update syntax highlighting with Prism
-function updateHighlight(textarea, highlightEl) {
-    if (!highlightEl) return;
-
-    const codeEl = highlightEl.querySelector('code');
-    if (!codeEl) return;
-
-    // Escape HTML
-    const escaped = textarea.value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-    codeEl.innerHTML = escaped;
-
-    // Re-highlight with Prism
-    if (window.Prism) {
-        Prism.highlightElement(codeEl);
-    }
-}
-
-// Run code in preview iframe
 // Run code in preview iframe
 function runCode(code, previewContainer) {
     if (!previewContainer) return;
