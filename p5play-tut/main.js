@@ -146,10 +146,10 @@ function initializePlaygrounds() {
             tabSize: 2,
             indentWithTabs: false,
             lineWrapping: false,
-            autoCloseBrackets: true,
-            matchBrackets: true,
+            matchBrackets: false,
             styleActiveLine: true,
-            scrollbarStyle: 'native'
+            scrollbarStyle: 'native',
+            inputStyle: 'contenteditable'
         });
 
         // Editör yüksekliğini ayarla
@@ -157,6 +157,17 @@ function initializePlaygrounds() {
 
         // Editörü sakla
         cmEditors.set(sourceArea.id, editor);
+
+        // Debounce timer
+        let debounceTimer = null;
+
+        // Kod değiştiğinde otomatik çalıştır (600ms gecikme ile)
+        editor.on('changes', function(cm, changes) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                runCode(cm.getValue(), previewContainer);
+            }, 600);
+        });
 
         // Run button handler
         if (runBtn) {
