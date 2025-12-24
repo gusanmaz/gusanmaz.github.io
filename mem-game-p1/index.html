@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>p5.js ile Eşleştirme Oyunu - Kod Hikayesi</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;600;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
+        <span class="theme-icon">🌙</span>
+    </button>
+
     <div class="hero">
         <h1>🎮 Eşleştirme Oyunu</h1>
         <p>Bir kodun hikayesi: Başlangıçtan bitişe, hatalardan çözümlere...</p>
         <div class="story-intro">
-            <span class="chapter-badge">6 Bölüm</span>
-            <span class="chapter-badge">5 Kod Versiyonu</span>
-            <span class="chapter-badge">Adım Adım Evrim</span>
+            <span class="chapter-badge">13 Adım</span>
+            <span class="chapter-badge">Tam Kod Örnekleri</span>
+            <span class="chapter-badge">Başlangıç Seviyesi</span>
         </div>
     </div>
-    
+
     <div class="container">
         <!-- PROLOGUE: What We're Building -->
         <section id="prologue" class="story-section">
@@ -25,13 +34,15 @@
                 <span class="chapter-number">Giriş</span>
                 <h2>Ne Yapıyoruz?</h2>
             </div>
-            
+
             <div class="story-text">
-                <p>Quizlet'teki "Match" oyununu bilir misin? İngilizce bir kelime ile Türkçe karşılığını eşleştiriyorsun. Biz de p5.js kullanarak böyle bir oyun yapacağız.</p>
-                
-                <p>Ama hemen bitmiş kodu yazmayacağız. Gerçek programcılar gibi <span class="highlight">adım adım</span> ilerleyeceğiz:</p>
+                <p>Quizlet'teki "Match" oyununu bilir misin? İngilizce bir kelime ile Türkçe karşılığını
+                    eşleştiriyorsun. Biz de p5.js kullanarak böyle bir oyun yapacağız.</p>
+
+                <p>Ama hemen bitmiş kodu yazmayacağız. Gerçek programcılar gibi <span class="highlight">adım adım</span>
+                    ilerleyeceğiz:</p>
             </div>
-            
+
             <div class="roadmap">
                 <div class="roadmap-item">
                     <div class="roadmap-icon">📝</div>
@@ -75,7 +86,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="final-goal">
                 <h3>🎯 Hedef: 4x4 Grid'e 16 Kelime Yerleştirmek</h3>
                 <div class="goal-grid" id="goal-grid"></div>
@@ -99,11 +110,11 @@
                 <span class="chapter-number">Bölüm 0</span>
                 <h2>p5.js Temelleri</h2>
             </div>
-            
+
             <div class="story-text">
                 <p>Koda başlamadan önce, p5.js'in nasıl çalıştığını anlamamız gerekiyor. İki özel fonksiyon var:</p>
             </div>
-            
+
             <div class="concept-box">
                 <div class="concept-visual">
                     <div class="flow-diagram">
@@ -120,19 +131,19 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="story-text">
                 <h3>🔧 Fonksiyon Nedir?</h3>
                 <p>Fonksiyon, belirli bir iş yapan kod bloğudur. İki aşaması vardır:</p>
             </div>
-            
+
             <div class="two-column">
                 <div class="column">
                     <div class="column-header definition">📝 Fonksiyon TANIMLAMA</div>
                     <div class="column-content">
                         <p>"Bu fonksiyon şunu yapsın" diyorsun. Henüz çalışmıyor, sadece tarif ediyorsun.</p>
                         <div class="mini-code">
-<pre><span class="keyword">function</span> <span class="function">selamVer</span>() {
+                            <pre><span class="keyword">function</span> <span class="function">selamVer</span>() {
     <span class="function">print</span>(<span class="string">"Merhaba!"</span>);
 }</pre>
                         </div>
@@ -144,27 +155,29 @@
                     <div class="column-content">
                         <p>Tanımladığın fonksiyonu <strong>kullanıyorsun</strong>. Artık kod çalışıyor!</p>
                         <div class="mini-code">
-<pre><span class="function">selamVer</span>();  <span class="comment">// Çalışır!</span>
+                            <pre><span class="function">selamVer</span>();  <span class="comment">// Çalışır!</span>
 <span class="function">selamVer</span>();  <span class="comment">// Tekrar çalışır!</span></pre>
                         </div>
                         <p class="analogy">👨‍🍳 Tarife bakarak yemeği yapmak gibi</p>
                     </div>
                 </div>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">🎮 Dene: Tanımlama vs Çağırma</span>
                 </div>
                 <div class="demo-content">
                     <div class="demo-explanation">
-                        <p>Aşağıda <code>sayHello()</code> fonksiyonu <strong>tanımlandı</strong>. Ama henüz <strong>çağrılmadı</strong>!</p>
+                        <p>Aşağıda <code>sayHello()</code> fonksiyonu <strong>tanımlandı</strong>. Ama henüz
+                            <strong>çağrılmadı</strong>!
+                        </p>
                         <p>Butona tıklayarak fonksiyonu <strong>çağır</strong> ve ne olduğunu gör:</p>
                     </div>
                     <div class="function-demo">
                         <div class="code-side">
                             <div class="mini-code">
-<pre><span class="comment">// Tanımlama (henüz çalışmaz)</span>
+                                <pre><span class="comment">// Tanımlama (henüz çalışmaz)</span>
 <span class="keyword">function</span> <span class="function">sayHello</span>() {
     <span class="function">print</span>(<span class="string">"Merhaba Dünya!"</span>);
 }</pre>
@@ -181,25 +194,27 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="story-text">
                 <h3>↩️ return - Değer Döndürmek</h3>
-                <p>Bazı fonksiyonlar bir iş yapar ve <strong>sonucu geri verir</strong>. Buna "değer döndürmek" diyoruz:</p>
+                <p>Bazı fonksiyonlar bir iş yapar ve <strong>sonucu geri verir</strong>. Buna "değer döndürmek" diyoruz:
+                </p>
             </div>
-            
+
             <div class="code-block">
                 <div class="code-header">
-                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span
+                            class="green"></span></div>
                     return-ornegi.js
                 </div>
-<pre><span class="keyword">function</span> <span class="function">topla</span>(<span class="variable">a</span>, <span class="variable">b</span>) {
+                <pre><span class="keyword">function</span> <span class="function">topla</span>(<span class="variable">a</span>, <span class="variable">b</span>) {
     <span class="keyword">return</span> <span class="variable">a</span> + <span class="variable">b</span>;  <span class="comment">// Sonucu GERİ DÖNDÜRÜR</span>
 }
 
 <span class="keyword">let</span> <span class="variable">sonuc</span> = <span class="function">topla</span>(<span class="number">5</span>, <span class="number">3</span>);  <span class="comment">// sonuc = 8 olur</span>
 <span class="function">print</span>(<span class="variable">sonuc</span>);  <span class="comment">// Ekranda: 8</span></pre>
             </div>
-            
+
             <div class="info-box">
                 <strong>💡 Önemli Fark:</strong>
                 <ul>
@@ -215,11 +230,11 @@
                 <span class="chapter-number">Bölüm 1</span>
                 <h2>Versiyon 1: Temel Yapı</h2>
             </div>
-            
+
             <div class="story-text">
                 <p>İlk adım: Grid'i çizelim ve kelimelerimizi tanımlayalım. Henüz kelime seçme yok, sadece altyapı.</p>
             </div>
-            
+
             <div class="version-goals">
                 <div class="goal-item done">✓ 4x4 grid çiz</div>
                 <div class="goal-item done">✓ Kelime dizilerini tanımla</div>
@@ -227,14 +242,15 @@
                 <div class="goal-item done">✓ allTrue() yardımcı fonksiyonu</div>
                 <div class="goal-item pending">○ selectText() fonksiyonu (boş)</div>
             </div>
-            
+
             <div class="code-block full-code">
                 <div class="code-header">
-                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span
+                            class="green"></span></div>
                     <span class="version-badge">VERSİYON 1</span>
                     sketch.js
                 </div>
-<pre><span class="comment">// ===== DEĞİŞKENLER =====</span>
+                <pre><span class="comment">// ===== DEĞİŞKENLER =====</span>
 <span class="keyword">let</span> <span class="variable">en</span> = [<span class="string">'red'</span>, <span class="string">'black'</span>, <span class="string">'blue'</span>,
          <span class="string">'green'</span>, <span class="string">'white'</span>, <span class="string">'yellow'</span>,
          <span class="string">'orange'</span>, <span class="string">'gray'</span>];
@@ -278,11 +294,11 @@
     <span class="comment">// Henüz boş - sonra dolduracağız</span>
 }</pre>
             </div>
-            
+
             <div class="story-text">
                 <h3>🧐 Neden 4 Tane Dizi Var?</h3>
             </div>
-            
+
             <div class="array-explanation">
                 <div class="array-pair">
                     <div class="array-box en-array">
@@ -294,14 +310,14 @@
                         <div class="array-visual" id="v1-tr-array"></div>
                     </div>
                 </div>
-                
+
                 <div class="connection-info">
                     <p><strong>🔗 Önemli:</strong> Aynı index'teki elemanlar birbirinin çevirisi!</p>
                     <div class="match-demo" id="v1-match-demo">
                         <span>Bir index'e tıkla →</span>
                     </div>
                 </div>
-                
+
                 <div class="array-pair">
                     <div class="array-box used-array">
                         <h4>en_used[] - İngilizce Kullanıldı mı?</h4>
@@ -312,22 +328,25 @@
                         <div class="array-visual" id="v1-tr-used"></div>
                     </div>
                 </div>
-                
+
                 <div class="used-explanation">
                     <p><strong>❓ en_used ve tr_used ne işe yarar?</strong></p>
-                    <p>Grid'de 16 hücre var ama her dilde 8 kelime var. Her kelime <strong>sadece 1 kere</strong> kullanılmalı. Bu diziler "hangi kelime zaten yerleştirildi?" sorusunun cevabını tutar:</p>
+                    <p>Grid'de 16 hücre var ama her dilde 8 kelime var. Her kelime <strong>sadece 1 kere</strong>
+                        kullanılmalı. Bu diziler "hangi kelime zaten yerleştirildi?" sorusunun cevabını tutar:</p>
                     <ul>
-                        <li><code class="false-code">false</code> → "Bu kelime henüz grid'e yerleştirilmedi, seçilebilir"</li>
+                        <li><code class="false-code">false</code> → "Bu kelime henüz grid'e yerleştirilmedi,
+                            seçilebilir"</li>
                         <li><code class="true-code">true</code> → "Bu kelime zaten grid'de, tekrar seçilemez"</li>
                     </ul>
                 </div>
             </div>
-            
+
             <div class="story-text">
                 <h3>📐 rect() ve Koordinatlar</h3>
-                <p><code>rect(x, y, 100, 100)</code> bir kare çizer. Ama dikkat: <strong>x ve y, karenin SOL ÜST KÖŞESİNİN koordinatıdır!</strong></p>
+                <p><code>rect(x, y, 100, 100)</code> bir kare çizer. Ama dikkat: <strong>x ve y, karenin SOL ÜST
+                        KÖŞESİNİN koordinatıdır!</strong></p>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">🖱️ Mouse ile Keşfet: rect() Koordinatları</span>
@@ -341,12 +360,14 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="story-text">
                 <h3>🔍 allTrue() Fonksiyonu</h3>
-                <p>Bu fonksiyon bir diziyi alır ve "hepsi true mu?" sorusunu cevaplar. Eğer <strong>bir tane bile false varsa</strong>, fonksiyon <code class="false-code">false</code> <strong>döndürür</strong> (return eder). Hepsi true ise <code class="true-code">true</code> döndürür.</p>
+                <p>Bu fonksiyon bir diziyi alır ve "hepsi true mu?" sorusunu cevaplar. Eğer <strong>bir tane bile false
+                        varsa</strong>, fonksiyon <code class="false-code">false</code> <strong>döndürür</strong>
+                    (return eder). Hepsi true ise <code class="true-code">true</code> döndürür.</p>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">🎮 allTrue() Simülasyonu</span>
@@ -364,7 +385,64 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Collapsible Full Code Block -->
+            <div class="collapsible-code">
+                <div class="collapsible-header" onclick="toggleCode(this)">
+                    <div class="collapsible-title">
+                        <span class="icon">📄</span>
+                        <span>Tam Kod - Adım 1</span>
+                        <span class="collapsible-badge">36 satır</span>
+                    </div>
+                    <div class="collapsible-actions">
+                        <button class="copy-btn" onclick="copyCode(event, 'adim1-code')">
+                            <span>📋</span> Kopyala
+                        </button>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </div>
+                <div class="collapsible-content">
+                    <div class="code-with-lines">
+                        <div class="line-numbers">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span>32</span><span>33</span><span>34</span><span>35</span><span>36</span>
+                        </div>
+                        <div class="code-content">
+                            <pre id="adim1-code">let en = ['red', 'black', 'blue', 'green', 'white', 'yellow', 'orange', 'gray'];
+let tr = ['kırmızı', 'siyah', 'mavi', 'yeşil', 'beyaz', 'sarı', 'turuncu', 'gri'];
+let en_used = [false, false, false, false, false, false, false, false];
+let tr_used = [false, false, false, false, false, false, false, false];
+
+function setup() {
+  createCanvas(400, 400);
+  let r = allTrue(en_used);
+  print(r);
+}
+
+function draw() {
+  for(let y = 0; y < 400; y += 100){
+    for(let x = 0; x < 400; x += 100){
+      rect(x,y,100,100);
+    }
+  }
+}
+
+function allTrue(a){
+  for (let i = 0; i < a.length; i++){
+    if (a[i] == false){
+      return false;
+    }
+  }
+  return true;
+}
+
+function selectText(){
+  // Henüz boş - sonra dolduracağız
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="version-summary">
                 <h3>📋 Versiyon 1 Özeti</h3>
                 <ul>
@@ -385,7 +463,7 @@
                 <span class="chapter-number">Bölüm 2</span>
                 <h2>Versiyon 2: İlk selectText() Denemesi</h2>
             </div>
-            
+
             <div class="story-text">
                 <p>Şimdi kelime seçme fonksiyonunu yazalım. Mantık şöyle:</p>
                 <ol>
@@ -394,15 +472,16 @@
                     <li>Seçilen dilden rastgele bir kelime döndür</li>
                 </ol>
             </div>
-            
+
             <div class="code-block full-code">
                 <div class="code-header">
-                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span
+                            class="green"></span></div>
                     <span class="version-badge">VERSİYON 2</span>
                     sketch.js
                     <span class="change-indicator">🔄 Değişiklik var!</span>
                 </div>
-<pre><span class="comment">// ... (değişkenler aynı) ...</span>
+                <pre><span class="comment">// ... (değişkenler aynı) ...</span>
 
 <span class="keyword">function</span> <span class="function">setup</span>() {
     <span class="function">createCanvas</span>(<span class="number">400</span>, <span class="number">400</span>);
@@ -441,7 +520,7 @@
     }
 }</span></pre>
             </div>
-            
+
             <div class="whats-new">
                 <h3>🆕 Bu Versiyonda Ne Değişti?</h3>
                 <div class="change-list">
@@ -455,12 +534,12 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="story-text">
                 <h3>🧪 Test Edelim!</h3>
                 <p>setup() içinde <code>selectText()</code> fonksiyonunu çağırıyoruz. Bir kelime dönmeli...</p>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">🎲 selectText() Versiyon 2 Simülasyonu</span>
@@ -497,7 +576,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="problem-box">
                 <div class="problem-header">
                     <span class="problem-icon">🐛</span>
@@ -509,19 +588,99 @@
                         <li>Aynı kelime tekrar tekrar seçilebiliyor!</li>
                         <li>Örneğin "red" 3 kez seçilebilir</li>
                     </ul>
-                    <p><strong>Neden?</strong> Çünkü kelimeyi seçtikten sonra <code>en_used</code> veya <code>tr_used</code> dizisini <strong>güncellemiyoruz</strong>!</p>
-                    
+                    <p><strong>Neden?</strong> Çünkü kelimeyi seçtikten sonra <code>en_used</code> veya
+                        <code>tr_used</code> dizisini <strong>güncellemiyoruz</strong>!
+                    </p>
+
                     <div class="bug-visualization">
                         <p>Fonksiyon şunu yapıyor:</p>
                         <ol>
                             <li>✓ <code>en_used[a] == false</code> mı diye bakıyor</li>
                             <li>✓ false ise kelimeyi döndürüyor</li>
-                            <li>❌ Ama <code>en_used[a] = true</code> yapmıyor! <span class="bug-highlight">← BUG!</span></li>
+                            <li>❌ Ama <code>en_used[a] = true</code> yapmıyor! <span class="bug-highlight">← BUG!</span>
+                            </li>
                         </ol>
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Collapsible Full Code Block -->
+            <div class="collapsible-code">
+                <div class="collapsible-header" onclick="toggleCode(this)">
+                    <div class="collapsible-title">
+                        <span class="icon">📄</span>
+                        <span>Tam Kod - Adım 2</span>
+                        <span class="collapsible-badge">55 satır</span>
+                    </div>
+                    <div class="collapsible-actions">
+                        <button class="copy-btn" onclick="copyCode(event, 'adim2-code')">
+                            <span>📋</span> Kopyala
+                        </button>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </div>
+                <div class="collapsible-content">
+                    <div class="code-with-lines">
+                        <div class="line-numbers">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span>32</span><span>33</span><span>34</span><span>35</span><span>36</span><span>37</span><span>38</span><span>39</span><span>40</span><span>41</span><span>42</span><span>43</span><span>44</span><span>45</span><span>46</span><span>47</span><span>48</span><span>49</span><span>50</span><span>51</span><span>52</span><span>53</span><span>54</span><span>55</span>
+                        </div>
+                        <div class="code-content">
+                            <pre id="adim2-code">let en = ['red', 'black', 'blue', 'green', 'white', 'yellow', 'orange', 'gray'];
+let tr = ['kırmızı', 'siyah', 'mavi', 'yeşil', 'beyaz', 'sarı', 'turuncu', 'gri'];
+let en_used = [false, false, false, false, false, false, false, false];
+let tr_used = [false, false, false, false, false, false, false, false];
+
+function setup() {
+  createCanvas(400, 400);
+  let r = allTrue(en_used);
+  print(r);
+  a = Math.floor(random(8));
+  print(a);
+  let word = selectText();
+  print(word);
+}
+
+function draw() {
+  for(let y = 0; y < 400; y+= 100){
+    for(let x = 0; x < 400; x += 100){
+      rect(x,y,100,100);
+    }
+  }
+}
+
+function allTrue(a){
+  for (let i = 0; i < a.length; i++){
+    if (a[i] == false){
+      return false;
+    }
+  }
+  return true;
+}
+
+function selectText(){
+  let r = random();
+  let p = allTrue(en_used);
+  if ((r < 0.5) && !p){
+    while(true){
+      a = Math.floor(random(8));
+      if (en_used[a] == false){
+        return en[a];
+      }
+    }
+  }else{
+    while(true){
+      a = Math.floor(random(8));
+      if (tr_used[a] == false){
+        return tr[a];
+      }
+    }
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="version-summary">
                 <h3>📋 Versiyon 2 Özeti</h3>
                 <ul>
@@ -541,16 +700,17 @@
                 <span class="chapter-number">Bölüm 3</span>
                 <h2>Versiyon 3: Hatayı Düzeltiyoruz!</h2>
             </div>
-            
+
             <div class="story-text">
-                <p>Sorunu bulduk: Kelimeyi seçtikten sonra "kullanıldı" olarak işaretlemiyoruz. Tek satır ekleyerek düzeltelim:</p>
+                <p>Sorunu bulduk: Kelimeyi seçtikten sonra "kullanıldı" olarak işaretlemiyoruz. Tek satır ekleyerek
+                    düzeltelim:</p>
             </div>
-            
+
             <div class="code-comparison">
                 <div class="code-before">
                     <h4>❌ Önceki (Hatalı)</h4>
                     <div class="mini-code">
-<pre><span class="keyword">if</span> (<span class="variable">en_used</span>[<span class="variable">a</span>] == <span class="keyword">false</span>) {
+                        <pre><span class="keyword">if</span> (<span class="variable">en_used</span>[<span class="variable">a</span>] == <span class="keyword">false</span>) {
     <span class="keyword">return</span> <span class="variable">en</span>[<span class="variable">a</span>];
 }</pre>
                     </div>
@@ -558,22 +718,23 @@
                 <div class="code-after">
                     <h4>✅ Sonraki (Doğru)</h4>
                     <div class="mini-code">
-<pre><span class="keyword">if</span> (<span class="variable">en_used</span>[<span class="variable">a</span>] == <span class="keyword">false</span>) {
+                        <pre><span class="keyword">if</span> (<span class="variable">en_used</span>[<span class="variable">a</span>] == <span class="keyword">false</span>) {
     <span class="new-line"><span class="variable">en_used</span>[<span class="variable">a</span>] = <span class="keyword">true</span>;  <span class="comment">// ← YENİ!</span></span>
     <span class="keyword">return</span> <span class="variable">en</span>[<span class="variable">a</span>];
 }</pre>
                     </div>
                 </div>
             </div>
-            
+
             <div class="code-block full-code">
                 <div class="code-header">
-                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span
+                            class="green"></span></div>
                     <span class="version-badge">VERSİYON 3</span>
                     sketch.js
                     <span class="change-indicator">🔄 Değişiklik var!</span>
                 </div>
-<pre><span class="comment">// ... (değişkenler aynı) ...</span>
+                <pre><span class="comment">// ... (değişkenler aynı) ...</span>
 
 <span class="keyword">function</span> <span class="function">setup</span>() {
     <span class="function">createCanvas</span>(<span class="number">400</span>, <span class="number">400</span>);
@@ -611,7 +772,7 @@
     }
 }</pre>
             </div>
-            
+
             <div class="whats-new">
                 <h3>🆕 Bu Versiyonda Ne Değişti?</h3>
                 <div class="change-list">
@@ -625,7 +786,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">🎮 16 Kelime Seçme - Tam Simülasyon</span>
@@ -648,7 +809,7 @@
                                 <div class="array-visual" id="v3-tr"></div>
                                 <div class="array-visual used-indicators" id="v3-tr-used"></div>
                             </div>
-                            
+
                             <div class="counter-display">
                                 <span>Seçilen kelime sayısı:</span>
                                 <span class="counter" id="v3-counter">0</span>
@@ -666,7 +827,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="success-box">
                 <div class="success-header">
                     <span class="success-icon">✅</span>
@@ -681,19 +842,23 @@
                     </ul>
                 </div>
             </div>
-            
+
             <div class="story-text">
                 <h3>🎲 "Şanssızlık" Durumu</h3>
-                <p>Dikkat ettiysen, bazen rastgele üretilen index zaten kullanılmış olabiliyor. Bu durumda kod yeni bir rastgele sayı üretiyor:</p>
+                <p>Dikkat ettiysen, bazen rastgele üretilen index zaten kullanılmış olabiliyor. Bu durumda kod yeni bir
+                    rastgele sayı üretiyor:</p>
             </div>
-            
+
             <div class="unlucky-demo">
                 <div class="demo-header">
                     <span class="demo-title">🎲 Şanssızlık Simülasyonu</span>
                     <button class="demo-btn" onclick="runUnluckyDemo()">Simülasyonu Başlat</button>
                 </div>
                 <div class="demo-content">
-                    <p>Diyelim ki en_used = [<span class="true-code">T</span>, <span class="true-code">T</span>, <span class="true-code">T</span>, <span class="true-code">T</span>, <span class="true-code">T</span>, <span class="true-code">T</span>, <span class="true-code">T</span>, <span class="false-code">F</span>] (sadece index 7 boş)</p>
+                    <p>Diyelim ki en_used = [<span class="true-code">T</span>, <span class="true-code">T</span>, <span
+                            class="true-code">T</span>, <span class="true-code">T</span>, <span
+                            class="true-code">T</span>, <span class="true-code">T</span>, <span
+                            class="true-code">T</span>, <span class="false-code">F</span>] (sadece index 7 boş)</p>
                     <div class="unlucky-visual">
                         <div class="array-visual" id="unlucky-array"></div>
                         <div class="attempt-display" id="unlucky-attempts"></div>
@@ -703,7 +868,85 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Collapsible Full Code Block -->
+            <div class="collapsible-code">
+                <div class="collapsible-header" onclick="toggleCode(this)">
+                    <div class="collapsible-title">
+                        <span class="icon">📄</span>
+                        <span>Tam Kod - Adım 3</span>
+                        <span class="collapsible-badge">56 satır</span>
+                    </div>
+                    <div class="collapsible-actions">
+                        <button class="copy-btn" onclick="copyCode(event, 'adim3-code')">
+                            <span>📋</span> Kopyala
+                        </button>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </div>
+                <div class="collapsible-content">
+                    <div class="code-with-lines">
+                        <div class="line-numbers">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span>32</span><span>33</span><span>34</span><span>35</span><span>36</span><span>37</span><span>38</span><span>39</span><span>40</span><span>41</span><span>42</span><span>43</span><span>44</span><span>45</span><span>46</span><span>47</span><span>48</span><span>49</span><span>50</span><span>51</span><span>52</span><span>53</span><span>54</span><span>55</span><span>56</span>
+                        </div>
+                        <div class="code-content">
+                            <pre id="adim3-code">let en = ['red', 'black', 'blue', 'green', 'white', 'yellow', 'orange', 'gray'];
+let tr = ['kırmızı', 'siyah', 'mavi', 'yeşil', 'beyaz', 'sarı', 'turuncu', 'gri'];
+let en_used = [false, false, false, false, false, false, false, false];
+let tr_used = [false, false, false, false, false, false, false, false];
+
+function setup() {
+  createCanvas(400, 400);
+  let r = allTrue(en_used);
+  for(let i = 0; i < 16; i++){
+    let a = selectText();
+    print(a);
+  }
+}
+
+function draw() {
+  for(let y = 0; y < 400; y+= 100){
+    for(let x = 0; x < 400; x += 100){
+      rect(x,y,100,100);
+    }
+  }
+}
+
+function allTrue(a){
+  for (let i = 0; i < a.length; i++){
+    if (a[i] == false){
+      return false;
+    }
+  }
+  return true;
+}
+
+function selectText(){
+  let r = random();
+  let p = allTrue(en_used);
+  if ((r < 0.5) && !p){
+    while(true){
+      a = Math.floor(random(8));
+      if (en_used[a] == false){
+        en_used[a] = true;  // BUG FİX!
+        return en[a];
+      }
+    }
+  }else{
+    while(true){
+      a = Math.floor(random(8));
+      if (tr_used[a] == false){
+        tr_used[a] = true;  // BUG FİX!
+        return tr[a];
+      }
+    }
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="version-summary">
                 <h3>📋 Versiyon 3 Özeti</h3>
                 <ul>
@@ -723,27 +966,29 @@
                 <span class="chapter-number">Bölüm 4</span>
                 <h2>Versiyon 4: Satır/Sütun Hesaplama</h2>
             </div>
-            
+
             <div class="story-text">
-                <p>16 kelimeyi seçebiliyoruz. Şimdi her kelimeyi grid'in bir hücresine yerleştirmemiz gerekiyor. Bunun için her hücreye bir numara verelim (0-15) ve bu numaradan satır/sütun hesaplayalım. Bu versiyonda henüz text yazmıyoruz, sadece hesaplamayı test ediyoruz.</p>
+                <p>16 kelimeyi seçebiliyoruz. Şimdi her kelimeyi grid'in bir hücresine yerleştirmemiz gerekiyor. Bunun
+                    için her hücreye bir numara verelim (0-15) ve bu numaradan satır/sütun hesaplayalım. Bu versiyonda
+                    henüz text yazmıyoruz, sadece hesaplamayı test ediyoruz.</p>
             </div>
-            
+
             <div class="numbering-explanation">
                 <h3>🔢 Grid'i Numaralandırma</h3>
                 <p>Her hücreye sol üstten başlayarak sırayla numara veriyoruz:</p>
-                
+
                 <div class="interactive-demo">
                     <div class="demo-content">
                         <div class="numbering-grid" id="numbering-grid"></div>
                     </div>
                 </div>
-                
+
                 <p>Şimdi soru şu: <strong>Numara 7'nin satır ve sütunu nedir?</strong></p>
             </div>
-            
+
             <div class="formula-explanation">
                 <h3>🧮 Satır ve Sütun Formülleri</h3>
-                
+
                 <div class="formula-cards">
                     <div class="formula-card">
                         <div class="formula-title">SATIR</div>
@@ -763,7 +1008,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">🎮 Numaradan Satır/Sütun Hesaplayıcı</span>
@@ -772,10 +1017,11 @@
                     <div class="calculator-v4">
                         <div class="calc-slider">
                             <label>Hücre numarası (i):</label>
-                            <input type="range" id="v4-slider" min="0" max="15" value="0" oninput="updateV4Calculator()">
+                            <input type="range" id="v4-slider" min="0" max="15" value="0"
+                                oninput="updateV4Calculator()">
                             <span class="calc-i-value" id="v4-i-value">0</span>
                         </div>
-                        
+
                         <div class="calc-formulas">
                             <div class="calc-formula-box">
                                 <span class="calc-formula-label">satır = floor(<span id="v4-i1">0</span> / 4)</span>
@@ -787,20 +1033,21 @@
                                 <span class="calc-formula-result">= <strong id="v4-sutun">0</strong></span>
                             </div>
                         </div>
-                        
+
                         <div class="calc-grid" id="v4-calc-grid"></div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="code-block full-code">
                 <div class="code-header">
-                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span
+                            class="green"></span></div>
                     <span class="version-badge">VERSİYON 4 (FİNAL)</span>
                     sketch.js
                     <span class="change-indicator">🔄 Değişiklik var!</span>
                 </div>
-<pre><span class="comment">// ... (değişkenler aynı) ...</span>
+                <pre><span class="comment">// ... (değişkenler aynı) ...</span>
 
 <span class="keyword">function</span> <span class="function">setup</span>() {
     <span class="function">createCanvas</span>(<span class="number">400</span>, <span class="number">400</span>);
@@ -815,7 +1062,7 @@
 
 <span class="comment">// ... (draw, allTrue, selectText aynı) ...</span></pre>
             </div>
-            
+
             <div class="whats-new">
                 <h3>🆕 Bu Versiyonda Ne Değişti?</h3>
                 <div class="change-list">
@@ -829,7 +1076,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">🎮 Tam Simülasyon: 16 Kelimeyi Grid'e Yerleştir</span>
@@ -888,7 +1135,90 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Collapsible Full Code Block -->
+            <div class="collapsible-code">
+                <div class="collapsible-header" onclick="toggleCode(this)">
+                    <div class="collapsible-title">
+                        <span class="icon">📄</span>
+                        <span>Tam Kod - Adım 4</span>
+                        <span class="collapsible-badge">61 satır</span>
+                    </div>
+                    <div class="collapsible-actions">
+                        <button class="copy-btn" onclick="copyCode(event, 'adim4-code')">
+                            <span>📋</span> Kopyala
+                        </button>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </div>
+                <div class="collapsible-content">
+                    <div class="code-with-lines">
+                        <div class="line-numbers">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span>32</span><span>33</span><span>34</span><span>35</span><span>36</span><span>37</span><span>38</span><span>39</span><span>40</span><span>41</span><span>42</span><span>43</span><span>44</span><span>45</span><span>46</span><span>47</span><span>48</span><span>49</span><span>50</span><span>51</span><span>52</span><span>53</span><span>54</span><span>55</span><span>56</span><span>57</span><span>58</span><span>59</span><span>60</span><span>61</span>
+                        </div>
+                        <div class="code-content">
+                            <pre id="adim4-code">let en = ['red', 'black', 'blue', 'green', 'white', 'yellow', 'orange', 'gray'];
+let tr = ['kırmızı', 'siyah', 'mavi', 'yeşil', 'beyaz', 'sarı', 'turuncu', 'gri'];
+let en_used = [false, false, false, false, false, false, false, false];
+let tr_used = [false, false, false, false, false, false, false, false];
+
+function setup() {
+  createCanvas(400, 400);
+  let r = allTrue(en_used);
+  textAlign(CENTER, CENTER);
+  for(let y = 0; y < 400; y+= 100){
+    for(let x = 0; x < 400; x += 100){
+      rect(x,y,100,100);
+    }
+  }
+  for(let i = 0; i < 16; i++){
+    let satir = floor(i / 4);
+    let sutun = floor(i % 4);
+    print("i:", i, "satir:", satir, "sutun:", sutun);
+    let word = selectText();
+    text(word, sutun * 100 + 50, satir * 100 + 50);
+  }
+}
+
+function draw() {
+  noLoop();
+}
+
+function allTrue(a){
+  for (let i = 0; i < a.length; i++){
+    if (a[i] == false){
+      return false;
+    }
+  }
+  return true;
+}
+
+function selectText(){
+  let r = random();
+  let p = allTrue(en_used);
+  if ((r < 0.5) && !p){
+    while(true){
+      a = Math.floor(random(8));
+      if (en_used[a] == false){
+        en_used[a] = true;
+        return en[a];
+      }
+    }
+  }else{
+    while(true){
+      a = Math.floor(random(8));
+      if (tr_used[a] == false){
+        tr_used[a] = true;
+        return tr[a];
+      }
+    }
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="version-summary">
                 <h3>📋 Versiyon 4 Özeti</h3>
                 <ul>
@@ -908,19 +1238,21 @@
                 <span class="chapter-number">Bölüm 5</span>
                 <h2>Versiyon 5: Kelimeleri Grid'e Yerleştirme (FİNAL)</h2>
             </div>
-            
+
             <div class="story-text">
-                <p>Artık her şeyi birleştirebiliriz! <code>text()</code> fonksiyonu ile kelimeleri grid'in doğru hücresine yazacağız.</p>
+                <p>Artık her şeyi birleştirebiliriz! <code>text()</code> fonksiyonu ile kelimeleri grid'in doğru
+                    hücresine yazacağız.</p>
             </div>
-            
+
             <div class="code-block full-code">
                 <div class="code-header">
-                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+                    <div class="code-dots"><span class="red"></span><span class="yellow"></span><span
+                            class="green"></span></div>
                     <span class="version-badge" style="background: var(--accent-green);">VERSİYON 5 - FİNAL</span>
                     sketch.js
                     <span class="change-indicator">🔄 Değişiklik var!</span>
                 </div>
-<pre><span class="comment">// ... (değişkenler aynı) ...</span>
+                <pre><span class="comment">// ... (değişkenler aynı) ...</span>
 
 <span class="keyword">function</span> <span class="function">setup</span>() {
     <span class="function">createCanvas</span>(<span class="number">400</span>, <span class="number">400</span>);
@@ -951,7 +1283,7 @@
 
 <span class="comment">// ... (allTrue ve selectText aynı) ...</span></pre>
             </div>
-            
+
             <div class="whats-new">
                 <h3>🆕 Bu Versiyonda Ne Değişti?</h3>
                 <div class="change-list">
@@ -973,12 +1305,13 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="story-text">
                 <h3>📐 text() Koordinat Hesabı</h3>
-                <p>Her karenin merkezi nerede? Sol üst köşeden +50 piksel sağa ve +50 piksel aşağı giderek merkeze ulaşıyoruz:</p>
+                <p>Her karenin merkezi nerede? Sol üst köşeden +50 piksel sağa ve +50 piksel aşağı giderek merkeze
+                    ulaşıyoruz:</p>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-content">
                     <div class="text-calc-visual">
@@ -1008,7 +1341,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="interactive-demo">
                 <div class="demo-header">
                     <span class="demo-title">🎮 FİNAL SİMÜLASYON: Kelimeleri Grid'e Yerleştir</span>
@@ -1033,7 +1366,7 @@
                                 <h4 class="used-label">tr_used[]</h4>
                                 <div class="array-visual mini" id="v5-tr-used"></div>
                             </div>
-                            
+
                             <div class="v5-calc-table-container">
                                 <h4>📊 Hesaplama Tablosu</h4>
                                 <div class="calc-table-scroll">
@@ -1058,8 +1391,10 @@
                         <div class="v5-grid-container">
                             <div class="v5-grid" id="v5-grid"></div>
                             <div class="legend">
-                                <div class="legend-item"><span class="legend-box en-box"></span><span>İngilizce</span></div>
-                                <div class="legend-item"><span class="legend-box tr-box"></span><span>Türkçe</span></div>
+                                <div class="legend-item"><span class="legend-box en-box"></span><span>İngilizce</span>
+                                </div>
+                                <div class="legend-item"><span class="legend-box tr-box"></span><span>Türkçe</span>
+                                </div>
                             </div>
                             <div class="v5-vars">
                                 <div class="v5-var"><span>i =</span><span id="v5-var-i">0</span></div>
@@ -1075,7 +1410,90 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Collapsible Full Code Block -->
+            <div class="collapsible-code">
+                <div class="collapsible-header" onclick="toggleCode(this)">
+                    <div class="collapsible-title">
+                        <span class="icon">📄</span>
+                        <span>Tam Kod - Adım 5 (FİNAL)</span>
+                        <span class="collapsible-badge">60 satır</span>
+                    </div>
+                    <div class="collapsible-actions">
+                        <button class="copy-btn" onclick="copyCode(event, 'adim5-code')">
+                            <span>📋</span> Kopyala
+                        </button>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </div>
+                <div class="collapsible-content">
+                    <div class="code-with-lines">
+                        <div class="line-numbers">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span>32</span><span>33</span><span>34</span><span>35</span><span>36</span><span>37</span><span>38</span><span>39</span><span>40</span><span>41</span><span>42</span><span>43</span><span>44</span><span>45</span><span>46</span><span>47</span><span>48</span><span>49</span><span>50</span><span>51</span><span>52</span><span>53</span><span>54</span><span>55</span><span>56</span><span>57</span><span>58</span><span>59</span><span>60</span>
+                        </div>
+                        <div class="code-content">
+                            <pre id="adim5-code">let en = ['red', 'black', 'blue', 'green', 'white', 'yellow', 'orange', 'gray'];
+let tr = ['kırmızı', 'siyah', 'mavi', 'yeşil', 'beyaz', 'sarı', 'turuncu', 'gri'];
+let en_used = [false, false, false, false, false, false, false, false];
+let tr_used = [false, false, false, false, false, false, false, false];
+
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  // Önce grid'i çiz
+  for(let y = 0; y < 400; y+=100){
+    for(let x = 0; x < 400; x += 100){
+      rect(x,y,100,100);
+    }
+  }
+  // Sonra kelimeleri yerleştir
+  for (let satir = 0; satir < 4; satir++){
+    for (let sutun = 0; sutun < 4; sutun++){
+      let word = selectText();
+      text(word, sutun * 100 + 50, satir * 100 + 50);
+    }
+  }
+}
+
+function draw() {
+  noLoop();
+}
+
+function isAllTrue(a){
+  for (let i = 0; i < a.length; i++){
+    if (a[i] == false){
+      return false;
+    }
+  }
+  return true;
+}
+
+function selectText(){
+  let r = random();
+  let p = isAllTrue(en_used);
+  if ((r < 0.5) && !p){
+    while(true){
+      a = Math.floor(random(8));
+      if (en_used[a] == false){
+        en_used[a] = true;
+        return en[a];
+      }
+    }
+  }else{
+    while(true){
+      a = Math.floor(random(8));
+      if (tr_used[a] == false){
+        tr_used[a] = true;
+        return tr[a];
+      }
+    }
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="success-box">
                 <div class="success-header">
                     <span class="success-icon">🎉</span>
@@ -1099,7 +1517,7 @@
                 <span class="chapter-number">Sonuç</span>
                 <h2>Kod Nasıl Evrildi?</h2>
             </div>
-            
+
             <div class="evolution-timeline">
                 <div class="timeline-item">
                     <div class="timeline-version">V1</div>
@@ -1141,7 +1559,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="lessons-learned">
                 <h3>📚 Öğrendiklerimiz</h3>
                 <table class="summary-table">
@@ -1187,17 +1605,19 @@
                     </tr>
                 </table>
             </div>
-            
+
             <div class="discussion-box">
                 <h3>💭 Tartışma: Alternatif Veri Yapıları</h3>
-                <p>4 ayrı dizi kullandık: <code>en[]</code>, <code>tr[]</code>, <code>en_used[]</code>, <code>tr_used[]</code>. Peki başka nasıl yapabilirdik?</p>
-                
+                <p>4 ayrı dizi kullandık: <code>en[]</code>, <code>tr[]</code>, <code>en_used[]</code>,
+                    <code>tr_used[]</code>. Peki başka nasıl yapabilirdik?
+                </p>
+
                 <div class="alternative-methods">
                     <div class="alt-method">
                         <h4>🔹 Alternatif 1: Obje Dizisi</h4>
                         <p>Her kelime çifti için tek bir obje kullansaydık:</p>
                         <div class="mini-code">
-<pre><span class="keyword">let</span> <span class="variable">words</span> = [
+                            <pre><span class="keyword">let</span> <span class="variable">words</span> = [
     { <span class="variable">en</span>: <span class="string">'red'</span>, <span class="variable">tr</span>: <span class="string">'kırmızı'</span>, <span class="variable">enUsed</span>: <span class="keyword">false</span>, <span class="variable">trUsed</span>: <span class="keyword">false</span> },
     { <span class="variable">en</span>: <span class="string">'black'</span>, <span class="variable">tr</span>: <span class="string">'siyah'</span>, <span class="variable">enUsed</span>: <span class="keyword">false</span>, <span class="variable">trUsed</span>: <span class="keyword">false</span> },
     <span class="comment">// ... diğer kelimeler</span>
@@ -1205,16 +1625,17 @@
                         </div>
                         <div class="pros-cons">
                             <span class="pro">✅ İlişkili veriler bir arada</span>
-                            <span class="pro">✅ Eşleşme kontrolü kolay: <code>words[i].en</code> ve <code>words[i].tr</code></span>
+                            <span class="pro">✅ Eşleşme kontrolü kolay: <code>words[i].en</code> ve
+                                <code>words[i].tr</code></span>
                             <span class="con">❌ Başlangıç için daha karmaşık</span>
                         </div>
                     </div>
-                    
+
                     <div class="alt-method">
                         <h4>🔹 Alternatif 2: İki Boyutlu Dizi</h4>
                         <p>Her satır bir kelime çifti olsaydı:</p>
                         <div class="mini-code">
-<pre><span class="keyword">let</span> <span class="variable">words</span> = [
+                            <pre><span class="keyword">let</span> <span class="variable">words</span> = [
     [<span class="string">'red'</span>, <span class="string">'kırmızı'</span>],
     [<span class="string">'black'</span>, <span class="string">'siyah'</span>],
     <span class="comment">// ... diğer çiftler</span>
@@ -1227,21 +1648,22 @@
                             <span class="con">❌ İndeks numaraları kafa karıştırıcı olabilir</span>
                         </div>
                     </div>
-                    
-                    
+
+
                 </div>
-                
+
                 <div class="conclusion-box">
                     <h4>🎯 Neden 4 Ayrı Dizi Kullandık?</h4>
                     <ul>
                         <li><strong>Basitlik:</strong> Başlangıç seviyesi için anlaşılması kolay</li>
-                        <li><strong>Index eşleştirmesi:</strong> <code>en[i]</code> ve <code>tr[i]</code> doğrudan eş</li>
+                        <li><strong>Index eşleştirmesi:</strong> <code>en[i]</code> ve <code>tr[i]</code> doğrudan eş
+                        </li>
                         <li><strong>p5.js uyumu:</strong> Döngülerle kolayca gezinilebilir</li>
                     </ul>
                     <p>İleride daha karmaşık projeler için <strong>obje dizileri</strong> en pratik çözüm olacaktır!</p>
                 </div>
             </div>
-            
+
             <div class="whats-next">
                 <h3>🚀 Sonraki Adımlar</h3>
                 <p>Grid'e kelimeler yerleştirildi. Oyunu tamamlamak için:</p>
@@ -1254,7 +1676,7 @@
             </div>
         </section>
     </div>
-    
+
     <!-- Navigation -->
     <div class="nav-dots">
         <div class="nav-dot" onclick="scrollToSection('prologue')" title="Giriş"></div>
@@ -1266,7 +1688,8 @@
         <div class="nav-dot" onclick="scrollToSection('version5')" title="Versiyon 5"></div>
         <div class="nav-dot" onclick="scrollToSection('summary')" title="Özet"></div>
     </div>
-    
+
     <script src="app.js"></script>
 </body>
+
 </html>

@@ -14,6 +14,328 @@
     --border-color: #2a3444;
 }
 
+/* =========================================
+   LIGHT MODE THEME
+   ========================================= */
+body.light-mode {
+    --bg-primary: #f5f7fa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e8ecf0;
+    --accent-blue: #0078d4;
+    --accent-green: #2d8f3c;
+    --accent-orange: #d96100;
+    --accent-red: #c53030;
+    --accent-purple: #7c3aed;
+    --accent-pink: #db2777;
+    --accent-yellow: #b8860b;
+    --text-primary: #1a2130;
+    --text-secondary: #5a6578;
+    --border-color: #d0d7e0;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    border-color: var(--accent-blue);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle .theme-icon {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover .theme-icon {
+    transform: rotate(20deg);
+}
+
+body.light-mode .theme-toggle {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   COLLAPSIBLE CODE BLOCK STYLES
+   ========================================= */
+.collapsible-code {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    margin: 2rem 0;
+    overflow: hidden;
+}
+
+.collapsible-header {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+}
+
+.collapsible-header:hover {
+    background: var(--bg-tertiary);
+}
+
+.collapsible-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-yellow);
+}
+
+.collapsible-title .icon {
+    font-size: 1.2rem;
+}
+
+.collapsible-badge {
+    background: var(--accent-purple);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+}
+
+.collapsible-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.copy-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    background: var(--accent-blue);
+    color: var(--bg-primary);
+    border-color: var(--accent-blue);
+}
+
+.copy-btn.copied {
+    background: var(--accent-green);
+    color: var(--bg-primary);
+    border-color: var(--accent-green);
+}
+
+.toggle-icon {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    transition: transform 0.3s;
+}
+
+.collapsible-code.open .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+
+.collapsible-code.open .collapsible-content {
+    max-height: 2000px;
+}
+
+.code-with-lines {
+    display: flex;
+    background: var(--bg-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+
+.line-numbers {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 1rem 0.75rem;
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.line-numbers span {
+    display: block;
+}
+
+.code-content {
+    padding: 1rem 1.25rem;
+    flex: 1;
+    overflow-x: auto;
+}
+
+.code-content pre {
+    margin: 0;
+    padding: 0;
+}
+
+/* Step indicator badge */
+.step-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-right: 0.5rem;
+}
+
+/* Concept explanation boxes */
+.concept-card {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.concept-card h4 {
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.concept-card .emoji {
+    font-size: 1.3rem;
+}
+
+.concept-card ul {
+    margin-left: 1.5rem;
+}
+
+.concept-card li {
+    margin-bottom: 0.5rem;
+}
+
+/* What's happening box */
+.whats-happening {
+    background: rgba(57, 186, 230, 0.1);
+    border-left: 4px solid var(--accent-blue);
+    padding: 1.25rem;
+    border-radius: 0 8px 8px 0;
+    margin: 1.5rem 0;
+}
+
+.whats-happening h4 {
+    color: var(--accent-blue);
+    margin-bottom: 0.75rem;
+}
+
+/* Code change highlight */
+.code-change {
+    background: rgba(127, 217, 98, 0.15);
+    border-left: 3px solid var(--accent-green);
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.code-change-title {
+    color: var(--accent-green);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Beginner tip box */
+.beginner-tip {
+    background: rgba(255, 229, 133, 0.1);
+    border: 1px dashed var(--accent-yellow);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+}
+
+.beginner-tip h4 {
+    color: var(--accent-yellow);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Step navigation */
+.step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.step-nav-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.step-nav-btn:hover {
+    background: var(--accent-blue);
+    color: var(--bg-primary);
+    border-color: var(--accent-blue);
+}
+
+.step-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.step-indicator {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {

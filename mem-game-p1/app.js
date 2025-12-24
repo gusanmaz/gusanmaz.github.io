@@ -5,6 +5,61 @@ const en = ['red', 'black', 'blue', 'green', 'white', 'yellow', 'orange', 'gray'
 const tr = ['kırmızı', 'siyah', 'mavi', 'yeşil', 'beyaz', 'sarı', 'turuncu', 'gri'];
 
 // ==========================================
+// THEME TOGGLE
+// ==========================================
+function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    const themeIcon = document.querySelector('.theme-toggle .theme-icon');
+    if (document.body.classList.contains('light-mode')) {
+        themeIcon.textContent = '☀️';
+        localStorage.setItem('theme', 'light');
+    } else {
+        themeIcon.textContent = '🌙';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Apply saved theme on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        const themeIcon = document.querySelector('.theme-toggle .theme-icon');
+        if (themeIcon) themeIcon.textContent = '☀️';
+    }
+});
+
+// ==========================================
+// COLLAPSIBLE CODE FUNCTIONS
+// ==========================================
+function toggleCode(header) {
+    const codeBlock = header.closest('.collapsible-code');
+    codeBlock.classList.toggle('open');
+}
+
+function copyCode(event, codeId) {
+    event.stopPropagation(); // Don't trigger toggle
+    
+    const codeEl = document.getElementById(codeId);
+    if (!codeEl) return;
+    
+    const text = codeEl.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = event.currentTarget;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<span>✓</span> Kopyalandı!';
+        btn.classList.add('copied');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('copied');
+        }, 2000);
+    }).catch(err => {
+        console.error('Copy failed:', err);
+    });
+}
+
+// ==========================================
 // UTILITY FUNCTIONS
 // ==========================================
 function sleep(ms) {
@@ -1194,6 +1249,118 @@ function autoV5() {
 }
 
 // ==========================================
+// COLLAPSIBLE CODE BLOCKS
+// ==========================================
+function toggleCollapsible(element) {
+    const codeBlock = element.closest('.collapsible-code');
+    if (codeBlock) {
+        codeBlock.classList.toggle('open');
+    }
+}
+
+async function copyCode(button, codeId) {
+    const codeElement = document.getElementById(codeId);
+    if (!codeElement) return;
+
+    // Get the raw code text (remove HTML tags)
+    const codeText = codeElement.textContent || codeElement.innerText;
+
+    try {
+        await navigator.clipboard.writeText(codeText);
+
+        // Visual feedback
+        const originalText = button.innerHTML;
+        button.innerHTML = '✓ Kopyalandı!';
+        button.classList.add('copied');
+
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('copied');
+        }, 2000);
+    } catch (err) {
+        console.error('Kopyalama hatası:', err);
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = codeText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        button.innerHTML = '✓ Kopyalandı!';
+        button.classList.add('copied');
+        setTimeout(() => {
+            button.innerHTML = '📋 Kopyala';
+            button.classList.remove('copied');
+        }, 2000);
+    }
+}
+
+// Load code files dynamically
+async function loadCodeFile(filename) {
+    try {
+        const response = await fetch(`codes/${filename}`);
+        if (!response.ok) throw new Error('File not found');
+        return await response.text();
+    } catch (err) {
+        console.error(`Error loading ${filename}:`, err);
+        return null;
+    }
+}
+
+// Generate line numbers for code
+function generateLineNumbers(code) {
+    const lines = code.split('\n');
+    return lines.map((_, i) => `<span>${i + 1}</span>`).join('\n');
+}
+
+// Apply syntax highlighting to code
+function highlightCode(code) {
+    // Basic syntax highlighting
+    let highlighted = code
+        // Escape HTML first
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        // Comments
+        .replace(/(\/\/.*$)/gm, '<span class="comment">$1</span>')
+        // Strings
+        .replace(/('[^']*')/g, '<span class="string">$1</span>')
+        .replace(/("[^"]*")/g, '<span class="string">$1</span>')
+        // Keywords
+        .replace(/\b(let|const|var|function|return|if|else|for|while|true|false|new)\b/g, '<span class="keyword">$1</span>')
+        // Numbers
+        .replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>')
+        // Function calls
+        .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, '<span class="function">$1</span>(');
+
+    return highlighted;
+}
+
+// Initialize all code blocks
+async function initCodeBlocks() {
+    const codeContainers = document.querySelectorAll('[data-code-file]');
+
+    for (const container of codeContainers) {
+        const filename = container.dataset.codeFile;
+        const code = await loadCodeFile(filename);
+
+        if (code) {
+            const lineNumbersEl = container.querySelector('.line-numbers');
+            const codeContentEl = container.querySelector('.code-content pre');
+
+            if (lineNumbersEl) {
+                lineNumbersEl.innerHTML = generateLineNumbers(code);
+            }
+
+            if (codeContentEl) {
+                codeContentEl.innerHTML = highlightCode(code);
+            }
+        }
+    }
+}
+
+// ==========================================
 // INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -1207,4 +1374,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initV4Calculator();
     initV4Demo();
     initV5Demo();
+    initCodeBlocks();
 });
