@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.4: Queue Örnekleri</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .example-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .example-card:hover {
+            transform: translateY(-5px);
+        }
+        .example-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .sliding-window {
+            display: flex;
+            gap: 5px;
+            margin: 15px 0;
+            align-items: center;
+            justify-content: center;
+        }
+        .window-cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        .window-cell.in-window {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        .window-bracket {
+            font-size: 40px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🧩 3.4: Queue Algoritmaları ve Simülasyonlar</h1>
+        <p>Gerçek Hayat Problemleri ve Çözümleri</p>
+    </header>
+
+    <div class="section">
+        <h2>📚 Queue Kullanım Alanları</h2>
+        <div class="example-grid">
+            <div class="example-card">
+                <div class="example-icon">🎮</div>
+                <h3>Oyun Geliştirme</h3>
+                <p>Oyuncu hareketleri, input buffer, event sistemi</p>
+            </div>
+            <div class="example-card">
+                <div class="example-icon">🌐</div>
+                <h3>Web Sunucuları</h3>
+                <p>HTTP istek kuyruğu, load balancing</p>
+            </div>
+            <div class="example-card">
+                <div class="example-icon">📱</div>
+                <h3>Mesajlaşma</h3>
+                <p>Message queue, async işlemler</p>
+            </div>
+            <div class="example-card">
+                <div class="example-icon">🔄</div>
+                <h3>Task Scheduling</h3>
+                <p>CPU process scheduling, cron jobs</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>1. Sıcak Patates Oyunu (Josephus Problemi)</h2>
+        
+        <!-- Detaylı Açıklama -->
+        <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; color: #c0392b;">🥔 Sıcak Patates Nedir?</h3>
+            <p>Çocuk oyunu: Herkes daire şeklinde oturur, bir patates (veya top) elden ele geçirilir. Müzik durduğunda elinde patates kalan oyundan çıkar!</p>
+            
+            <h4 style="color: #e67e22;">📜 Tarihsel Arka Plan: Josephus Problemi</h4>
+            <p style="margin-bottom: 0;">
+                <strong>MS 67, Yahudi-Roma Savaşı:</strong> Tarihçi Josephus ve 40 asker Romalılar tarafından kuşatıldı. 
+                Teslim olmak yerine intihar etmeye karar verdiler. Daire şeklinde durup her 3. kişi öldürülecekti. 
+                Josephus matematik kullanarak kendini ve arkadaşını <strong>son iki kişi</strong> olarak konumlandırdı ve hayatta kaldılar!
+            </p>
+        </div>
+        
+        <!-- Algoritma Mantığı -->
+        <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #27ae60; margin-bottom: 20px;">
+            <h4 style="margin-top: 0; color: #27ae60;">🔄 Queue ile Nasıl Çözülür?</h4>
+            <ol style="margin-bottom: 0;">
+                <li><strong>Başlangıç:</strong> Tüm oyuncuları queue'ya ekle</li>
+                <li><strong>Her turda:</strong> k kez dequeue yap ve hemen enqueue yap (elden ele geçir)</li>
+                <li><strong>Eleme:</strong> k. kişiyi dequeue yap ama geri ekleme (elendi!)</li>
+                <li><strong>Tekrar:</strong> Tek kişi kalana kadar devam et</li>
+            </ol>
+        </div>
+        
+        <!-- Dairesel İnteraktif Görsel -->
+        <div style="background: white; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+            <h4 style="text-align: center; margin-bottom: 15px;">🎮 İnteraktif Josephus Simülasyonu</h4>
+            
+            <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: bold;">k (her k. kişi elenir):</span>
+                    <select id="josephus-k" style="padding: 8px; border-radius: 5px; border: 2px solid #3498db;">
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </label>
+                <button onclick="startJosephus()" style="padding: 10px 25px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">▶️ Başlat</button>
+                <button onclick="resetJosephus()" style="padding: 10px 25px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">🔄 Sıfırla</button>
+            </div>
+            
+            <!-- Dairesel Görselleştirme -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap;">
+                <div id="josephus-circle" style="position: relative; width: 300px; height: 300px;"></div>
+                
+                <div style="max-width: 300px;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                        <strong>📊 Durum:</strong>
+                        <div id="josephus-status" style="margin-top: 8px; font-family: monospace;">Başlamak için ▶️ tıklayın</div>
+                    </div>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                        <strong>🔢 Queue Durumu:</strong>
+                        <div id="josephus-queue" style="margin-top: 8px; font-family: monospace; font-size: 14px;">[Ali, Veli, Ayşe, Fatma, Can, Zeynep]</div>
+                    </div>
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 10px;">
+                        <strong>❌ Elenenler:</strong>
+                        <div id="josephus-eliminated" style="margin-top: 8px; font-family: monospace;">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Adım adım log -->
+            <div id="josephus-log" style="margin-top: 20px; padding: 15px; background: #2c3e50; color: #ecf0f1; border-radius: 10px; font-family: monospace; font-size: 13px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        
+        <script>
+        // Josephus Simülasyonu
+        const josephusPlayers = ["Ali", "Veli", "Ayşe", "Fatma", "Can", "Zeynep"];
+        const playerColors = ["#3498db", "#9b59b6", "#e74c3c", "#f39c12", "#1abc9c", "#e91e63"];
+        let josephusState = {
+            queue: [...josephusPlayers],
+            eliminated: [],
+            current: 0,
+            running: false,
+            k: 3
+        };
+        
+        function drawJosephusCircle() {
+            const container = document.getElementById('josephus-circle');
+            container.innerHTML = '';
+            
+            const allPlayers = josephusPlayers;
+            const activeQueue = josephusState.queue;
+            const eliminated = josephusState.eliminated;
+            const centerX = 150, centerY = 150, radius = 120;
+            
+            // SVG oluştur
+            let svg = `<svg width="300" height="300" style="position: absolute; top: 0; left: 0;">`;
+            
+            // Dairesel bağlantı çizgileri (aktif oyuncular arası)
+            if (activeQueue.length > 1) {
+                for (let i = 0; i < activeQueue.length; i++) {
+                    const idx1 = josephusPlayers.indexOf(activeQueue[i]);
+                    const idx2 = josephusPlayers.indexOf(activeQueue[(i + 1) % activeQueue.length]);
+                    const angle1 = (idx1 / allPlayers.length) * 2 * Math.PI - Math.PI / 2;
+                    const angle2 = (idx2 / allPlayers.length) * 2 * Math.PI - Math.PI / 2;
+                    const x1 = centerX + radius * Math.cos(angle1);
+                    const y1 = centerY + radius * Math.sin(angle1);
+                    const x2 = centerX + radius * Math.cos(angle2);
+                    const y2 = centerY + radius * Math.sin(angle2);
+                    svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#27ae60" stroke-width="3" stroke-dasharray="5,5"/>`;
+                }
+            }
+            svg += `</svg>`;
+            container.innerHTML = svg;
+            
+            // Oyuncuları yerleştir
+            allPlayers.forEach((player, i) => {
+                const angle = (i / allPlayers.length) * 2 * Math.PI - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle) - 30;
+                const y = centerY + radius * Math.sin(angle) - 30;
+                
+                const isEliminated = eliminated.includes(player);
+                const isActive = activeQueue.includes(player);
+                const queuePos = activeQueue.indexOf(player);
+                const isCurrent = queuePos === 0 && josephusState.running;
+                
+                const div = document.createElement('div');
+                div.style.cssText = `
+                    position: absolute;
+                    left: ${x}px;
+                    top: ${y}px;
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 12px;
+                    transition: all 0.3s;
+                    ${isEliminated ? 
+                        'background: #bdc3c7; color: #7f8c8d; text-decoration: line-through; opacity: 0.5;' : 
+                        `background: ${playerColors[i]}; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.3);`}
+                    ${isCurrent ? 'transform: scale(1.2); border: 4px solid #f1c40f;' : ''}
+                `;
+                
+                div.innerHTML = `
+                    <span>${player}</span>
+                    ${isActive && !isEliminated ? `<span style="font-size: 10px; opacity: 0.8;">#${queuePos + 1}</span>` : ''}
+                    ${isEliminated ? '<span style="font-size: 16px;">❌</span>' : ''}
+                `;
+                
+                container.appendChild(div);
+            });
+            
+            // Merkeze bilgi ekle
+            const centerDiv = document.createElement('div');
+            centerDiv.style.cssText = `
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+                font-size: 14px;
+            `;
+            centerDiv.innerHTML = `
+                <div style="font-size: 24px;">🥔</div>
+                <div style="font-weight: bold; color: #2c3e50;">k = ${josephusState.k}</div>
+                <div style="font-size: 12px; color: #666;">Kalan: ${activeQueue.length}</div>
+            `;
+            container.appendChild(centerDiv);
+        }
+        
+        function updateJosephusUI() {
+            document.getElementById('josephus-queue').textContent = `[${josephusState.queue.join(', ')}]`;
+            document.getElementById('josephus-eliminated').textContent = josephusState.eliminated.length > 0 ? josephusState.eliminated.join(' → ') : '-';
+            drawJosephusCircle();
+        }
+        
+        function logJosephus(msg, type = 'info') {
+            const log = document.getElementById('josephus-log');
+            const colors = { info: '#3498db', pass: '#f39c12', eliminate: '#e74c3c', win: '#27ae60' };
+            log.innerHTML += `<div style="color: ${colors[type]}; margin: 3px 0;">${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        async function startJosephus() {
+            if (josephusState.running) return;
+            
+            josephusState.k = parseInt(document.getElementById('josephus-k').value);
+            josephusState.queue = [...josephusPlayers];
+            josephusState.eliminated = [];
+            josephusState.running = true;
+            
+            const log = document.getElementById('josephus-log');
+            log.innerHTML = '';
+            
+            logJosephus(`🎮 Oyun başladı! k=${josephusState.k} (Her ${josephusState.k}. kişi elenir)`, 'info');
+            logJosephus(`👥 Oyuncular: ${josephusState.queue.join(', ')}`, 'info');
+            
+            updateJosephusUI();
+            await sleep(1000);
+            
+            let round = 1;
+            while (josephusState.queue.length > 1) {
+                document.getElementById('josephus-status').innerHTML = `<span style="color: #e67e22;">Tur ${round} - Patates elden ele...</span>`;
+                
+                // k-1 kez geçir
+                for (let i = 0; i < josephusState.k - 1; i++) {
+                    const passed = josephusState.queue.shift();
+                    josephusState.queue.push(passed);
+                    logJosephus(`   🥔 ${passed} → patatesi geçirdi`, 'pass');
+                    updateJosephusUI();
+                    await sleep(600);
+                }
+                
+                // k. kişiyi elen
+                const eliminated = josephusState.queue.shift();
+                josephusState.eliminated.push(eliminated);
+                logJosephus(`❌ Tur ${round}: ${eliminated} elendi!`, 'eliminate');
+                document.getElementById('josephus-status').innerHTML = `<span style="color: #e74c3c;">Tur ${round}: ${eliminated} elendi!</span>`;
+                updateJosephusUI();
+                await sleep(1000);
+                
+                round++;
+            }
+            
+            const winner = josephusState.queue[0];
+            logJosephus(`🏆 KAZANAN: ${winner}!`, 'win');
+            document.getElementById('josephus-status').innerHTML = `<span style="color: #27ae60; font-size: 18px;">🏆 KAZANAN: ${winner}!</span>`;
+            josephusState.running = false;
+            updateJosephusUI();
+        }
+        
+        function resetJosephus() {
+            josephusState.queue = [...josephusPlayers];
+            josephusState.eliminated = [];
+            josephusState.running = false;
+            document.getElementById('josephus-log').innerHTML = '';
+            document.getElementById('josephus-status').textContent = 'Başlamak için ▶️ tıklayın';
+            updateJosephusUI();
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Sayfa yüklendiğinde çiz
+        document.addEventListener('DOMContentLoaded', () => {
+            drawJosephusCircle();
+        });
+        
+        // Hemen çiz
+        setTimeout(drawJosephusCircle, 100);
+        </script>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Oyna</button>
+                    <button class="btn" onclick="toggleEdit('code1')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code1"><code class="language-python">from collections import deque
+
+def sicak_patates(oyuncular, tur_sayisi):
+    q = deque(oyuncular)
+    print(f"Başlangıç: {list(q)}\n")
+    
+    tur = 1
+    while len(q) > 1:
+        # Patatesi elden ele geçir
+        for i in range(tur_sayisi):
+            kisi = q.popleft()
+            q.append(kisi)
+            
+        # Tur bitti, elinde patates olan yandı
+        yanan = q.popleft()
+        print(f"Tur {tur}: {yanan} yandı! Kalanlar: {list(q)}")
+        tur += 1
+        
+    return q[0]
+
+kazanan = sicak_patates(["Ali", "Veli", "Ayşe", "Fatma", "Can", "Zeynep"], 2)
+print(f"\n🏆 KAZANAN: {kazanan}")</code></pre>
+
+            <textarea id="code1" class="code-editor">from collections import deque
+
+def sicak_patates(oyuncular, tur_sayisi):
+    q = deque(oyuncular)
+    print(f"Başlangıç: {list(q)}\n")
+    tur = 1
+    while len(q) > 1:
+        for i in range(tur_sayisi):
+            kisi = q.popleft()
+            q.append(kisi)
+        yanan = q.popleft()
+        print(f"Tur {tur}: {yanan} yandı! Kalanlar: {list(q)}")
+        tur += 1
+    return q[0]
+
+kazanan = sicak_patates(["Ali", "Veli", "Ayşe", "Fatma", "Can", "Zeynep"], 2)
+print(f"\n🏆 KAZANAN: {kazanan}")</textarea>
+            
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>2. Yazıcı Kuyruğu (Printer Spooler)</h2>
+        <p>Ofis yazıcısı simülasyonu. İşletim sistemlerinde spool (Simultaneous Peripheral Operations On-Line) kavramı.</p>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Simüle Et</button>
+                    <button class="btn" onclick="toggleEdit('code2')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code2"><code class="language-python">from collections import deque
+import time
+
+class Yazici:
+    def __init__(self):
+        self.kuyruk = deque()
+        
+    def belge_ekle(self, belge):
+        self.kuyruk.append(belge)
+        print(f"📥 Eklendi: {belge}")
+        
+    def yazdir(self):
+        print("\n🖨️ Yazdırma Başlıyor...")
+        while self.kuyruk:
+            belge = self.kuyruk.popleft()
+            print(f"   Çıktı alınıyor: {belge}...")
+            # time.sleep(1) 
+            print("   ✅ Tamamlandı.")
+        print("🏁 Tüm belgeler yazdırıldı.")
+
+ofis_yazicisi = Yazici()
+ofis_yazicisi.belge_ekle("Rapor.pdf")
+ofis_yazicisi.belge_ekle("Tez.docx")
+ofis_yazicisi.belge_ekle("Fotoğraf.jpg")
+
+ofis_yazicisi.yazdir()</code></pre>
+
+            <textarea id="code2" class="code-editor">from collections import deque
+import time
+
+class Yazici:
+    def __init__(self):
+        self.kuyruk = deque()
+    def belge_ekle(self, belge):
+        self.kuyruk.append(belge)
+        print(f"📥 Eklendi: {belge}")
+    def yazdir(self):
+        print("\n🖨️ Yazdırma Başlıyor...")
+        while self.kuyruk:
+            belge = self.kuyruk.popleft()
+            print(f"   Çıktı alınıyor: {belge}...")
+            print("   ✅ Tamamlandı.")
+        print("🏁 Tüm belgeler yazdırıldı.")
+
+ofis_yazicisi = Yazici()
+ofis_yazicisi.belge_ekle("Rapor.pdf")
+ofis_yazicisi.belge_ekle("Tez.docx")
+ofis_yazicisi.belge_ekle("Fotoğraf.jpg")
+ofis_yazicisi.yazdir()</textarea>
+            
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. Sliding Window Maximum (Kayan Pencere)</h2>
+        
+        <!-- ADIM 1: Problem Nedir? -->
+        <div style="background: linear-gradient(135deg, #74b9ff, #0984e3); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+            <h3 style="margin-top:0;">🎯 Problem Ne Diyor?</h3>
+            <p style="font-size: 18px;">Bir dizi üzerinde <strong>k boyutlu bir pencere</strong> kaydır. Her konumda pencere içindeki <strong>en büyük sayıyı</strong> bul.</p>
+            
+            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                <div style="font-family: monospace; font-size: 16px;">
+                    <div>Dizi: <span style="background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 4px;">[1, 3, -1, -3, 5, 3]</span> &nbsp; k = 3</div>
+                    <div style="margin-top: 10px;">
+                        Pencere 1: [<strong style="color: #fdcb6e;">1, 3, -1</strong>, -3, 5, 3] → max = <strong>3</strong><br>
+                        Pencere 2: [1, <strong style="color: #fdcb6e;">3, -1, -3</strong>, 5, 3] → max = <strong>3</strong><br>
+                        Pencere 3: [1, 3, <strong style="color: #fdcb6e;">-1, -3, 5</strong>, 3] → max = <strong>5</strong><br>
+                        Pencere 4: [1, 3, -1, <strong style="color: #fdcb6e;">-3, 5, 3</strong>] → max = <strong>5</strong>
+                    </div>
+                    <div style="margin-top: 10px;">Sonuç: <strong style="background: #00b894; padding: 3px 10px; border-radius: 4px;">[3, 3, 5, 5]</strong></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ADIM 2: Basit Yöntem Neden Kötü? -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div style="background: #ffe6e6; padding: 20px; border-radius: 12px; border: 2px solid #e74c3c;">
+                <h4 style="margin-top:0; color: #c0392b;">❌ Naif Yöntem (Yavaş)</h4>
+                <pre style="background: #2c3e50; color: #ecf0f1; padding: 10px; border-radius: 8px; font-size: 13px;">for her pencere:
+    max(pencere)  # O(k) işlem</pre>
+                <p style="margin-bottom: 0;">Toplam: <strong>O(n × k)</strong><br>n=1000, k=100 → 100.000 işlem 😰</p>
+            </div>
+            <div style="background: #e6ffe6; padding: 20px; border-radius: 12px; border: 2px solid #27ae60;">
+                <h4 style="margin-top:0; color: #27ae60;">✅ Deque Yöntemi (Hızlı)</h4>
+                <pre style="background: #2c3e50; color: #ecf0f1; padding: 10px; border-radius: 8px; font-size: 13px;">Her eleman 1 kez girer
+Her eleman 1 kez çıkar</pre>
+                <p style="margin-bottom: 0;">Toplam: <strong>O(n)</strong><br>n=1000, k=100 → 1.000 işlem 🚀</p>
+            </div>
+        </div>
+        
+        <!-- ADIM 3: Ana Fikir - Basit Analoji -->
+        <div style="background: #fff9e6; padding: 25px; border-radius: 15px; border: 3px solid #f39c12; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; color: #d68910;">💡 Ana Fikir: "Bully Algoritması"</h3>
+            
+            <p style="font-size: 16px;">Bir <strong>sıraya yeni biri</strong> geldiğinde:</p>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin: 20px 0;">
+                <div style="background: white; padding: 15px 20px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                    <div style="font-size: 40px;">👨‍🦲 → 🚪</div>
+                    <div style="font-weight: bold; margin-top: 5px;">Yeni eleman geldi</div>
+                </div>
+                <div style="background: white; padding: 15px 20px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                    <div style="font-size: 40px;">👨‍🦲 > 👦👧</div>
+                    <div style="font-weight: bold; margin-top: 5px;">Kendinden küçükleri kovar!</div>
+                </div>
+                <div style="background: white; padding: 15px 20px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                    <div style="font-size: 40px;">🏆 ← 👨‍🦲</div>
+                    <div style="font-weight: bold; margin-top: 5px;">En büyük hep önde!</div>
+                </div>
+            </div>
+            
+            <p style="margin-bottom: 0; font-size: 15px; background: #ffeaa7; padding: 10px 15px; border-radius: 8px;">
+                <strong>Neden?</strong> Çünkü önündeki küçükler artık <u>hiçbir zaman</u> maksimum olamaz. 
+                Yeni gelen varken onlar asla kazanamaz, o yüzden niye tutayım?
+            </p>
+        </div>
+        
+        <!-- ADIM 4: Elle Takip -->
+        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 20px;">
+            <h3 style="margin-top: 0; color: #2c3e50;">📝 Elle Takip Edelim: [1, 3, -1, -3, 5], k=3</h3>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 600px;">
+                    <thead>
+                        <tr style="background: #2c3e50; color: white;">
+                            <th style="padding: 12px; width: 60px;">i</th>
+                            <th style="padding: 12px; width: 80px;">Gelen</th>
+                            <th style="padding: 12px;">Ne Oldu?</th>
+                            <th style="padding: 12px; width: 150px;">Deque (indeksler)</th>
+                            <th style="padding: 12px; width: 100px;">Deque (değerler)</th>
+                            <th style="padding: 12px; width: 80px;">Sonuç</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px; text-align: center; font-weight: bold;">0</td>
+                            <td style="padding: 10px; text-align: center; background: #3498db; color: white; font-weight: bold;">1</td>
+                            <td style="padding: 10px;">Deque boş, direkt ekle</td>
+                            <td style="padding: 10px; font-family: monospace;">[0]</td>
+                            <td style="padding: 10px; font-family: monospace;">[1]</td>
+                            <td style="padding: 10px; color: #999;">pencere dolmadı</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; text-align: center; font-weight: bold;">1</td>
+                            <td style="padding: 10px; text-align: center; background: #27ae60; color: white; font-weight: bold;">3</td>
+                            <td style="padding: 10px;"><span style="color: #e74c3c;">3 > 1</span> → 1'i kov! Sonra 3 ekle</td>
+                            <td style="padding: 10px; font-family: monospace;"><s style="color:#e74c3c">[0]</s> → [1]</td>
+                            <td style="padding: 10px; font-family: monospace;">[3]</td>
+                            <td style="padding: 10px; color: #999;">pencere dolmadı</td>
+                        </tr>
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px; text-align: center; font-weight: bold;">2</td>
+                            <td style="padding: 10px; text-align: center; background: #e74c3c; color: white; font-weight: bold;">-1</td>
+                            <td style="padding: 10px;"><span style="color: #27ae60;">-1 < 3</span> → kimseyi kovma, ekle</td>
+                            <td style="padding: 10px; font-family: monospace;">[1, 2]</td>
+                            <td style="padding: 10px; font-family: monospace;">[3, -1]</td>
+                            <td style="padding: 10px; font-weight: bold; color: #27ae60;">3 ✓</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; text-align: center; font-weight: bold;">3</td>
+                            <td style="padding: 10px; text-align: center; background: #9b59b6; color: white; font-weight: bold;">-3</td>
+                            <td style="padding: 10px;"><span style="color: #27ae60;">-3 < -1</span> → kimseyi kovma, ekle</td>
+                            <td style="padding: 10px; font-family: monospace;">[1, 2, 3]</td>
+                            <td style="padding: 10px; font-family: monospace;">[3, -1, -3]</td>
+                            <td style="padding: 10px; font-weight: bold; color: #27ae60;">3 ✓</td>
+                        </tr>
+                        <tr style="background: #fff3cd;">
+                            <td style="padding: 10px; text-align: center; font-weight: bold;">4</td>
+                            <td style="padding: 10px; text-align: center; background: #f39c12; color: white; font-weight: bold;">5</td>
+                            <td style="padding: 10px;">
+                                <span style="color: #e74c3c;">5 > -3, -1, 3</span> → hepsini kov!<br>
+                                <span style="color: #3498db;">+ indeks 1 pencere dışı</span> (i-k+1 = 2)
+                            </td>
+                            <td style="padding: 10px; font-family: monospace;"><s style="color:#e74c3c">[1,2,3]</s> → [4]</td>
+                            <td style="padding: 10px; font-family: monospace;">[5]</td>
+                            <td style="padding: 10px; font-weight: bold; color: #27ae60;">5 ✓</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 15px; background: #d4edda; border-radius: 10px; text-align: center;">
+                <strong>Sonuç:</strong> <span style="font-size: 20px; font-family: monospace;">[3, 3, 5]</span>
+            </div>
+        </div>
+        
+        <!-- ADIM 5: 3 Kural -->
+        <div style="background: #2c3e50; color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; color: #f39c12;">🔑 3 Basit Kural (Ezberle!)</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div style="background: rgba(231, 76, 60, 0.3); padding: 15px; border-radius: 10px; border-left: 4px solid #e74c3c;">
+                    <div style="font-size: 24px; margin-bottom: 5px;">1️⃣</div>
+                    <strong>Pencere dışını sil</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Baştaki indeks pencere dışına çıktıysa → popleft()</p>
+                </div>
+                <div style="background: rgba(241, 196, 15, 0.3); padding: 15px; border-radius: 10px; border-left: 4px solid #f1c40f;">
+                    <div style="font-size: 24px; margin-bottom: 5px;">2️⃣</div>
+                    <strong>Küçükleri kov</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Yeni gelen > sondaki → pop() (döngüyle)</p>
+                </div>
+                <div style="background: rgba(46, 204, 113, 0.3); padding: 15px; border-radius: 10px; border-left: 4px solid #2ecc71;">
+                    <div style="font-size: 24px; margin-bottom: 5px;">3️⃣</div>
+                    <strong>Ekle ve max al</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Yeni indeksi sona ekle. Baştaki = max!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ADIM 6: İnteraktif Simülasyon (Sadeleştirilmiş) -->
+        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 20px;">
+            <h4 style="margin-top:0;">🎮 Kendin Dene!</h4>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                <div>
+                    <label style="font-weight: bold; font-size: 14px;">Dizi:</label>
+                    <input id="swInputArray" type="text" value="1, 3, -1, -3, 5, 3" style="padding: 8px; border: 2px solid #3498db; border-radius: 6px; width: 200px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; font-size: 14px;">k:</label>
+                    <input id="swInputK" type="number" value="3" min="1" max="10" style="padding: 8px; border: 2px solid #3498db; border-radius: 6px; width: 60px;">
+                </div>
+            </div>
+            
+            <!-- Dizi Görselleştirme -->
+            <div style="margin-bottom: 15px;">
+                <div id="sw2ArrayDisplay" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            </div>
+            
+            <!-- Deque -->
+            <div style="background: #34495e; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <div style="color: #f39c12; font-weight: bold; margin-bottom: 10px; font-size: 14px;">
+                    DEQUE: <span style="color: #e74c3c;">← MAX</span> ... <span style="color: #27ae60;">YENİ →</span>
+                </div>
+                <div id="sw2DequeDisplay" style="display: flex; gap: 8px; min-height: 45px; align-items: center; flex-wrap: wrap;">
+                    <span style="color: #95a5a6;">[ başla ]</span>
+                </div>
+            </div>
+            
+            <!-- Açıklama -->
+            <div id="sw2StepInfo" style="background: #e8f8f5; padding: 15px; border-radius: 10px; border-left: 4px solid #1abc9c; margin-bottom: 15px; min-height: 60px;">
+                <strong>▶️ Başlat</strong> butonuna tıklayın
+            </div>
+            
+            <!-- Sonuç -->
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                <strong>Sonuç:</strong>
+                <div id="sw2ResultDisplay" style="display: flex; gap: 5px;">
+                    <span style="color: #999;">[ ]</span>
+                </div>
+            </div>
+            
+            <!-- Butonlar -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="sw2Reset()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">🔄 Sıfırla</button>
+                <button onclick="sw2Step()" style="padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">➡️ Adım</button>
+                <button onclick="sw2Auto()" style="padding: 10px 20px; background: #9b59b6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">▶️ Otomatik</button>
+            </div>
+        </div>
+        
+        <script>
+        // Basitleştirilmiş Sliding Window Simülasyonu
+        let sw2 = { nums: [], k: 3, i: -1, dq: [], result: [], running: false };
+        
+        function sw2Reset() {
+            const inputArr = document.getElementById('swInputArray').value;
+            sw2.nums = inputArr.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+            sw2.k = parseInt(document.getElementById('swInputK').value) || 3;
+            sw2.i = -1;
+            sw2.dq = [];
+            sw2.result = [];
+            sw2.running = false;
+            sw2Draw();
+            document.getElementById('sw2StepInfo').innerHTML = `<strong>Dizi:</strong> [${sw2.nums.join(', ')}], <strong>k=${sw2.k}</strong><br>▶️ Adım adım ilerleyin veya Otomatik çalıştırın.`;
+        }
+        
+        function sw2Draw() {
+            // Dizi
+            const arrDiv = document.getElementById('sw2ArrayDisplay');
+            arrDiv.innerHTML = sw2.nums.map((n, idx) => {
+                const inWindow = sw2.i >= 0 && idx >= Math.max(0, sw2.i - sw2.k + 1) && idx <= sw2.i;
+                const isCurrent = idx === sw2.i;
+                return `<div style="
+                    width: 45px; height: 45px; 
+                    display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    border-radius: 8px; font-weight: bold;
+                    ${isCurrent ? 'background: #e74c3c; color: white; transform: scale(1.1);' : 
+                      inWindow ? 'background: #f39c12; color: white;' : 'background: #ecf0f1; color: #2c3e50;'}
+                    transition: all 0.3s;
+                ">
+                    <span style="font-size: 16px;">${n}</span>
+                    <span style="font-size: 10px; opacity: 0.7;">[${idx}]</span>
+                </div>`;
+            }).join('');
+            
+            // Deque
+            const dqDiv = document.getElementById('sw2DequeDisplay');
+            if (sw2.dq.length === 0) {
+                dqDiv.innerHTML = '<span style="color: #95a5a6;">[ boş ]</span>';
+            } else {
+                dqDiv.innerHTML = sw2.dq.map((idx, pos) => `
+                    <div style="
+                        padding: 8px 12px; 
+                        background: ${pos === 0 ? '#e74c3c' : '#3498db'}; 
+                        color: white; 
+                        border-radius: 6px;
+                        display: flex; flex-direction: column; align-items: center;
+                    ">
+                        <span style="font-weight: bold;">${sw2.nums[idx]}</span>
+                        <span style="font-size: 10px; opacity: 0.8;">i=${idx}</span>
+                    </div>
+                `).join('<span style="color: #27ae60;">→</span>');
+            }
+            
+            // Sonuç
+            const resDiv = document.getElementById('sw2ResultDisplay');
+            resDiv.innerHTML = sw2.result.length > 0 
+                ? sw2.result.map(r => `<span style="background: #27ae60; color: white; padding: 5px 12px; border-radius: 6px; font-weight: bold;">${r}</span>`).join('')
+                : '<span style="color: #999;">[ ]</span>';
+        }
+        
+        function sw2Step() {
+            if (sw2.i >= sw2.nums.length - 1) {
+                document.getElementById('sw2StepInfo').innerHTML = '✅ <strong>Tamamlandı!</strong> Sonuç: [' + sw2.result.join(', ') + ']';
+                return;
+            }
+            
+            sw2.i++;
+            const i = sw2.i;
+            const num = sw2.nums[i];
+            let info = `<strong>Adım ${i}:</strong> Gelen sayı = <span style="color:#e74c3c; font-weight:bold;">${num}</span><br>`;
+            
+            // 1. Pencere dışını temizle
+            if (sw2.dq.length > 0 && sw2.dq[0] < i - sw2.k + 1) {
+                const removed = sw2.dq.shift();
+                info += `❌ indeks ${removed} pencere dışı, silindi<br>`;
+            }
+            
+            // 2. Küçükleri kov
+            let kovulanlar = [];
+            while (sw2.dq.length > 0 && sw2.nums[sw2.dq[sw2.dq.length - 1]] < num) {
+                kovulanlar.push(sw2.dq.pop());
+            }
+            if (kovulanlar.length > 0) {
+                info += `🗑️ ${num} > sondakiler → indeks ${kovulanlar.join(', ')} kovuldu<br>`;
+            }
+            
+            // 3. Ekle
+            sw2.dq.push(i);
+            info += `✅ indeks ${i} eklendi → Deque: [${sw2.dq.join(', ')}]<br>`;
+            
+            // 4. Sonuç
+            if (i >= sw2.k - 1) {
+                const maxVal = sw2.nums[sw2.dq[0]];
+                sw2.result.push(maxVal);
+                info += `🎯 Pencere [${i-sw2.k+1}...${i}] → MAX = <strong style="color:#27ae60;">${maxVal}</strong>`;
+            } else {
+                info += `⏳ Pencere henüz dolmadı (${i+1}/${sw2.k})`;
+            }
+            
+            document.getElementById('sw2StepInfo').innerHTML = info;
+            sw2Draw();
+        }
+        
+        async function sw2Auto() {
+            if (sw2.running) return;
+            sw2.running = true;
+            sw2Reset();
+            await new Promise(r => setTimeout(r, 500));
+            
+            while (sw2.i < sw2.nums.length - 1 && sw2.running) {
+                sw2Step();
+                await new Promise(r => setTimeout(r, 1200));
+            }
+            sw2.running = false;
+        }
+        
+        // Sayfa yüklendiğinde
+        setTimeout(sw2Reset, 100);
+        </script>
+        
+        <!-- Basit Python Kodu -->
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu (Basit Versiyon)</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code3')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code3"><code class="language-python">from collections import deque
+
+def sliding_window_max(nums, k):
+    dq = deque()   # İNDEKSLERİ tutuyoruz!
+    sonuc = []
+    
+    for i in range(len(nums)):
+        # 1️⃣ Pencere dışına çıkanı sil
+        if dq and dq[0] < i - k + 1:
+            dq.popleft()
+        
+        # 2️⃣ Küçükleri kov (yeni eleman büyükse)
+        while dq and nums[dq[-1]] < nums[i]:
+            dq.pop()
+        
+        # 3️⃣ Yeni indeksi ekle
+        dq.append(i)
+        
+        # 4️⃣ Pencere dolduysa, baştaki = max
+        if i >= k - 1:
+            sonuc.append(nums[dq[0]])
+    
+    return sonuc
+
+# Test
+nums = [1, 3, -1, -3, 5, 3]
+k = 3
+print(f"Dizi: {nums}")
+print(f"k = {k}")
+print(f"Sonuç: {sliding_window_max(nums, k)}")
+# Beklenen: [3, 3, 5, 5]</code></pre>
+
+            <textarea id="code3" class="code-editor">from collections import deque
+
+def sliding_window_max(nums, k):
+    dq = deque()   # İNDEKSLERİ tutuyoruz!
+    sonuc = []
+    
+    for i in range(len(nums)):
+        # 1️⃣ Pencere dışına çıkanı sil
+        if dq and dq[0] < i - k + 1:
+            dq.popleft()
+        
+        # 2️⃣ Küçükleri kov (yeni eleman büyükse)
+        while dq and nums[dq[-1]] < nums[i]:
+            dq.pop()
+        
+        # 3️⃣ Yeni indeksi ekle
+        dq.append(i)
+        
+        # 4️⃣ Pencere dolduysa, baştaki = max
+        if i >= k - 1:
+            sonuc.append(nums[dq[0]])
+    
+    return sonuc
+
+# Test
+nums = [1, 3, -1, -3, 5, 3]
+k = 3
+print(f"Dizi: {nums}")
+print(f"k = {k}")
+print(f"Sonuç: {sliding_window_max(nums, k)}")</textarea>
+            
+            <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+        </div>
+        
+        <!-- Özet Kutu -->
+        <div style="background: linear-gradient(135deg, #00b894, #00cec9); color: white; padding: 20px; border-radius: 12px; margin-top: 20px;">
+            <h4 style="margin-top: 0;">✨ Özet: Neden Çalışıyor?</h4>
+            <ul style="margin-bottom: 0; line-height: 1.8;">
+                <li><strong>Deque'te indeksler tutulur</strong> (değerler değil)</li>
+                <li><strong>Deque hep azalan sırada</strong> (baştaki en büyük)</li>
+                <li><strong>Yeni gelen büyükse</strong> → önündeki küçükler artık asla max olamaz → kov!</li>
+                <li><strong>Pencere kaydığında</strong> → eski indeks dışarı çıkar → sil</li>
+                <li><strong>Her eleman 1 kez girer, 1 kez çıkar</strong> → O(n) 🚀</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. CPU Task Scheduler (Round Robin)</h2>
+        <p>İşletim sistemlerinde kullanılan <strong>Round Robin</strong> scheduling algoritması. Her işleme eşit zaman dilimi (quantum) verilir.</p>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code4')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code4')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code4"><code class="language-python">from collections import deque
+
+def round_robin(islemler, quantum):
+    """
+    Round Robin CPU Scheduling
+    islemler: [(isim, sure), ...]
+    quantum: Her işleme verilen maksimum süre
+    """
+    kuyruk = deque()
+    
+    # İşlemleri kuyruğa ekle: [isim, kalan_sure]
+    for isim, sure in islemler:
+        kuyruk.append([isim, sure])
+    
+    zaman = 0
+    print(f"⏰ Round Robin Scheduler (Quantum: {quantum}ms)\n")
+    print("=" * 50)
+    
+    while kuyruk:
+        islem = kuyruk.popleft()
+        isim, kalan = islem
+        
+        # Bu turda çalışacak süre
+        calisma = min(kalan, quantum)
+        zaman += calisma
+        kalan -= calisma
+        
+        if kalan > 0:
+            # İşlem bitmedi, tekrar kuyruğa ekle
+            print(f"⏳ t={zaman:3d}ms | {isim} çalıştı ({calisma}ms), kalan: {kalan}ms")
+            kuyruk.append([isim, kalan])
+        else:
+            # İşlem tamamlandı
+            print(f"✅ t={zaman:3d}ms | {isim} TAMAMLANDI!")
+    
+    print("=" * 50)
+    print(f"🏁 Tüm işlemler tamamlandı. Toplam süre: {zaman}ms")
+
+# Test
+islemler = [
+    ("Chrome", 10),
+    ("VSCode", 8),
+    ("Spotify", 6),
+    ("Discord", 4)
+]
+
+round_robin(islemler, quantum=3)</code></pre>
+
+            <textarea id="code4" class="code-editor">from collections import deque
+
+def round_robin(islemler, quantum):
+    kuyruk = deque()
+    for isim, sure in islemler:
+        kuyruk.append([isim, sure])
+    
+    zaman = 0
+    print(f"⏰ Round Robin Scheduler (Quantum: {quantum}ms)\n")
+    
+    while kuyruk:
+        islem = kuyruk.popleft()
+        isim, kalan = islem
+        calisma = min(kalan, quantum)
+        zaman += calisma
+        kalan -= calisma
+        
+        if kalan > 0:
+            print(f"⏳ t={zaman:3d}ms | {isim} ({calisma}ms), kalan: {kalan}ms")
+            kuyruk.append([isim, kalan])
+        else:
+            print(f"✅ t={zaman:3d}ms | {isim} TAMAMLANDI!")
+    
+    print(f"\n🏁 Toplam: {zaman}ms")
+
+islemler = [("Chrome", 10), ("VSCode", 8), ("Spotify", 6), ("Discord", 4)]
+round_robin(islemler, quantum=3)</textarea>
+            
+            <div id="output-code4" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>5. Rate Limiter (Hız Sınırlayıcı)</h2>
+        <p>API'lerde kullanılan <strong>Sliding Window Rate Limiter</strong>. Belirli sürede maksimum istek sayısını sınırlar.</p>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code5')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code5')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code5"><code class="language-python">from collections import deque
+import time
+
+class RateLimiter:
+    """
+    Sliding Window Rate Limiter
+    Belirli sürede (window) maksimum istek sayısını (limit) sınırlar.
+    """
+    def __init__(self, limit, window_seconds):
+        self.limit = limit
+        self.window = window_seconds
+        self.requests = deque()  # Timestamp'leri tutar
+    
+    def is_allowed(self, current_time):
+        # Pencere dışındaki eski istekleri temizle
+        while self.requests and self.requests[0] <= current_time - self.window:
+            self.requests.popleft()
+        
+        # Limit kontrolü
+        if len(self.requests) < self.limit:
+            self.requests.append(current_time)
+            return True
+        return False
+
+# Simülasyon
+print("🚦 Rate Limiter Simülasyonu")
+print("Limit: 5 istek / 10 saniye\n")
+
+limiter = RateLimiter(limit=5, window_seconds=10)
+
+# Test istekleri (zaman, kullanıcı)
+test_istekler = [
+    (0, "GET /api/users"),
+    (1, "GET /api/posts"),
+    (2, "POST /api/comment"),
+    (3, "GET /api/profile"),
+    (4, "PUT /api/settings"),
+    (5, "GET /api/feed"),      # Bu reddedilmeli
+    (6, "GET /api/messages"),  # Bu da
+    (12, "GET /api/users"),    # 10 sn geçti, ilk istek düştü
+    (13, "GET /api/posts"),    # İkinci istek de düştü
+]
+
+for zaman, endpoint in test_istekler:
+    izin = limiter.is_allowed(zaman)
+    durum = "✅ İZİN" if izin else "❌ REDDEDİLDİ"
+    print(f"t={zaman:2d}s | {durum} | {endpoint}")</code></pre>
+
+            <textarea id="code5" class="code-editor">from collections import deque
+
+class RateLimiter:
+    def __init__(self, limit, window_seconds):
+        self.limit = limit
+        self.window = window_seconds
+        self.requests = deque()
+    
+    def is_allowed(self, current_time):
+        while self.requests and self.requests[0] <= current_time - self.window:
+            self.requests.popleft()
+        if len(self.requests) < self.limit:
+            self.requests.append(current_time)
+            return True
+        return False
+
+print("🚦 Rate Limiter (5 istek / 10 sn)\n")
+limiter = RateLimiter(limit=5, window_seconds=10)
+
+istekler = [(0,"GET /users"), (1,"GET /posts"), (2,"POST /comment"),
+            (3,"GET /profile"), (4,"PUT /settings"), (5,"GET /feed"),
+            (6,"GET /messages"), (12,"GET /users"), (13,"GET /posts")]
+
+for t, endpoint in istekler:
+    izin = "✅" if limiter.is_allowed(t) else "❌"
+    print(f"t={t:2d}s | {izin} | {endpoint}")</textarea>
+            
+            <div id="output-code5" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="3c_queue_python.html" class="btn">⬅️ Önceki: Python</a>
+        <a href="3e_queue_analiz.html" class="btn btn-next">Sonraki: Analiz ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+    
+</script>
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.1: İkili Arama Ağacı (BST) Giriş</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .tree-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .tree-svg {
+            max-width: 100%;
+        }
+
+        .tree-node {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tree-node:hover circle {
+            fill: #e74c3c;
+        }
+
+        .node-circle {
+            fill: #3498db;
+            stroke: #2c3e50;
+            stroke-width: 2;
+        }
+
+        .node-text {
+            fill: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .tree-edge {
+            stroke: #7f8c8d;
+            stroke-width: 2;
+        }
+
+        .concept-card {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .property-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #9b59b6;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .compare-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+
+        .compare-item.good { border-left: 5px solid #27ae60; }
+        .compare-item.bad { border-left: 5px solid #e74c3c; }
+
+        .interactive-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .interactive-controls input {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🌳 5.1: İkili Arama Ağacı (BST) Nedir?</h1>
+        <p>Binary Search Tree - Hızlı Arama için Ağaç Yapısı</p>
+    </header>
+
+    <div class="section">
+        <h2>🤔 Ağaç (Tree) Veri Yapısı Nedir?</h2>
+        <p><strong>Ağaç</strong>, hiyerarşik bir veri yapısıdır. Linked List'in genelleştirilmiş halidir:</p>
+
+        <ul>
+            <li><strong>Linked List:</strong> Her node → 1 sonraki node</li>
+            <li><strong>Binary Tree:</strong> Her node → 0, 1 veya 2 çocuk node</li>
+        </ul>
+
+        <div class="concept-card">
+            <h3 style="margin-top:0;">📌 Temel Terimler</h3>
+            <ul style="margin-bottom:0;">
+                <li><strong>Root (Kök):</strong> Ağacın en üstündeki node</li>
+                <li><strong>Parent (Ebeveyn):</strong> Bir node'un üstündeki node</li>
+                <li><strong>Child (Çocuk):</strong> Bir node'un altındaki node'lar</li>
+                <li><strong>Leaf (Yaprak):</strong> Çocuğu olmayan node'lar</li>
+                <li><strong>Height (Yükseklik):</strong> Kökten en derin yaprağa mesafe</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 İkili Arama Ağacı (BST) Özelliği</h2>
+
+        <div class="property-box">
+            <h4 style="margin-top:0; color:#9b59b6;">🔑 BST Kuralı (Çok Önemli!)</h4>
+            <p>Her node için:</p>
+            <ul>
+                <li><strong>Sol alt ağaçtaki</strong> TÜM değerler &lt; node değeri</li>
+                <li><strong>Sağ alt ağaçtaki</strong> TÜM değerler &gt; node değeri</li>
+            </ul>
+            <p style="margin-bottom:0;">Bu kural sayesinde arama <strong>O(log n)</strong> olur!</p>
+        </div>
+    </div>
+
+    <div class="tree-container">
+        <h3>🎮 İnteraktif BST Görselleştirme</h3>
+
+        <svg id="treeSvg" class="tree-svg" width="600" height="350"></svg>
+
+        <div class="interactive-controls">
+            <input type="number" id="insertValue" placeholder="Değer" min="1" max="99">
+            <button class="btn btn-run" onclick="insertNode()">➕ Ekle</button>
+            <button class="btn btn-reset" onclick="resetTree()">🔄 Sıfırla</button>
+        </div>
+
+        <p id="treeMsg" style="color:#666; margin-top:10px;">Değer girin ve "Ekle" butonuna tıklayın</p>
+    </div>
+
+    <div class="section">
+        <h2>🧱 Node (Düğüm) Yapısı</h2>
+        <p>BST node'u, linked list node'una benzer ama <strong>iki</strong> referans içerir:</p>
+
+        <div style="text-align:center; margin:20px 0;">
+            <div style="display:inline-block; border:3px solid #2c3e50; border-radius:10px; overflow:hidden; background:white;">
+                <div style="display:flex;">
+                    <div style="padding:15px 20px; background:#e74c3c; color:white; font-size:12px;">
+                        <div>LEFT</div>
+                        <div style="font-size:18px;">←</div>
+                    </div>
+                    <div style="padding:15px 25px; background:#3498db; color:white;">
+                        <div style="font-size:12px;">DATA</div>
+                        <div style="font-size:24px; font-weight:bold;">50</div>
+                    </div>
+                    <div style="padding:15px 20px; background:#27ae60; color:white; font-size:12px;">
+                        <div>RIGHT</div>
+                        <div style="font-size:18px;">→</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code1')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code1"><code class="language-python"># BST için Node sınıfı
+class Node:
+    def __init__(self, data):
+        self.data = data      # Saklanan değer
+        self.left = None      # Sol çocuğa referans (küçükler)
+        self.right = None     # Sağ çocuğa referans (büyükler)
+
+# Örnek: Basit bir ağaç oluşturalım
+#        50
+#       /  \
+#      30   70
+#     / \   / \
+#    20 40 60 80
+
+root = Node(50)
+root.left = Node(30)
+root.right = Node(70)
+
+root.left.left = Node(20)
+root.left.right = Node(40)
+root.right.left = Node(60)
+root.right.right = Node(80)
+
+# Yapıyı kontrol edelim
+print("🌳 Ağaç Yapısı:")
+print(f"Kök: {root.data}")
+print(f"  Sol çocuk: {root.left.data}")
+print(f"    Sol-sol: {root.left.left.data}")
+print(f"    Sol-sağ: {root.left.right.data}")
+print(f"  Sağ çocuk: {root.right.data}")
+print(f"    Sağ-sol: {root.right.left.data}")
+print(f"    Sağ-sağ: {root.right.right.data}")
+
+# BST kuralını kontrol edelim
+print("\n✅ BST Kuralı Kontrolü:")
+print(f"  30 < 50 < 70? {root.left.data} < {root.data} < {root.right.data}")
+print(f"  20 < 30 < 40? {root.left.left.data} < {root.left.data} < {root.left.right.data}")
+print(f"  60 < 70 < 80? {root.right.left.data} < {root.right.data} < {root.right.right.data}")</code></pre>
+
+            <textarea id="code1" class="code-editor">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+root = Node(50)
+root.left = Node(30)
+root.right = Node(70)
+root.left.left = Node(20)
+root.left.right = Node(40)
+
+print(f"Kök: {root.data}")
+print(f"Sol: {root.left.data}")
+print(f"Sağ: {root.right.data}")</textarea>
+
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Neden BST? Performans Karşılaştırması</h2>
+
+        <div class="compare-grid">
+            <div class="compare-item bad">
+                <h4 style="margin-top:0; color:#e74c3c;">📋 Sıralı Dizi</h4>
+                <table style="width:100%; font-size:14px;">
+                    <tr><td>Arama:</td><td><strong>O(n)</strong> (sıralıysa O(log n))</td></tr>
+                    <tr><td>Ekleme:</td><td><strong>O(n)</strong> (kaydırma gerekir)</td></tr>
+                    <tr><td>Silme:</td><td><strong>O(n)</strong> (kaydırma gerekir)</td></tr>
+                </table>
+            </div>
+
+            <div class="compare-item bad">
+                <h4 style="margin-top:0; color:#e74c3c;">🔗 Linked List</h4>
+                <table style="width:100%; font-size:14px;">
+                    <tr><td>Arama:</td><td><strong>O(n)</strong></td></tr>
+                    <tr><td>Ekleme (başa):</td><td><strong>O(1)</strong></td></tr>
+                    <tr><td>Silme:</td><td><strong>O(n)</strong> (arama + O(1))</td></tr>
+                </table>
+            </div>
+
+            <div class="compare-item good">
+                <h4 style="margin-top:0; color:#27ae60;">🌳 BST (Dengeli)</h4>
+                <table style="width:100%; font-size:14px;">
+                    <tr><td>Arama:</td><td><strong>O(log n)</strong> ✨</td></tr>
+                    <tr><td>Ekleme:</td><td><strong>O(log n)</strong> ✨</td></tr>
+                    <tr><td>Silme:</td><td><strong>O(log n)</strong> ✨</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="property-box" style="border-left-color:#f39c12;">
+            <h4 style="margin-top:0; color:#f39c12;">⚠️ Önemli Not: Dengesiz BST</h4>
+            <p>Eğer elemanlar sıralı eklenirse (1, 2, 3, 4, 5...), BST bir "linked list"e dönüşür ve performans <strong>O(n)</strong> olur!</p>
+            <p style="margin-bottom:0;">Bu problemi çözmek için <strong>AVL Tree</strong> veya <strong>Red-Black Tree</strong> gibi dengeli ağaçlar kullanılır.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔍 BST'de Arama Nasıl Çalışır?</h2>
+
+        <p>Aradığımız değer: <strong>40</strong></p>
+
+        <ol>
+            <li>Kökten başla (50)</li>
+            <li>40 < 50 → Sola git (30)</li>
+            <li>40 > 30 → Sağa git (40)</li>
+            <li>40 == 40 → Bulundu! ✅</li>
+        </ol>
+
+        <p>Sadece <strong>3 karşılaştırma</strong> ile 7 elemanlı ağaçta değeri bulduk!</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code2')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code2"><code class="language-python">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+def search(root, target):
+    """BST'de arama - O(log n)"""
+    steps = 0
+    current = root
+
+    while current is not None:
+        steps += 1
+        print(f"Adım {steps}: {current.data} ile karşılaştır", end=" → ")
+
+        if target == current.data:
+            print(f"BULUNDU! ✅")
+            return current, steps
+        elif target < current.data:
+            print(f"{target} < {current.data}, SOLA git")
+            current = current.left
+        else:
+            print(f"{target} > {current.data}, SAĞA git")
+            current = current.right
+
+    print("Bulunamadı ❌")
+    return None, steps
+
+# Ağacı oluştur
+root = Node(50)
+root.left = Node(30)
+root.right = Node(70)
+root.left.left = Node(20)
+root.left.right = Node(40)
+root.right.left = Node(60)
+root.right.right = Node(80)
+
+print("🌳 Ağaç: 50 → (30, 70) → (20, 40, 60, 80)\n")
+
+# Farklı değerleri ara
+for target in [40, 80, 25, 50]:
+    print(f"\n🔍 {target} aranıyor:")
+    result, steps = search(root, target)
+    print(f"   Toplam adım: {steps}")</code></pre>
+
+            <textarea id="code2" class="code-editor">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+def search(root, target):
+    current = root
+    steps = 0
+    while current:
+        steps += 1
+        if target == current.data:
+            return current, steps
+        elif target < current.data:
+            current = current.left
+        else:
+            current = current.right
+    return None, steps
+
+root = Node(50)
+root.left = Node(30)
+root.right = Node(70)
+root.left.left = Node(20)
+root.left.right = Node(40)
+
+for val in [40, 20, 100]:
+    result, steps = search(root, val)
+    status = "Bulundu" if result else "Yok"
+    print(f"{val}: {status} ({steps} adım)")</textarea>
+
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌍 Gerçek Hayat Kullanım Alanları</h2>
+
+        <h3>💾 Veritabanı ve Dosya Sistemleri</h3>
+        <ul>
+            <li>📚 <strong>Veritabanı Index'leri:</strong> MySQL, PostgreSQL gibi veritabanları B-Tree (BST'nin gelişmiş hali) kullanır. Milyonlarca kayıt arasında saniyenin kesri içinde arama yapabilirsiniz.</li>
+            <li>📁 <strong>Dosya Sistemleri:</strong> NTFS, ext4 gibi dosya sistemleri klasör yapısını ağaç şeklinde organize eder.</li>
+        </ul>
+
+        <h3>🖥️ Yazılım Uygulamaları</h3>
+        <ul>
+            <li>🔤 <strong>Otomatik Tamamlama:</strong> Arama motorları ve IDE'ler yazdığınız harflere göre önerileri BST varyantları (Trie) ile bulur.</li>
+            <li>📖 <strong>Sözlük Uygulamaları:</strong> Kelime arama ve yazım denetimi sistemleri.</li>
+            <li>🗜️ <strong>Huffman Kodlama:</strong> ZIP, GZIP gibi sıkıştırma algoritmaları binary tree kullanır.</li>
+        </ul>
+
+        <h3>🎮 Oyun ve Grafik</h3>
+        <ul>
+            <li>🎮 <strong>Collision Detection:</strong> Oyunlarda nesnelerin çarpışıp çarpışmadığını kontrol etmek için BST varyantları kullanılır.</li>
+            <li>🗺️ <strong>Harita Uygulamaları:</strong> Google Maps gibi uygulamalar yakındaki noktaları bulmak için spatial tree yapıları kullanır.</li>
+        </ul>
+
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-top: 15px;">
+            <strong>💡 Neden BST?</strong>
+            <p><strong>Dizide arama:</strong> 1 milyon elemanda → 1.000.000 karşılaştırma (O(n))</p>
+            <p><strong>BST'de arama:</strong> 1 milyon elemanda → sadece ~20 karşılaştırma (O(log n))</p>
+            <p>Bu fark, gerçek dünya uygulamalarında hayati önem taşır!</p>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="5_tree_intro.html" class="btn">⬅️ Önceki: Ağaç Temelleri</a>
+        <a href="bst.html" class="btn" style="background:#11998e">📋 BST Menü</a>
+        <a href="5b_bst_islemler.html" class="btn btn-next">Sonraki: BST İşlemler ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    // BST Visualization
+    let treeData = null;
+    const svg = document.getElementById('treeSvg');
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    class TreeNode {
+        constructor(data) {
+            this.data = data;
+            this.left = null;
+            this.right = null;
+        }
+    }
+
+    function insertIntoBST(root, data) {
+        if (!root) return new TreeNode(data);
+        if (data < root.data) {
+            root.left = insertIntoBST(root.left, data);
+        } else if (data > root.data) {
+            root.right = insertIntoBST(root.right, data);
+        }
+        return root;
+    }
+
+    function drawTree() {
+        svg.innerHTML = '';
+        if (!treeData) return;
+
+        const nodeRadius = 22;
+        const levelHeight = 70;
+
+        function getTreeWidth(node) {
+            if (!node) return 0;
+            return 1 + Math.max(getTreeWidth(node.left), getTreeWidth(node.right));
+        }
+
+        function drawNode(node, x, y, xOffset) {
+            if (!node) return;
+
+            // Draw edges first
+            if (node.left) {
+                const line = document.createElementNS(svgNS, 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', x - xOffset);
+                line.setAttribute('y2', y + levelHeight);
+                line.setAttribute('class', 'tree-edge');
+                svg.appendChild(line);
+                drawNode(node.left, x - xOffset, y + levelHeight, xOffset / 2);
+            }
+
+            if (node.right) {
+                const line = document.createElementNS(svgNS, 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', x + xOffset);
+                line.setAttribute('y2', y + levelHeight);
+                line.setAttribute('class', 'tree-edge');
+                svg.appendChild(line);
+                drawNode(node.right, x + xOffset, y + levelHeight, xOffset / 2);
+            }
+
+            // Draw node
+            const g = document.createElementNS(svgNS, 'g');
+            g.setAttribute('class', 'tree-node');
+
+            const circle = document.createElementNS(svgNS, 'circle');
+            circle.setAttribute('cx', x);
+            circle.setAttribute('cy', y);
+            circle.setAttribute('r', nodeRadius);
+            circle.setAttribute('class', 'node-circle');
+
+            const text = document.createElementNS(svgNS, 'text');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y + 5);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('class', 'node-text');
+            text.textContent = node.data;
+
+            g.appendChild(circle);
+            g.appendChild(text);
+            svg.appendChild(g);
+        }
+
+        const width = getTreeWidth(treeData);
+        const startX = 300;
+        const startY = 40;
+        const initialOffset = Math.min(120, 300 / (width + 1));
+
+        drawNode(treeData, startX, startY, initialOffset);
+    }
+
+    function insertNode() {
+        const input = document.getElementById('insertValue');
+        const value = parseInt(input.value);
+        const msg = document.getElementById('treeMsg');
+
+        if (isNaN(value) || value < 1 || value > 99) {
+            msg.textContent = "⚠️ 1-99 arası bir değer girin!";
+            msg.style.color = "red";
+            return;
+        }
+
+        treeData = insertIntoBST(treeData, value);
+        drawTree();
+        msg.textContent = `✅ ${value} eklendi!`;
+        msg.style.color = "green";
+        input.value = '';
+    }
+
+    function resetTree() {
+        treeData = null;
+        // Örnek ağaç
+        [50, 30, 70, 20, 40, 60, 80].forEach(v => {
+            treeData = insertIntoBST(treeData, v);
+        });
+        drawTree();
+        document.getElementById('treeMsg').textContent = "🔄 Örnek ağaç yüklendi";
+        document.getElementById('treeMsg').style.color = "#666";
+    }
+
+    // Initialize
+    resetTree();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+</body>
+</html>
+

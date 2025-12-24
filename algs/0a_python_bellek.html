@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0.1: Python'da Bellek ve Referanslar</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .memory-box {
+            display: inline-block;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin: 5px;
+            text-align: center;
+            background: white;
+        }
+        .memory-box .addr {
+            font-size: 10px;
+            color: #666;
+            font-family: monospace;
+        }
+        .memory-box .value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .memory-box .varname {
+            font-size: 12px;
+            color: #3498db;
+            font-style: italic;
+        }
+        .arrow-right {
+            display: inline-block;
+            color: #e74c3c;
+            font-size: 24px;
+            margin: 0 10px;
+        }
+        .concept-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .concept-box h3 {
+            margin-top: 0;
+            color: white;
+        }
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        .warning-card {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .danger-card {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🧠 0.1: Python'da Bellek ve Referanslar</h1>
+        <p>Linked List ve BST için Temel Kavramlar</p>
+    </header>
+
+    <div class="section">
+        <h2>🎯 Neden Bu Konuyu Öğrenmeliyiz?</h2>
+        <p>Linked List ve Binary Search Tree gibi veri yapılarını anlamak için <strong>referans (pointer)</strong> kavramını bilmek gerekir.</p>
+
+        <div class="concept-box">
+            <h3>📌 Temel Fikir</h3>
+            <p>Python'da bir değişken <strong>değerin kendisini değil</strong>, o değerin bellekteki <strong>adresini (referansını)</strong> tutar.</p>
+            <p>Bu, C'deki pointer kavramına benzer!</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔍 id() Fonksiyonu: Bellek Adresini Görme</h2>
+        <p><code>id(obj)</code> fonksiyonu, bir objenin bellekteki benzersiz kimliğini (adresini) döndürür.</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code1')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code1"><code class="language-python"># Basit değerler
+a = 42
+b = 42
+c = 43
+
+print("=" * 50)
+print("🔢 TAM SAYILAR")
+print("=" * 50)
+print(f"a = {a}, id(a) = {id(a)}")
+print(f"b = {b}, id(b) = {id(b)}")
+print(f"c = {c}, id(c) = {id(c)}")
+
+print(f"\na ve b aynı obje mi? {a is b}")  # True! Python küçük sayıları cache'ler
+print(f"a ve c aynı obje mi? {a is c}")    # False
+
+print("\n" + "=" * 50)
+print("📝 STRING'LER")
+print("=" * 50)
+s1 = "merhaba"
+s2 = "merhaba"
+s3 = "dünya"
+
+print(f"s1 = '{s1}', id(s1) = {id(s1)}")
+print(f"s2 = '{s2}', id(s2) = {id(s2)}")
+print(f"s3 = '{s3}', id(s3) = {id(s3)}")
+
+print(f"\ns1 ve s2 aynı obje mi? {s1 is s2}")  # True! String interning
+
+print("\n" + "=" * 50)
+print("📦 LİSTELER")
+print("=" * 50)
+liste1 = [1, 2, 3]
+liste2 = [1, 2, 3]
+liste3 = liste1  # Aynı listeye referans!
+
+print(f"liste1 = {liste1}, id(liste1) = {id(liste1)}")
+print(f"liste2 = {liste2}, id(liste2) = {id(liste2)}")
+print(f"liste3 = {liste3}, id(liste3) = {id(liste3)}")
+
+print(f"\nliste1 ve liste2 aynı obje mi? {liste1 is liste2}")  # False! Farklı listeler
+print(f"liste1 ve liste3 aynı obje mi? {liste1 is liste3}")    # True! Aynı liste</code></pre>
+
+            <textarea id="code1" class="code-editor">a = 42
+b = 42
+c = 43
+
+print(f"a = {a}, id(a) = {id(a)}")
+print(f"b = {b}, id(b) = {id(b)}")
+print(f"c = {c}, id(c) = {id(c)}")
+
+print(f"\na ve b aynı obje mi? {a is b}")
+
+liste1 = [1, 2, 3]
+liste2 = [1, 2, 3]
+liste3 = liste1
+
+print(f"\nliste1 id: {id(liste1)}")
+print(f"liste2 id: {id(liste2)}")
+print(f"liste3 id: {id(liste3)}")
+
+print(f"\nliste1 is liste2: {liste1 is liste2}")
+print(f"liste1 is liste3: {liste1 is liste3}")</textarea>
+
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Görsel: Değişkenler ve Referanslar</h2>
+
+        <div class="info-card">
+            <h4 style="margin-top:0;">1️⃣ İmmutable (Değiştirilemez) Tipler</h4>
+            <p>int, str, tuple gibi tipler değiştirilemez. Aynı değer = aynı adres (genellikle).</p>
+
+            <div style="text-align:center; margin:20px 0;">
+                <div class="memory-box">
+                    <div class="varname">a</div>
+                    <div class="arrow-right">→</div>
+                </div>
+                <div class="memory-box" style="background:#d4edda;">
+                    <div class="addr">0x7f123456</div>
+                    <div class="value">42</div>
+                </div>
+                <div class="memory-box">
+                    <div class="varname">b</div>
+                    <div class="arrow-right">→</div>
+                </div>
+            </div>
+            <p style="text-align:center; color:#666;">a ve b aynı 42 objesini gösteriyor (aynı adres)</p>
+        </div>
+
+        <div class="info-card warning-card">
+            <h4 style="margin-top:0;">2️⃣ Mutable (Değiştirilebilir) Tipler</h4>
+            <p>list, dict, set gibi tipler değiştirilebilir. Her oluşturma yeni adres!</p>
+
+            <div style="text-align:center; margin:20px 0;">
+                <div class="memory-box">
+                    <div class="varname">liste1</div>
+                    <div class="arrow-right">→</div>
+                </div>
+                <div class="memory-box" style="background:#cce5ff;">
+                    <div class="addr">0x7f111111</div>
+                    <div class="value">[1,2,3]</div>
+                </div>
+
+                <br><br>
+
+                <div class="memory-box">
+                    <div class="varname">liste2</div>
+                    <div class="arrow-right">→</div>
+                </div>
+                <div class="memory-box" style="background:#fff3cd;">
+                    <div class="addr">0x7f222222</div>
+                    <div class="value">[1,2,3]</div>
+                </div>
+            </div>
+            <p style="text-align:center; color:#856404;">liste1 ve liste2 aynı içeriğe sahip ama FARKLI objeler!</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚠️ Tehlikeli Durum: Aliasing (Takma Ad)</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code2')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code2"><code class="language-python"># ⚠️ ALİASİNG: İki değişken aynı objeyi gösterirse...
+
+print("=" * 50)
+print("⚠️ ALIASING PROBLEMİ")
+print("=" * 50)
+
+# liste1 oluştur
+liste1 = [1, 2, 3]
+print(f"liste1 başlangıç: {liste1}")
+
+# liste2'yi liste1'e eşitle (KOPYA DEĞİL, REFERANS!)
+liste2 = liste1
+print(f"liste2 = liste1 sonrası")
+print(f"  liste1: {liste1}, id: {id(liste1)}")
+print(f"  liste2: {liste2}, id: {id(liste2)}")
+
+# liste2'yi değiştir
+print("\n⚡ liste2.append(4) yapıyoruz...")
+liste2.append(4)
+
+print(f"\n❌ Sonuç:")
+print(f"  liste1: {liste1}")  # liste1 de değişti!
+print(f"  liste2: {liste2}")
+print(f"\n  İkisi de aynı obje: {liste1 is liste2}")
+
+print("\n" + "=" * 50)
+print("✅ ÇÖZÜM: KOPYA OLUŞTUR")
+print("=" * 50)
+
+# Yeni baştan
+liste1 = [1, 2, 3]
+liste2 = liste1.copy()  # veya liste1[:] veya list(liste1)
+
+print(f"liste1: {liste1}, id: {id(liste1)}")
+print(f"liste2 (kopya): {liste2}, id: {id(liste2)}")
+
+liste2.append(4)
+print(f"\nliste2.append(4) sonrası:")
+print(f"  liste1: {liste1}")  # Değişmedi!
+print(f"  liste2: {liste2}")
+print(f"\n  Artık farklı objeler: {liste1 is liste2}")</code></pre>
+
+            <textarea id="code2" class="code-editor">liste1 = [1, 2, 3]
+liste2 = liste1  # Alias!
+
+print(f"liste1: {liste1}")
+print(f"liste2: {liste2}")
+
+liste2.append(4)
+
+print(f"\nliste2.append(4) sonrası:")
+print(f"liste1: {liste1}")  # liste1 de değişti!
+print(f"liste2: {liste2}")
+
+# Çözüm: Kopya
+liste3 = liste1.copy()
+liste3.append(5)
+print(f"\nliste3 (kopya) değişti ama liste1 aynı:")
+print(f"liste1: {liste1}")
+print(f"liste3: {liste3}")</textarea>
+
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔗 Linked List ile Bağlantı: Node Referansları</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code3')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code3"><code class="language-python"># Linked List için Node sınıfı
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None  # Başlangıçta hiçbir yere işaret etmiyor
+
+# Node'lar oluştur
+node_a = Node("A")
+node_b = Node("B")
+node_c = Node("C")
+
+print("=" * 60)
+print("🔗 NODE'LAR VE REFERANSLARI")
+print("=" * 60)
+
+print(f"\nnode_a: data={node_a.data}, id={id(node_a)}")
+print(f"node_b: data={node_b.data}, id={id(node_b)}")
+print(f"node_c: data={node_c.data}, id={id(node_c)}")
+
+# Bağlantıları kur
+print("\n⛓️ Bağlantıları kuruyoruz...")
+node_a.next = node_b  # A -> B
+node_b.next = node_c  # B -> C
+
+print(f"\nnode_a.next = {node_a.next} (id: {id(node_a.next)})")
+print(f"node_b       = {node_b}      (id: {id(node_b)})")
+print(f"Aynı obje mi? {node_a.next is node_b}")
+
+print("\n" + "=" * 60)
+print("🚶 LİSTEYİ GEZELİM")
+print("=" * 60)
+
+current = node_a  # Baştan başla
+step = 1
+while current is not None:
+    next_info = f"→ {current.next.data}" if current.next else "→ None"
+    print(f"Adım {step}: data={current.data}, id={id(current)} {next_info}")
+    current = current.next  # Sonraki node'a geç
+    step += 1
+
+print("\n💡 Gördüğünüz gibi, her node bir sonrakinin REFERANSINI tutuyor!")
+print("   Bu 'pointer' mantığının Python versiyonudur.")</code></pre>
+
+            <textarea id="code3" class="code-editor">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+node_a = Node("A")
+node_b = Node("B")
+node_c = Node("C")
+
+print(f"node_a id: {id(node_a)}")
+print(f"node_b id: {id(node_b)}")
+print(f"node_c id: {id(node_c)}")
+
+# Bağla
+node_a.next = node_b
+node_b.next = node_c
+
+# Gez
+print("\nListeyi gez:")
+current = node_a
+while current:
+    print(f"  {current.data} (id: {id(current)})")
+    current = current.next</textarea>
+
+            <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📚 == vs is Farkı</h2>
+
+        <div class="info-card">
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="background:#f8f9fa;">
+                    <th style="padding:12px; border:1px solid #ddd;">Operatör</th>
+                    <th style="padding:12px; border:1px solid #ddd;">Karşılaştırma</th>
+                    <th style="padding:12px; border:1px solid #ddd;">Örnek</th>
+                </tr>
+                <tr>
+                    <td style="padding:12px; border:1px solid #ddd;"><code>==</code></td>
+                    <td style="padding:12px; border:1px solid #ddd;">Değer eşitliği</td>
+                    <td style="padding:12px; border:1px solid #ddd;"><code>[1,2] == [1,2]</code> → True</td>
+                </tr>
+                <tr>
+                    <td style="padding:12px; border:1px solid #ddd;"><code>is</code></td>
+                    <td style="padding:12px; border:1px solid #ddd;">Kimlik eşitliği (aynı obje mi?)</td>
+                    <td style="padding:12px; border:1px solid #ddd;"><code>[1,2] is [1,2]</code> → False</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code4')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code4')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code4"><code class="language-python"># == vs is
+
+a = [1, 2, 3]
+b = [1, 2, 3]
+c = a
+
+print(f"a = {a}")
+print(f"b = {b}")
+print(f"c = a")
+
+print(f"\na == b: {a == b}")  # True - değerler eşit
+print(f"a is b: {a is b}")    # False - farklı objeler
+
+print(f"\na == c: {a == c}")  # True - değerler eşit
+print(f"a is c: {a is c}")    # True - AYNI obje!
+
+# None kontrolü için is kullanın
+print(f"\n📌 None kontrolü:")
+x = None
+print(f"x == None: {x == None}")  # Çalışır ama...
+print(f"x is None: {x is None}")  # Tercih edilen yöntem!</code></pre>
+
+            <textarea id="code4" class="code-editor">a = [1, 2, 3]
+b = [1, 2, 3]
+c = a
+
+print(f"a == b: {a == b}")
+print(f"a is b: {a is b}")
+
+print(f"\na == c: {a == c}")
+print(f"a is c: {a is c}")
+
+x = None
+print(f"\nx is None: {x is None}")</textarea>
+
+            <div id="output-code4" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Özet</h2>
+
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <th style="padding: 15px;">Kavram</th>
+                    <th style="padding: 15px;">Açıklama</th>
+                    <th style="padding: 15px;">Örnek</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>id()</strong></td>
+                    <td style="padding: 12px;">Objenin bellek kimliği</td>
+                    <td style="padding: 12px;"><code>id(x)</code></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>is</strong></td>
+                    <td style="padding: 12px;">Aynı obje mi?</td>
+                    <td style="padding: 12px;"><code>a is b</code></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Referans</strong></td>
+                    <td style="padding: 12px;">Değişken = objenin adresi</td>
+                    <td style="padding: 12px;"><code>x = obj</code></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Aliasing</strong></td>
+                    <td style="padding: 12px;">İki isim, aynı obje</td>
+                    <td style="padding: 12px;"><code>b = a</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px;"><strong>Kopya</strong></td>
+                    <td style="padding: 12px;">Yeni obje oluştur</td>
+                    <td style="padding: 12px;"><code>b = a.copy()</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="nav-footer">
+        <a href="index.html" class="btn">⬅️ Ana Menü</a>
+        <a href="fonksiyonlar.html" class="btn btn-next">Sonraki: Fonksiyonlar ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+</body>
+</html>
+

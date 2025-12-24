@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.4: Insertion Sort (Eklemeli Sıralama)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .visual-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .cards-visual {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 120px;
+            align-items: center;
+        }
+        .card {
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .card.sorted {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+        }
+        .card.current {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            transform: translateY(-20px) scale(1.1);
+        }
+        .card.comparing {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        .card.shifting {
+            animation: shift 0.3s ease-out;
+        }
+        @keyframes shift {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(60px); }
+            100% { transform: translateX(0); }
+        }
+        .divider {
+            width: 3px;
+            height: 80px;
+            background: #e74c3c;
+            border-radius: 2px;
+        }
+        .step-info {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 15px 0;
+            min-height: 60px;
+        }
+        .analogy-box {
+            background: linear-gradient(135deg, #fff5f5, #ffe5e5);
+            border: 2px solid #e74c3c;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📥 7.4: Insertion Sort (Eklemeli Sıralama)</h1>
+        <p>Kart Oyununda El Düzenleme Mantığı</p>
+    </header>
+
+    <div class="section">
+        <h2>📌 Insertion Sort Nedir?</h2>
+        <p><strong>Insertion Sort</strong>, her elemanı sıralı bölümde doğru yerine "sokan" bir algoritmadır. Kart oyunlarında elimizdeki kartları düzenleme mantığına benzer.</p>
+
+        <div class="analogy-box">
+            <h4 style="margin-top: 0; color: #c0392b;">🃏 Kart Oyunu Analojisi</h4>
+            <p>İskambil oynarken:</p>
+            <ol style="margin-bottom: 0;">
+                <li>Yeni bir kart çekersiniz</li>
+                <li>Elinizdeki sıralı kartlara bakarsınız</li>
+                <li>Yeni kartı doğru yerine sokarsınız</li>
+                <li>Bu şekilde eliniz her zaman sıralı kalır!</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="visual-container">
+        <h3 style="text-align: center;">🎮 İnteraktif Insertion Sort Simülasyonu</h3>
+        <p style="text-align: center; color: #666;">🟢 Sıralı Kısım | 🔴 Yerleştirilecek Kart | ⬜ Sıralanmamış Kısım</p>
+
+        <div class="cards-visual" id="cardsVisual"></div>
+
+        <div class="step-info" id="stepInfo">
+            🎯 "Başlat" butonuna tıklayarak sıralamayı izleyin.
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn btn-run" onclick="startSort()">▶️ Başlat</button>
+            <button class="btn" onclick="stepSort()">⏭️ Adım</button>
+            <button class="btn btn-reset" onclick="resetSort()">🔄 Sıfırla</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Karmaşıklık Analizi</h2>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <th style="padding: 15px;">Durum</th>
+                    <th style="padding: 15px;">Zaman</th>
+                    <th style="padding: 15px;">Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>En İyi</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(n)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Dizi zaten sıralı - sadece n-1 karşılaştırma</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Ortalama</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">O(n²)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Rastgele sıralı dizi</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>En Kötü</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">O(n²)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Ters sıralı dizi - her eleman en başa gider</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60;">
+            <strong>💡 Insertion Sort'un Güçlü Yönü:</strong>
+            <p style="margin: 5px 0 0 0;"><strong>Neredeyse sıralı verilerde</strong> çok hızlıdır! Verinin büyük kısmı sıralıysa O(n)'e yakın çalışır. Bu nedenle küçük dizilerde veya hibrit algoritmalarda (Timsort) kullanılır.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Python Implementasyonu</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code1"><code class="language-python">def insertion_sort(arr):
+    """
+    Insertion Sort Algoritması
+
+    Her elemanı sıralı bölümde doğru yerine "sokar".
+    """
+    n = len(arr)
+    comparisons = 0
+    shifts = 0
+
+    for i in range(1, n):
+        key = arr[i]  # Yerleştirilecek eleman
+        j = i - 1
+
+        print(f"\n--- Adım {i} ---")
+        print(f"Yerleştirilecek: {key}")
+        print(f"Sıralı bölüm: {arr[:i]}")
+
+        # key'den büyük elemanları sağa kaydır
+        while j >= 0 and arr[j] > key:
+            comparisons += 1
+            print(f"  {arr[j]} > {key} → Sağa kaydır")
+            arr[j + 1] = arr[j]
+            shifts += 1
+            j -= 1
+
+        if j >= 0:
+            comparisons += 1
+            print(f"  {arr[j]} ≤ {key} → Dur")
+
+        arr[j + 1] = key
+        print(f"Sonuç: {arr}")
+
+    return comparisons, shifts
+
+# Test
+dizi = [64, 34, 25, 12, 22, 11]
+print(f"Başlangıç: {dizi}\n")
+
+comp, shift = insertion_sort(dizi)
+
+print(f"\n{'='*40}")
+print(f"Sonuç: {dizi}")
+print(f"Karşılaştırma: {comp}")
+print(f"Kaydırma: {shift}")</code></pre>
+            <textarea id="code1" class="code-editor"></textarea>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌟 Avantajları</h2>
+        <ul>
+            <li>✅ <strong>Adaptive:</strong> Neredeyse sıralı dizilerde O(n)</li>
+            <li>✅ <strong>Stabil:</strong> Eşit elemanların sırası korunur</li>
+            <li>✅ <strong>In-place:</strong> O(1) ek alan</li>
+            <li>✅ <strong>Online:</strong> Veri gelirken anında sıralayabilir</li>
+            <li>✅ <strong>Küçük veriler:</strong> n < 50 için diğer algoritmalardan hızlı</li>
+        </ul>
+
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3; margin-top: 15px;">
+            <strong>💡 Pratikte Kullanım:</strong>
+            <p style="margin: 5px 0 0 0;">Python'un <code>sort()</code> fonksiyonu (Timsort), küçük parçaları Insertion Sort ile sıralar. Çünkü küçük dizilerde overhead'sız ve cache-friendly!</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🆚 O(n²) Algoritmaları Karşılaştırma</h2>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #667eea; color: white;">
+                    <th style="padding: 12px;">Özellik</th>
+                    <th style="padding: 12px;">Bubble</th>
+                    <th style="padding: 12px;">Selection</th>
+                    <th style="padding: 12px;">Insertion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">En İyi Durum</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #e74c3c;">O(n²)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">O(n)</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #ddd;">Takas Sayısı</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n²)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n²)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Stabil</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">✅</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">❌</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">✅</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #ddd;">Online</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">❌</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">❌</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">✅</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>Önerilen Kullanım</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Sadece öğretim</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Takas maliyetli</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;"><strong>Küçük/neredeyse sıralı</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="nav-footer">
+        <a href="7c_selection_sort.html" class="btn">⬅️ Önceki: Selection Sort</a>
+        <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="7e_merge_sort.html" class="btn btn-next">Sonraki: Merge Sort ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let array = [64, 34, 25, 12, 22, 11];
+    const originalArray = [...array];
+    let i = 1, j = 0;
+    let key = null;
+    let phase = 'pick'; // pick, compare, insert
+    let isRunning = false;
+    let sortInterval = null;
+
+    function renderCards() {
+        const container = document.getElementById('cardsVisual');
+        container.innerHTML = '';
+
+        array.forEach((val, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${idx}`;
+            card.innerText = val;
+
+            if (idx < i) {
+                card.classList.add('sorted');
+            }
+            if (idx === i && phase !== 'insert') {
+                card.classList.add('current');
+            }
+            if (idx === j && phase === 'compare') {
+                card.classList.add('comparing');
+            }
+
+            // Sıralı ve sıralanmamış bölüm arasına çizgi
+            if (idx === i - 1 && i < array.length) {
+                container.appendChild(card);
+                const divider = document.createElement('div');
+                divider.className = 'divider';
+                container.appendChild(divider);
+            } else {
+                container.appendChild(card);
+            }
+        });
+    }
+
+    function stepSort() {
+        const n = array.length;
+
+        if (i >= n) {
+            document.querySelectorAll('.card').forEach(c => {
+                c.classList.remove('current', 'comparing');
+                c.classList.add('sorted');
+            });
+            document.getElementById('stepInfo').innerHTML = '✅ Sıralama tamamlandı!';
+            pauseSort();
+            return;
+        }
+
+        if (phase === 'pick') {
+            key = array[i];
+            j = i - 1;
+            document.getElementById('stepInfo').innerHTML =
+                `🎴 Kart ${key} alındı, doğru yeri aranıyor...`;
+            phase = 'compare';
+        } else if (phase === 'compare') {
+            if (j >= 0 && array[j] > key) {
+                document.getElementById('stepInfo').innerHTML =
+                    `📍 ${array[j]} > ${key} → Sağa kaydır`;
+                array[j + 1] = array[j];
+                j--;
+            } else {
+                phase = 'insert';
+            }
+        } else if (phase === 'insert') {
+            array[j + 1] = key;
+            document.getElementById('stepInfo').innerHTML =
+                `✅ ${key} yerine konuldu!`;
+            i++;
+            phase = 'pick';
+        }
+
+        renderCards();
+    }
+
+    function startSort() {
+        if (i >= array.length) resetSort();
+        isRunning = true;
+        sortInterval = setInterval(() => {
+            if (i < array.length) {
+                stepSort();
+            } else {
+                stepSort();
+                pauseSort();
+            }
+        }, 600);
+    }
+
+    function pauseSort() {
+        isRunning = false;
+        if (sortInterval) clearInterval(sortInterval);
+    }
+
+    function resetSort() {
+        pauseSort();
+        array = [...originalArray];
+        i = 1; j = 0; key = null;
+        phase = 'pick';
+        renderCards();
+        document.getElementById('stepInfo').innerHTML = '🎯 "Başlat" butonuna tıklayarak sıralamayı izleyin.';
+    }
+
+    renderCards();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+</script>
+</body>
+</html>
+

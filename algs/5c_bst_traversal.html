@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.3: BST Dolaşma (Traversal)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .traversal-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .traversal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .traversal-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .icon-inorder { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .icon-preorder { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .icon-postorder { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .icon-level { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+
+        .order-visual {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+
+        .order-item {
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .tree-mini-container {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .algorithm-box {
+            background: #2d2d30;
+            color: #9cdcfe;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .use-case {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #eee;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🚶 5.3: BST Dolaşma (Traversal)</h1>
+        <p>Ağacın Tüm Elemanlarını Ziyaret Etme Yöntemleri</p>
+    </header>
+
+    <div class="section">
+        <h2>🎯 Örnek Ağaç</h2>
+        <p>Tüm traversal örneklerinde bu ağacı kullanacağız:</p>
+
+        <div class="tree-mini-container">
+            <pre style="font-family:monospace; font-size:16px; line-height:1.8;">
+        <strong>50</strong>
+       /  \
+     30    70
+    / \   /  \
+   20  40 60  80
+            </pre>
+        </div>
+    </div>
+
+    <!-- INORDER -->
+    <div class="traversal-card">
+        <div class="traversal-header">
+            <div class="traversal-icon icon-inorder">📋</div>
+            <div>
+                <h3 style="margin:0;">Inorder (Sol-Kök-Sağ)</h3>
+                <p style="margin:5px 0 0 0; color:#666;">LNR: Left → Node → Right</p>
+            </div>
+        </div>
+
+        <div class="algorithm-box">
+            <strong>Algoritma:</strong><br>
+            1. Sol alt ağacı ziyaret et<br>
+            2. Kökü ziyaret et (işle)<br>
+            3. Sağ alt ağacı ziyaret et
+        </div>
+
+        <p><strong>Sonuç:</strong></p>
+        <div class="order-visual">
+            <span class="order-item" style="background:#3498db;">20</span>
+            <span>→</span>
+            <span class="order-item" style="background:#3498db;">30</span>
+            <span>→</span>
+            <span class="order-item" style="background:#3498db;">40</span>
+            <span>→</span>
+            <span class="order-item" style="background:#3498db;">50</span>
+            <span>→</span>
+            <span class="order-item" style="background:#3498db;">60</span>
+            <span>→</span>
+            <span class="order-item" style="background:#3498db;">70</span>
+            <span>→</span>
+            <span class="order-item" style="background:#3498db;">80</span>
+        </div>
+
+        <p style="color:#27ae60; font-weight:bold;">
+            ✨ BST için inorder = SIRALI çıktı! (Küçükten büyüğe)
+        </p>
+
+        <div class="use-case-grid">
+            <div class="use-case">
+                <div style="font-size:24px;">📊</div>
+                <strong>Sıralı Liste</strong>
+            </div>
+            <div class="use-case">
+                <div style="font-size:24px;">🔍</div>
+                <strong>BST Doğrulama</strong>
+            </div>
+            <div class="use-case">
+                <div style="font-size:24px;">📈</div>
+                <strong>k'ıncı En Küçük</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREORDER -->
+    <div class="traversal-card">
+        <div class="traversal-header">
+            <div class="traversal-icon icon-preorder">📦</div>
+            <div>
+                <h3 style="margin:0;">Preorder (Kök-Sol-Sağ)</h3>
+                <p style="margin:5px 0 0 0; color:#666;">NLR: Node → Left → Right</p>
+            </div>
+        </div>
+
+        <div class="algorithm-box">
+            <strong>Algoritma:</strong><br>
+            1. Kökü ziyaret et (işle)<br>
+            2. Sol alt ağacı ziyaret et<br>
+            3. Sağ alt ağacı ziyaret et
+        </div>
+
+        <p><strong>Sonuç:</strong></p>
+        <div class="order-visual">
+            <span class="order-item" style="background:#27ae60;">50</span>
+            <span>→</span>
+            <span class="order-item" style="background:#27ae60;">30</span>
+            <span>→</span>
+            <span class="order-item" style="background:#27ae60;">20</span>
+            <span>→</span>
+            <span class="order-item" style="background:#27ae60;">40</span>
+            <span>→</span>
+            <span class="order-item" style="background:#27ae60;">70</span>
+            <span>→</span>
+            <span class="order-item" style="background:#27ae60;">60</span>
+            <span>→</span>
+            <span class="order-item" style="background:#27ae60;">80</span>
+        </div>
+
+        <p style="color:#27ae60; font-weight:bold;">
+            ✨ Kök her zaman İLK! Ağacı kopyalamak/serialize etmek için ideal.
+        </p>
+
+        <div class="use-case-grid">
+            <div class="use-case">
+                <div style="font-size:24px;">💾</div>
+                <strong>Ağaç Kopyalama</strong>
+            </div>
+            <div class="use-case">
+                <div style="font-size:24px;">📁</div>
+                <strong>Dosya Sistemi</strong>
+            </div>
+            <div class="use-case">
+                <div style="font-size:24px;">🔗</div>
+                <strong>Serileştirme</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- POSTORDER -->
+    <div class="traversal-card">
+        <div class="traversal-header">
+            <div class="traversal-icon icon-postorder">🗑️</div>
+            <div>
+                <h3 style="margin:0;">Postorder (Sol-Sağ-Kök)</h3>
+                <p style="margin:5px 0 0 0; color:#666;">LRN: Left → Right → Node</p>
+            </div>
+        </div>
+
+        <div class="algorithm-box">
+            <strong>Algoritma:</strong><br>
+            1. Sol alt ağacı ziyaret et<br>
+            2. Sağ alt ağacı ziyaret et<br>
+            3. Kökü ziyaret et (işle)
+        </div>
+
+        <p><strong>Sonuç:</strong></p>
+        <div class="order-visual">
+            <span class="order-item" style="background:#e74c3c;">20</span>
+            <span>→</span>
+            <span class="order-item" style="background:#e74c3c;">40</span>
+            <span>→</span>
+            <span class="order-item" style="background:#e74c3c;">30</span>
+            <span>→</span>
+            <span class="order-item" style="background:#e74c3c;">60</span>
+            <span>→</span>
+            <span class="order-item" style="background:#e74c3c;">80</span>
+            <span>→</span>
+            <span class="order-item" style="background:#e74c3c;">70</span>
+            <span>→</span>
+            <span class="order-item" style="background:#e74c3c;">50</span>
+        </div>
+
+        <p style="color:#e74c3c; font-weight:bold;">
+            ✨ Kök her zaman SON! Ağacı silmek için ideal (önce çocukları sil).
+        </p>
+
+        <div class="use-case-grid">
+            <div class="use-case">
+                <div style="font-size:24px;">🗑️</div>
+                <strong>Ağaç Silme</strong>
+            </div>
+            <div class="use-case">
+                <div style="font-size:24px;">🧮</div>
+                <strong>İfade Değerlendirme</strong>
+            </div>
+            <div class="use-case">
+                <div style="font-size:24px;">📐</div>
+                <strong>Boyut Hesaplama</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEVEL ORDER -->
+    <div class="traversal-card">
+        <div class="traversal-header">
+            <div class="traversal-icon icon-level">📊</div>
+            <div>
+                <h3 style="margin:0;">Level Order (BFS)</h3>
+                <p style="margin:5px 0 0 0; color:#666;">Seviye seviye, soldan sağa</p>
+            </div>
+        </div>
+
+        <div class="algorithm-box">
+            <strong>Algoritma (Queue kullanarak):</strong><br>
+            1. Kökü queue'ya ekle<br>
+            2. Queue boş olana kadar:<br>
+            &nbsp;&nbsp;&nbsp;- Queue'dan çıkar ve işle<br>
+            &nbsp;&nbsp;&nbsp;- Çocuklarını queue'ya ekle
+        </div>
+
+        <p><strong>Sonuç:</strong></p>
+        <div class="order-visual">
+            <span class="order-item" style="background:#9b59b6;">50</span>
+            <span>|</span>
+            <span class="order-item" style="background:#9b59b6;">30</span>
+            <span class="order-item" style="background:#9b59b6;">70</span>
+            <span>|</span>
+            <span class="order-item" style="background:#9b59b6;">20</span>
+            <span class="order-item" style="background:#9b59b6;">40</span>
+            <span class="order-item" style="background:#9b59b6;">60</span>
+            <span class="order-item" style="background:#9b59b6;">80</span>
+        </div>
+
+        <p style="color:#9b59b6; font-weight:bold;">
+            ✨ Her seviye sırayla! En kısa yol bulma, seviye sayma için ideal.
+        </p>
+
+        <div class="use-case-grid">
+            <div class="use-case">
+                <div style="font-size:24px;">🗺️</div>
+                <strong>En Kısa Yol</strong>
+            </div>
+            <div class="use-case">
+                <div style="font-size:24px;">📏</div>
+                <strong>Derinlik Bulma</strong>
+            </div>
+            <div class="use-case">
+                <div style="font-size:24px;">🖨️</div>
+                <strong>Seviye Yazdırma</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Python Implementasyonu</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Tüm Traversal Metodları</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code1')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code1"><code class="language-python">from collections import deque
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+class BST:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, data):
+        if not self.root:
+            self.root = Node(data)
+            return
+        c = self.root
+        while True:
+            if data < c.data:
+                if not c.left: c.left = Node(data); return
+                c = c.left
+            else:
+                if not c.right: c.right = Node(data); return
+                c = c.right
+
+    # ===== TRAVERSAL METODLARI =====
+
+    def inorder(self, node=None, result=None):
+        """Sol → Kök → Sağ (Sıralı çıktı)"""
+        if result is None: result = []
+        if node is None: node = self.root
+
+        if node:
+            self.inorder(node.left, result)   # Sol
+            result.append(node.data)           # Kök
+            self.inorder(node.right, result)  # Sağ
+        return result
+
+    def preorder(self, node=None, result=None):
+        """Kök → Sol → Sağ"""
+        if result is None: result = []
+        if node is None: node = self.root
+
+        if node:
+            result.append(node.data)           # Kök
+            self.preorder(node.left, result)  # Sol
+            self.preorder(node.right, result) # Sağ
+        return result
+
+    def postorder(self, node=None, result=None):
+        """Sol → Sağ → Kök"""
+        if result is None: result = []
+        if node is None: node = self.root
+
+        if node:
+            self.postorder(node.left, result)  # Sol
+            self.postorder(node.right, result) # Sağ
+            result.append(node.data)            # Kök
+        return result
+
+    def level_order(self):
+        """BFS ile seviye seviye dolaşma"""
+        if not self.root:
+            return []
+
+        result = []
+        queue = deque([self.root])
+
+        while queue:
+            node = queue.popleft()  # FIFO
+            result.append(node.data)
+
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+
+        return result
+
+# Test
+bst = BST()
+for v in [50, 30, 70, 20, 40, 60, 80]:
+    bst.insert(v)
+
+print("🌳 Ağaç: 50 → (30, 70) → (20, 40, 60, 80)")
+print()
+print("=" * 50)
+print("📋 TRAVERSAL SONUÇLARI")
+print("=" * 50)
+print()
+print(f"📋 Inorder  (LNR): {bst.inorder()}")
+print(f"   → Sıralı çıktı verir!")
+print()
+print(f"📦 Preorder (NLR): {bst.preorder()}")
+print(f"   → Kök başta, kopyalama için")
+print()
+print(f"🗑️ Postorder(LRN): {bst.postorder()}")
+print(f"   → Kök sonda, silme için")
+print()
+print(f"📊 Level Order:    {bst.level_order()}")
+print(f"   → Seviye seviye, BFS")</code></pre>
+
+            <textarea id="code1" class="code-editor">from collections import deque
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+class BST:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, data):
+        if not self.root:
+            self.root = Node(data); return
+        c = self.root
+        while True:
+            if data < c.data:
+                if not c.left: c.left = Node(data); return
+                c = c.left
+            else:
+                if not c.right: c.right = Node(data); return
+                c = c.right
+
+    def inorder(self, node=None, res=None):
+        if res is None: res = []
+        if node is None: node = self.root
+        if node:
+            self.inorder(node.left, res)
+            res.append(node.data)
+            self.inorder(node.right, res)
+        return res
+
+    def preorder(self, node=None, res=None):
+        if res is None: res = []
+        if node is None: node = self.root
+        if node:
+            res.append(node.data)
+            self.preorder(node.left, res)
+            self.preorder(node.right, res)
+        return res
+
+bst = BST()
+for v in [50, 30, 70, 20, 40, 60, 80]:
+    bst.insert(v)
+
+print(f"Inorder:  {bst.inorder()}")
+print(f"Preorder: {bst.preorder()}")</textarea>
+
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Özet Tablosu</h2>
+
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <th style="padding: 15px;">Traversal</th>
+                    <th style="padding: 15px;">Sıra</th>
+                    <th style="padding: 15px;">Özellik</th>
+                    <th style="padding: 15px;">Kullanım</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Inorder</strong></td>
+                    <td style="padding: 12px;">Sol → Kök → Sağ</td>
+                    <td style="padding: 12px;">BST'de sıralı çıktı</td>
+                    <td style="padding: 12px;">Sıralama, doğrulama</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Preorder</strong></td>
+                    <td style="padding: 12px;">Kök → Sol → Sağ</td>
+                    <td style="padding: 12px;">Kök ilk</td>
+                    <td style="padding: 12px;">Kopyalama, serialize</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Postorder</strong></td>
+                    <td style="padding: 12px;">Sol → Sağ → Kök</td>
+                    <td style="padding: 12px;">Kök son</td>
+                    <td style="padding: 12px;">Silme, ifade değerlendirme</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px;"><strong>Level Order</strong></td>
+                    <td style="padding: 12px;">Seviye seviye</td>
+                    <td style="padding: 12px;">BFS, Queue kullanır</td>
+                    <td style="padding: 12px;">En kısa yol, seviye işlemleri</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="nav-footer">
+        <a href="5b_bst_islemler.html" class="btn">⬅️ Önceki: BST İşlemler</a>
+        <a href="bst.html" class="btn" style="background:#11998e">📋 BST Menü</a>
+        <a href="5d_bst_ornekler.html" class="btn btn-next">Sonraki: Örnekler ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+</body>
+</html>
+

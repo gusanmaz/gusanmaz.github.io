@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.0: Algoritma Analizine Giriş - Big O, Ω, Θ</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .math-box {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border: 2px solid #667eea;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .math-notation {
+            font-size: 1.8em;
+            color: #667eea;
+            font-family: 'Times New Roman', serif;
+            margin: 15px 0;
+        }
+        .complexity-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+        }
+        .complexity-card.excellent { border-color: #27ae60; }
+        .complexity-card.good { border-color: #3498db; }
+        .complexity-card.fair { border-color: #f39c12; }
+        .complexity-card.poor { border-color: #e74c3c; }
+        .complexity-card.terrible { border-color: #8e44ad; }
+
+        .complexity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .complexity-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .complexity-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+        }
+        .comparison-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .comparison-table tr:nth-child(even) { background: #f8f9fa; }
+
+        .growth-viz {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            min-height: 300px;
+            justify-content: center;
+        }
+        .growth-bar {
+            width: 60px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 10px;
+            color: white;
+            font-weight: bold;
+            transition: height 0.5s;
+        }
+        .growth-bar span {
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .cpu-diagram {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .cpu-component {
+            display: inline-block;
+            padding: 15px 25px;
+            margin: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .step-counter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .step-item {
+            padding: 10px 15px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .step-item.highlight {
+            background: #27ae60;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📊 1.0: Algoritma Analizi Nedir?</h1>
+        <p>Big O, Big Omega, Big Theta ve Neden Önemli?</p>
+    </header>
+
+    <!-- BÖLÜM 1: NEDİR VE NEDEN ÖNEMLİ -->
+    <div class="section">
+        <h2>🎯 Algoritma Analizi Nedir?</h2>
+        <p><strong>Algoritma analizi</strong>, bir algoritmanın ne kadar <em>zaman</em> ve <em>bellek (alan)</em> kullandığını matematiksel olarak ifade etme bilimidir.</p>
+
+        <div class="info-box">
+            <strong>📌 Temel Soru:</strong> "Bu algoritma büyük verilerle çalışırken nasıl davranacak?"
+            <ul>
+                <li>10 elemanlı listeyi sıralamak → 0.001 saniye</li>
+                <li>10.000 elemanlı listeyi sıralamak → ?</li>
+                <li>10.000.000 elemanlı listeyi sıralamak → ???</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- BÖLÜM 2: BİLGİSAYAR MİMARİSİ TEMELLER -->
+    <div class="section">
+        <h2>🖥️ Bilgisayar Nasıl Çalışır? (Temel Bilgiler)</h2>
+        <p>Algoritma analizini anlamak için bilgisayarın temel çalışma prensiplerini bilmek gerekir.</p>
+
+        <div class="cpu-diagram">
+            <h4 style="text-align:center; margin-bottom:20px;">Bilgisayarın Ana Bileşenleri</h4>
+            <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
+                <div class="cpu-component" style="background: #e74c3c; color: white;">
+                    <div style="font-size: 2em;">🧠</div>
+                    <div>CPU</div>
+                    <div style="font-size: 0.8em; font-weight: normal;">İşlemci</div>
+                </div>
+                <div style="display: flex; align-items: center; font-size: 2em;">⟷</div>
+                <div class="cpu-component" style="background: #3498db; color: white;">
+                    <div style="font-size: 2em;">⚡</div>
+                    <div>RAM</div>
+                    <div style="font-size: 0.8em; font-weight: normal;">Geçici Bellek</div>
+                </div>
+                <div style="display: flex; align-items: center; font-size: 2em;">⟷</div>
+                <div class="cpu-component" style="background: #27ae60; color: white;">
+                    <div style="font-size: 2em;">💾</div>
+                    <div>SSD/HDD</div>
+                    <div style="font-size: 0.8em; font-weight: normal;">Kalıcı Depolama</div>
+                </div>
+            </div>
+        </div>
+
+        <h3>⏱️ İşlem Süreleri (Yaklaşık)</h3>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>İşlem</th>
+                    <th>Süre</th>
+                    <th>İnsan Ölçeği*</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>CPU'da toplama/çarpma</td>
+                    <td>~0.3 nanosaniye</td>
+                    <td>1 saniye</td>
+                </tr>
+                <tr>
+                    <td>L1 Cache okuma</td>
+                    <td>~1 nanosaniye</td>
+                    <td>3 saniye</td>
+                </tr>
+                <tr>
+                    <td>RAM okuma</td>
+                    <td>~100 nanosaniye</td>
+                    <td>5 dakika</td>
+                </tr>
+                <tr>
+                    <td>SSD okuma</td>
+                    <td>~100.000 nanosaniye</td>
+                    <td>4 gün</td>
+                </tr>
+                <tr>
+                    <td>HDD okuma</td>
+                    <td>~10.000.000 nanosaniye</td>
+                    <td>1 yıl</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 0.9em; color: #666;">*CPU işlemi 1 saniye olsaydı, diğer işlemler ne kadar sürerdi?</p>
+
+        <div class="warning-box">
+            <strong>💡 Önemli:</strong> RAM'e erişmek CPU'ya göre yüzlerce kat yavaştır. Bu nedenle algoritmaların bellekteki veriyi nasıl okuduğu çok önemlidir. Bitişik bellekte (array) tutulan veriler, dağınık bellektekinden (linked list) daha hızlı erişilir.
+        </div>
+    </div>
+
+    <!-- BÖLÜM 3: ZAMAN KARMAŞIKLIĞI -->
+    <div class="section">
+        <h2>⏱️ Zaman Karmaşıklığı (Time Complexity)</h2>
+        <p>Bir algoritmanın çalışma süresinin, girdi boyutuna (n) göre nasıl değiştiğini gösterir.</p>
+
+        <h3>Adım Sayma Örneği</h3>
+        <p>Aşağıdaki kodda kaç "temel işlem" yapılıyor?</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu - Adım Analizi</span>
+            </div>
+            <pre><code class="language-python"># n elemanlı bir listede toplam bulma
+def toplam_bul(liste):
+    toplam = 0            # 1 adım (atama)
+    for x in liste:       # n kez döner
+        toplam += x       # n adım (her döngüde 1)
+    return toplam         # 1 adım
+
+# Toplam: 1 + n + 1 = n + 2 adım
+# Big O: O(n)  (sabitler önemsiz, n önemli)</code></pre>
+        </div>
+
+        <h3>Neden Sadece En Büyük Terim?</h3>
+        <p>n = 1.000.000 olduğunda:</p>
+        <ul>
+            <li><code>n + 2</code> → 1.000.002</li>
+            <li><code>n²</code> → 1.000.000.000.000 (1 trilyon!)</li>
+        </ul>
+        <p>Gördüğünüz gibi, n büyüdükçe sabitler (+2) ve küçük terimler anlamsızlaşır.</p>
+    </div>
+
+    <!-- BÖLÜM 4: BIG O NOTASYONU -->
+    <div class="section">
+        <h2>📐 Big O Notasyonu (Üst Sınır)</h2>
+
+        <div class="math-box">
+            <p><strong>Big O</strong>, algoritmanın <strong>en kötü durumda</strong> ne kadar süreceğini gösterir.</p>
+            <div class="math-notation">f(n) = O(g(n))</div>
+            <p>"f(n), g(n)'den <strong>daha hızlı büyümez</strong>"</p>
+        </div>
+
+        <h3>🏆 Yaygın Karmaşıklıklar (En İyiden En Kötüye)</h3>
+
+        <div class="complexity-card excellent">
+            <div class="complexity-header">
+                <span class="complexity-name">O(1) - Sabit Zaman</span>
+                <span class="complexity-badge" style="background:#27ae60">MÜKEMMEL</span>
+            </div>
+            <p>Girdi boyutu ne olursa olsun, işlem sayısı aynıdır.</p>
+            <p><strong>Örnekler:</strong> Dizide index ile erişim, stack push/pop, hash table ekleme</p>
+            <pre><code class="language-python">arr[5]  # Her zaman 1 adım</code></pre>
+        </div>
+
+        <div class="complexity-card good">
+            <div class="complexity-header">
+                <span class="complexity-name">O(log n) - Logaritmik</span>
+                <span class="complexity-badge" style="background:#3498db">ÇOK İYİ</span>
+            </div>
+            <p>Her adımda problem boyutu yarıya iner. n iki katına çıkınca sadece 1 adım eklenir.</p>
+            <p><strong>Örnekler:</strong> Binary search, dengeli BST arama</p>
+            <pre><code class="language-python"># Binary Search: 1 milyon elemanda sadece ~20 karşılaştırma!</code></pre>
+        </div>
+
+        <div class="complexity-card good">
+            <div class="complexity-header">
+                <span class="complexity-name">O(n) - Doğrusal</span>
+                <span class="complexity-badge" style="background:#17a2b8">İYİ</span>
+            </div>
+            <p>Girdi boyutuyla orantılı. n iki katına çıkarsa, süre de iki katına çıkar.</p>
+            <p><strong>Örnekler:</strong> Lineer arama, dizi toplama, tek döngü</p>
+            <pre><code class="language-python">for x in liste:  # n kez döner
+    print(x)</code></pre>
+        </div>
+
+        <div class="complexity-card fair">
+            <div class="complexity-header">
+                <span class="complexity-name">O(n log n) - Linearitmik</span>
+                <span class="complexity-badge" style="background:#f39c12">ORTA</span>
+            </div>
+            <p>Verimli sıralama algoritmalarının sınırı.</p>
+            <p><strong>Örnekler:</strong> Merge sort, Quick sort (ortalama), Heap sort</p>
+        </div>
+
+        <div class="complexity-card poor">
+            <div class="complexity-header">
+                <span class="complexity-name">O(n²) - Karesel</span>
+                <span class="complexity-badge" style="background:#e74c3c">KÖTÜ</span>
+            </div>
+            <p>İç içe iki döngü. n iki katına çıkarsa, süre dört katına çıkar!</p>
+            <p><strong>Örnekler:</strong> Bubble sort, Selection sort, basit matris çarpımı</p>
+            <pre><code class="language-python">for i in range(n):       # n kez
+    for j in range(n):   # n kez → toplam n×n = n²
+        print(i, j)</code></pre>
+        </div>
+
+        <div class="complexity-card terrible">
+            <div class="complexity-header">
+                <span class="complexity-name">O(2ⁿ) - Üstel</span>
+                <span class="complexity-badge" style="background:#8e44ad">ÇOK KÖTÜ</span>
+            </div>
+            <p>n bir artınca süre iki katına çıkar. Pratikte kullanılamaz!</p>
+            <p><strong>Örnekler:</strong> Tüm alt kümeleri bulma, bazı recursive algoritmalar</p>
+        </div>
+    </div>
+
+    <!-- BÖLÜM 5: BÜYÜME GÖRSELLEŞTİRME -->
+    <div class="section">
+        <h2>📈 Karmaşıklıkların Karşılaştırması</h2>
+        <p>n = 16 için her karmaşıklığın kaç işlem gerektirdiği:</p>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Karmaşıklık</th>
+                    <th>n = 16</th>
+                    <th>n = 256</th>
+                    <th>n = 1.000</th>
+                    <th>n = 1.000.000</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="background: #d4edda;">
+                    <td><strong>O(1)</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr style="background: #d1ecf1;">
+                    <td><strong>O(log n)</strong></td>
+                    <td>4</td>
+                    <td>8</td>
+                    <td>10</td>
+                    <td>20</td>
+                </tr>
+                <tr>
+                    <td><strong>O(n)</strong></td>
+                    <td>16</td>
+                    <td>256</td>
+                    <td>1.000</td>
+                    <td>1.000.000</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td><strong>O(n log n)</strong></td>
+                    <td>64</td>
+                    <td>2.048</td>
+                    <td>10.000</td>
+                    <td>20.000.000</td>
+                </tr>
+                <tr style="background: #f8d7da;">
+                    <td><strong>O(n²)</strong></td>
+                    <td>256</td>
+                    <td>65.536</td>
+                    <td>1.000.000</td>
+                    <td>1.000.000.000.000</td>
+                </tr>
+                <tr style="background: #e2d5f1;">
+                    <td><strong>O(2ⁿ)</strong></td>
+                    <td>65.536</td>
+                    <td>10⁷⁷</td>
+                    <td>∞</td>
+                    <td>∞</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warning-box">
+            <strong>💥 Gerçek Dünya Etkisi:</strong> Eğer bir işlem 1 nanosaniye (10⁻⁹ sn) sürüyorsa:
+            <ul>
+                <li>O(n) ile 1 milyon işlem → 0.001 saniye</li>
+                <li>O(n²) ile 1 milyon işlem → 11.5 gün!</li>
+                <li>O(2ⁿ) ile n=50 → evrenin yaşından uzun süre</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- BÖLÜM 6: BIG OMEGA VE THETA -->
+    <div class="section">
+        <h2>📐 Big Omega (Ω) ve Big Theta (Θ)</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <div class="math-box" style="border-color: #27ae60;">
+                <h4 style="color: #27ae60;">Big Omega Ω(n)</h4>
+                <p><strong>Alt Sınır</strong> - En İyi Durum</p>
+                <p>"En azından bu kadar sürer"</p>
+            </div>
+            <div class="math-box" style="border-color: #e74c3c;">
+                <h4 style="color: #e74c3c;">Big O - O(n)</h4>
+                <p><strong>Üst Sınır</strong> - En Kötü Durum</p>
+                <p>"En fazla bu kadar sürer"</p>
+            </div>
+            <div class="math-box" style="border-color: #8e44ad;">
+                <h4 style="color: #8e44ad;">Big Theta Θ(n)</h4>
+                <p><strong>Sıkı Sınır</strong> - Ortalama Durum</p>
+                <p>"Her zaman bu civarda sürer"</p>
+            </div>
+        </div>
+
+        <h3>Örnek: Lineer Arama</h3>
+        <div class="code-container">
+            <div class="code-header"><span>Python Kodu</span></div>
+            <pre><code class="language-python">def lineer_ara(liste, hedef):
+    for i, eleman in enumerate(liste):
+        if eleman == hedef:
+            return i
+    return -1
+
+# En iyi durum: İlk elemanda bulunur → Ω(1)
+# En kötü durum: Son elemanda veya yok → O(n)
+# Ortalama durum: Ortada bir yerde → Θ(n/2) = Θ(n)</code></pre>
+        </div>
+
+        <div class="info-box">
+            <strong>🎯 Pratikte:</strong> Genellikle <strong>Big O</strong> kullanılır çünkü en kötü duruma hazırlıklı olmak isteriz. Omega ve Theta daha çok teorik analizlerde kullanılır.
+        </div>
+    </div>
+
+    <!-- BÖLÜM 7: ALAN KARMAŞIKLIĞI -->
+    <div class="section">
+        <h2>💾 Alan Karmaşıklığı (Space Complexity)</h2>
+        <p>Algoritmanın ne kadar <strong>ek bellek</strong> kullandığını gösterir.</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code1"><code class="language-python"># Örnek 1: O(1) Alan - Sabit bellek
+def toplam_bul(liste):
+    toplam = 0  # Sadece 1 değişken
+    for x in liste:
+        toplam += x
+    return toplam
+# Liste ne kadar büyük olursa olsun, sadece 'toplam' değişkeni var
+
+# Örnek 2: O(n) Alan - Yeni liste oluşturma
+def kareleri_al(liste):
+    sonuc = []  # Yeni liste (n eleman tutacak)
+    for x in liste:
+        sonuc.append(x ** 2)
+    return sonuc
+# Girdi kadar yer kaplayan yeni liste oluşturuyor
+
+# Test
+orijinal = [1, 2, 3, 4, 5]
+print(f"Toplam: {toplam_bul(orijinal)}")
+print(f"Kareler: {kareleri_al(orijinal)}")</code></pre>
+            <textarea id="code1" class="code-editor"></textarea>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <h3>Zaman vs Alan Trade-off</h3>
+        <p>Bazen daha fazla bellek kullanarak daha hızlı algoritmalar yazabiliriz (veya tersi).</p>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Yaklaşım</th>
+                    <th>Zaman</th>
+                    <th>Alan</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Hash Table</td>
+                    <td>O(1)</td>
+                    <td>O(n)</td>
+                    <td>Hızlı ama bellek yer</td>
+                </tr>
+                <tr>
+                    <td>Binary Search</td>
+                    <td>O(log n)</td>
+                    <td>O(1)</td>
+                    <td>Az bellek, sıralı veri gerekli</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- BÖLÜM 8: PRATİK HESAPLAMA -->
+    <div class="section">
+        <h2>🧮 Pratikte Big O Nasıl Hesaplanır?</h2>
+
+        <h3>Basit Kurallar</h3>
+        <ol>
+            <li><strong>Sabitleri at:</strong> O(2n) → O(n)</li>
+            <li><strong>Küçük terimleri at:</strong> O(n² + n) → O(n²)</li>
+            <li><strong>Farklı girdileri birleştirme:</strong> O(n + m) kalır (n ≠ m ise)</li>
+            <li><strong>İç içe döngüler çarp:</strong> n × m = O(nm)</li>
+            <li><strong>Ardışık döngüler topla:</strong> n + m = O(n + m)</li>
+        </ol>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code2"><code class="language-python"># Örnek Analiz
+
+# Örnek 1: İç içe döngü → O(n²)
+def ornek1(n):
+    sayac = 0
+    for i in range(n):          # n kez
+        for j in range(n):      # n kez → n × n = n²
+            sayac += 1
+    return sayac
+
+# Örnek 2: Ardışık döngüler → O(n) + O(n) = O(n)
+def ornek2(n):
+    for i in range(n):          # n kez
+        print(f"Döngü 1: {i}")
+    for j in range(n):          # n kez
+        print(f"Döngü 2: {j}")   # Toplam: 2n → O(n)
+
+# Örnek 3: Logaritmik → O(log n)
+def ornek3(n):
+    sayac = 0
+    while n > 1:
+        n = n // 2              # Her seferinde yarıya böl
+        sayac += 1
+    return sayac
+
+# Test
+print(f"n=16 için iç içe döngü: {ornek1(16)} işlem")
+print(f"n=16 için log: {ornek3(16)} işlem")
+print(f"n=1024 için log: {ornek3(1024)} işlem")</code></pre>
+            <textarea id="code2" class="code-editor"></textarea>
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- BÖLÜM 9: VERİ YAPILARI KARŞILAŞTIRMASI -->
+    <div class="section">
+        <h2>📋 Veri Yapıları Karmaşıklık Tablosu</h2>
+        <p>Bu derste öğreneceğiniz veri yapılarının performans karşılaştırması:</p>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Veri Yapısı</th>
+                    <th>Erişim</th>
+                    <th>Arama</th>
+                    <th>Ekleme</th>
+                    <th>Silme</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Array (Dizi)</strong></td>
+                    <td style="color:#27ae60;">O(1)</td>
+                    <td>O(n)</td>
+                    <td style="color:#e74c3c;">O(n)</td>
+                    <td style="color:#e74c3c;">O(n)</td>
+                </tr>
+                <tr>
+                    <td><strong>Stack</strong></td>
+                    <td>O(n)</td>
+                    <td>O(n)</td>
+                    <td style="color:#27ae60;">O(1)</td>
+                    <td style="color:#27ae60;">O(1)</td>
+                </tr>
+                <tr>
+                    <td><strong>Queue</strong></td>
+                    <td>O(n)</td>
+                    <td>O(n)</td>
+                    <td style="color:#27ae60;">O(1)</td>
+                    <td style="color:#27ae60;">O(1)</td>
+                </tr>
+                <tr>
+                    <td><strong>Linked List</strong></td>
+                    <td>O(n)</td>
+                    <td>O(n)</td>
+                    <td style="color:#27ae60;">O(1)*</td>
+                    <td style="color:#27ae60;">O(1)*</td>
+                </tr>
+                <tr>
+                    <td><strong>BST (Dengeli)</strong></td>
+                    <td style="color:#3498db;">O(log n)</td>
+                    <td style="color:#3498db;">O(log n)</td>
+                    <td style="color:#3498db;">O(log n)</td>
+                    <td style="color:#3498db;">O(log n)</td>
+                </tr>
+                <tr>
+                    <td><strong>Hash Table</strong></td>
+                    <td>-</td>
+                    <td style="color:#27ae60;">O(1)</td>
+                    <td style="color:#27ae60;">O(1)</td>
+                    <td style="color:#27ae60;">O(1)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 0.9em; color: #666;">* Linked List'te ekleme/silme O(1), ama önce konumu bulmak O(n) gerektirir.</p>
+    </div>
+
+    <!-- ÖZET -->
+    <div class="section">
+        <h2>📝 Özet</h2>
+        <ul>
+            <li><strong>Algoritma analizi</strong>, kodun büyük verilerle nasıl performans göstereceğini tahmin eder</li>
+            <li><strong>Big O</strong>, en kötü durum performansını gösterir (en çok kullanılan)</li>
+            <li><strong>Big Omega</strong>, en iyi durum performansını gösterir</li>
+            <li><strong>Big Theta</strong>, ortalama/kesin performansı gösterir</li>
+            <li><strong>Zaman karmaşıklığı</strong>: Algoritma ne kadar sürer?</li>
+            <li><strong>Alan karmaşıklığı</strong>: Algoritma ne kadar bellek kullanır?</li>
+            <li>Doğru veri yapısı seçimi, programınızın performansını dramatik şekilde etkiler</li>
+        </ul>
+    </div>
+
+    <div class="nav-footer">
+        <a href="siniflar.html" class="btn">⬅️ Önceki: Sınıflar</a>
+        <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="1a_analiz_giris.html" class="btn btn-next">Sonraki: Bellek Modeli ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let pyodideReady = false;
+    let pyodide = null;
+
+    async function main() {
+        pyodide = await loadPyodide();
+        pyodideReady = true;
+    }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+</script>
+</body>
+</html>
+

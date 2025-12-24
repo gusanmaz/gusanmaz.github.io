@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.2: Normal Queue Problemi ve Circular Queue</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .clock-container { 
+            position: relative; width: 300px; height: 300px; margin: 20px auto; 
+            border: 2px dashed #ccc; border-radius: 50%; 
+        }
+        .cell {
+            position: absolute; width: 50px; height: 50px; background: white; border: 2px solid #333;
+            border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 14px; transition: all 0.3s;
+        }
+        .cell.filled { background: #1abc9c; color: white; border-color: #16a085; }
+        .idx-label { font-size: 10px; color: #666; position: absolute; top: -15px; }
+
+        .array-visual {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+        .array-cell {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: #ecf0f1;
+        }
+        .array-cell.used { background: #3498db; color: white; }
+        .array-cell.head-cell { border-color: #27ae60; border-width: 3px; }
+        .array-cell.tail-cell { border-color: #e74c3c; border-width: 3px; }
+        .array-cell.wasted { background: #e74c3c; color: white; opacity: 0.5; }
+
+        .pointer-label {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .problem-box {
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+            border: 2px solid #fc8181;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .solution-box {
+            background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+            border: 2px solid #68d391;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🔄 3.2: Normal Queue Problemi ve Circular Queue</h1>
+        <p>Neden Dairesel Kuyruk Gerekli?</p>
+    </header>
+
+    <!-- YENİ BÖLÜM: Normal Queue Problemi -->
+    <div class="section">
+        <h2>🤔 Önce Normal (Linear) Queue'yu Anlayalım</h2>
+        <p>Bir diziyi queue olarak kullandığımızda <strong>head</strong> (baş) ve <strong>tail</strong> (kuyruk) pointer'ları kullanırız:</p>
+
+        <ul>
+            <li><strong>head:</strong> İlk elemanın (çıkacak olanın) indeksi</li>
+            <li><strong>tail:</strong> Yeni elemanın ekleneceği indeks</li>
+        </ul>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Normal (Linear) Queue - Problem Gösterimi</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code-linear')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code-linear')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code-linear"><code class="language-python">import numpy as np
+
+class LinearQueue:
+    """
+    Normal (Dairesel Olmayan) Queue
+    Problem: tail sona ulaştığında, başta yer olsa bile ekleme yapılamaz!
+    """
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)  # Sabit boyutlu numpy dizisi
+        self.head = 0   # Çıkış noktası (dequeue buradan)
+        self.tail = 0   # Giriş noktası (enqueue buraya)
+        self.size = 0   # Mevcut eleman sayısı
+
+    def enqueue(self, val):
+        # ❌ PROBLEM: tail dizinin sonuna ulaştıysa,
+        # baş tarafta boş yer olsa bile ekleme yapamayız!
+        if self.tail == self.capacity:
+            print(f"❌ Dolu! tail={self.tail} (Dizinin sonuna ulaşıldı)")
+            print(f"   Başta {self.head} boş hücre var ama kullanamıyoruz!")
+            return False
+
+        self.data[self.tail] = val
+        self.tail += 1  # Sadece artırıyoruz, modülo YOK
+        self.size += 1
+        print(f"✅ Enqueue({val}) -> Dizi: {self.data}, head={self.head}, tail={self.tail}")
+        return True
+
+    def dequeue(self):
+        if self.size == 0:
+            print("❌ Boş!")
+            return None
+
+        val = self.data[self.head]
+        self.data[self.head] = 0  # Görsel temizlik (zorunlu değil)
+        self.head += 1  # Sadece artırıyoruz, modülo YOK
+        self.size -= 1
+        print(f"🔻 Dequeue() -> {val}, Dizi: {self.data}, head={self.head}, tail={self.tail}")
+        return val
+
+
+# ===== PROBLEMİ GÖSTEREN SENARYO =====
+print("=" * 60)
+print("📌 NORMAL QUEUE PROBLEMİ")
+print("=" * 60)
+
+q = LinearQueue(5)
+
+# Adım 1: 3 eleman ekle
+print("\n1️⃣ Üç eleman ekliyoruz:")
+q.enqueue(10)
+q.enqueue(20)
+q.enqueue(30)
+
+# Adım 2: 2 eleman çıkar
+print("\n2️⃣ İki eleman çıkarıyoruz:")
+q.dequeue()  # 10 çıkar
+q.dequeue()  # 20 çıkar
+
+# Adım 3: 2 eleman daha ekle
+print("\n3️⃣ İki eleman daha ekliyoruz:")
+q.enqueue(40)
+q.enqueue(50)
+
+# Adım 4: Bir eleman daha eklemeye çalış
+print("\n4️⃣ Bir eleman daha eklemeye çalışıyoruz:")
+q.enqueue(60)  # ❌ BAŞARISIZ! Başta yer var ama kullanamıyoruz!
+
+print("\n" + "=" * 60)
+print("📊 SONUÇ:")
+print(f"   Dizide sadece {q.size} eleman var")
+print(f"   Ama {q.head} hücre boşa gitti (kullanılamıyor)!")
+print("   Bu hafıza israfıdır ve 'false overflow' denir.")
+print("=" * 60)</code></pre>
+
+            <textarea id="code-linear" class="code-editor">import numpy as np
+
+class LinearQueue:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)
+        self.head = 0
+        self.tail = 0
+        self.size = 0
+
+    def enqueue(self, val):
+        if self.tail == self.capacity:
+            print(f"❌ Dolu! tail={self.tail} (Dizinin sonuna ulaşıldı)")
+            print(f"   Başta {self.head} boş hücre var ama kullanamıyoruz!")
+            return False
+        self.data[self.tail] = val
+        self.tail += 1
+        self.size += 1
+        print(f"✅ Enqueue({val}) -> Dizi: {self.data}, head={self.head}, tail={self.tail}")
+        return True
+
+    def dequeue(self):
+        if self.size == 0:
+            print("❌ Boş!")
+            return None
+        val = self.data[self.head]
+        self.data[self.head] = 0
+        self.head += 1
+        self.size -= 1
+        print(f"🔻 Dequeue() -> {val}, Dizi: {self.data}, head={self.head}, tail={self.tail}")
+        return val
+
+q = LinearQueue(5)
+q.enqueue(10)
+q.enqueue(20)
+q.enqueue(30)
+q.dequeue()
+q.dequeue()
+q.enqueue(40)
+q.enqueue(50)
+q.enqueue(60)  # Başarısız olacak!</textarea>
+
+            <div id="output-code-linear" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Problemi Görselleştirelim</h2>
+
+        <div class="problem-box">
+            <h4 style="margin-top:0; color:#c53030;">❌ Normal Queue Problemi: "False Overflow"</h4>
+
+            <p><strong>Başlangıç durumu (3 eleman eklendi):</strong></p>
+            <div class="array-visual">
+                <div class="array-cell used head-cell">10</div>
+                <div class="array-cell used">20</div>
+                <div class="array-cell used tail-cell">30</div>
+                <div class="array-cell">-</div>
+                <div class="array-cell">-</div>
+            </div>
+            <div class="pointer-label">head=0, tail=3</div>
+
+            <p><strong>2 eleman çıkarıldıktan sonra:</strong></p>
+            <div class="array-visual">
+                <div class="array-cell wasted">💀</div>
+                <div class="array-cell wasted">💀</div>
+                <div class="array-cell used head-cell">30</div>
+                <div class="array-cell used">40</div>
+                <div class="array-cell used tail-cell">50</div>
+            </div>
+            <div class="pointer-label">head=2, tail=5 (dizinin sonu!)</div>
+
+            <p style="color:#c53030; font-weight:bold;">
+                ⚠️ tail=5 oldu ama dizi boyutu 5. Başta 2 hücre boş olmasına rağmen yeni eleman ekleyemiyoruz!
+            </p>
+        </div>
+
+        <div class="solution-box">
+            <h4 style="margin-top:0; color:#276749;">✅ Çözüm: Circular Queue (Modülo ile)</h4>
+            <p>Pointer'ları <code>% capacity</code> ile sarmalayarak dizinin başına dönebiliriz:</p>
+            <pre style="background:#2d2d30; color:#9cdcfe; padding:15px; border-radius:8px; margin:10px 0;">
+tail = (tail + 1) % capacity  # 5 % 5 = 0 (başa döner!)
+head = (head + 1) % capacity
+            </pre>
+            <p>Bu sayede dizi <strong>dairesel</strong> olarak kullanılır ve hafıza israfı önlenir.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔄 Circular Queue Görsel Simülasyonu</h2>
+        <div class="clock-container" id="clock"></div>
+        <div style="text-align: center;">
+            <button class="btn btn-run" onclick="demoEnqueue()">Enqueue</button>
+            <button class="btn btn-reset" onclick="demoDequeue()">Dequeue</button>
+            <p id="status" style="margin-top: 10px;">Head: 0, Tail: 0</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Circular Queue - Numpy Implementasyonu</h2>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code"><code class="language-python">import numpy as np
+
+class CircularQueue:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)
+        self.head = 0
+        self.tail = 0
+        self.size = 0
+        
+    def enqueue(self, val):
+        if self.size == self.capacity:
+            print("❌ Gerçekten dolu! (Tüm hücreler kullanımda)")
+            return False
+        self.data[self.tail] = val
+        # 🔑 MODÜLO İLE SARMALAMA - dizinin başına döner!
+        self.tail = (self.tail + 1) % self.capacity
+        self.size += 1
+        print(f"✅ Enqueue({val}) -> Dizi: {self.data}, head={self.head}, tail={self.tail}")
+        return True
+
+    def dequeue(self):
+        if self.size == 0:
+            print("❌ Boş!")
+            return None
+        val = self.data[self.head]
+        self.data[self.head] = 0
+        # 🔑 MODÜLO İLE SARMALAMA
+        self.head = (self.head + 1) % self.capacity
+        self.size -= 1
+        print(f"🔻 Dequeue() -> {val}, Dizi: {self.data}, head={self.head}, tail={self.tail}")
+        return val
+
+# ===== CIRCULAR QUEUE'NUN AVANTAJINI GÖSTER =====
+print("=" * 60)
+print("📌 CIRCULAR QUEUE - AYNI SENARYO")
+print("=" * 60)
+
+q = CircularQueue(5)
+
+print("\n1️⃣ Üç eleman ekliyoruz:")
+q.enqueue(10)
+q.enqueue(20)
+q.enqueue(30)
+
+print("\n2️⃣ İki eleman çıkarıyoruz:")
+q.dequeue()
+q.dequeue()
+
+print("\n3️⃣ İki eleman daha ekliyoruz:")
+q.enqueue(40)
+q.enqueue(50)
+
+print("\n4️⃣ Şimdi bir eleman daha eklemeye çalışalım:")
+q.enqueue(60)  # ✅ BAŞARILI! tail=0'a döndü!
+
+print("\n5️⃣ Hatta bir tane daha ekleyelim:")
+q.enqueue(70)  # ✅ BAŞARILI! tail=1'e geçti!
+
+print("\n" + "=" * 60)
+print("📊 SONUÇ:")
+print(f"   Circular Queue ile tüm {q.capacity} hücre kullanılabilir!")
+print(f"   Mevcut eleman sayısı: {q.size}")
+print("   Hafıza israfı YOK!")
+print("=" * 60)</code></pre>
+
+            <textarea id="code" class="code-editor">import numpy as np
+
+class CircularQueue:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)
+        self.head = 0
+        self.tail = 0
+        self.size = 0
+    def enqueue(self, val):
+        if self.size == self.capacity:
+            print("❌ Gerçekten dolu!")
+            return False
+        self.data[self.tail] = val
+        self.tail = (self.tail + 1) % self.capacity  # Modülo!
+        self.size += 1
+        print(f"✅ Enqueue({val}) -> {self.data}, head={self.head}, tail={self.tail}")
+        return True
+    def dequeue(self):
+        if self.size == 0:
+            print("❌ Boş!")
+            return None
+        val = self.data[self.head]
+        self.data[self.head] = 0
+        self.head = (self.head + 1) % self.capacity  # Modülo!
+        self.size -= 1
+        print(f"🔻 Dequeue() -> {val}, head={self.head}, tail={self.tail}")
+        return val
+
+q = CircularQueue(5)
+q.enqueue(10)
+q.enqueue(20)
+q.enqueue(30)
+q.dequeue()
+q.dequeue()
+q.enqueue(40)
+q.enqueue(50)
+q.enqueue(60)  # Şimdi çalışır!
+q.enqueue(70)  # Bu da çalışır!</textarea>
+
+            <div id="output-code" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- Karşılaştırma Tablosu -->
+    <div class="section">
+        <h2>📊 Linear vs Circular Queue Karşılaştırması</h2>
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white;">
+                    <th style="padding: 15px;">Özellik</th>
+                    <th style="padding: 15px;">Linear Queue</th>
+                    <th style="padding: 15px;">Circular Queue</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Hafıza Kullanımı</strong></td>
+                    <td style="padding: 12px; color: #e74c3c;">❌ İsraf var (false overflow)</td>
+                    <td style="padding: 12px; color: #27ae60;">✅ Tam verimli</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Pointer Güncelleme</strong></td>
+                    <td style="padding: 12px;"><code>tail++</code></td>
+                    <td style="padding: 12px;"><code>tail = (tail+1) % cap</code></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Doluluk Kontrolü</strong></td>
+                    <td style="padding: 12px;"><code>tail == capacity</code></td>
+                    <td style="padding: 12px;"><code>size == capacity</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px;"><strong>Zaman Karmaşıklığı</strong></td>
+                    <td style="padding: 12px;">O(1)</td>
+                    <td style="padding: 12px;">O(1)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modülo Aritmetiği Açıklaması -->
+    <div class="section">
+        <h2>🔢 Modülo (%) Operatörü Nasıl Çalışır?</h2>
+        <p>Modülo, bölme işleminin <strong>kalanını</strong> verir ve circular yapılar için mükemmeldir:</p>
+
+        <pre style="background: #2d2d30; color: #9cdcfe; padding: 20px; border-radius: 10px; overflow-x: auto;"><code># Kapasite = 5 iken:
+0 % 5 = 0  # Başlangıç
+1 % 5 = 1
+2 % 5 = 2
+3 % 5 = 3
+4 % 5 = 4
+5 % 5 = 0  # ← Tekrar başa döndü!
+6 % 5 = 1
+7 % 5 = 2
+...
+
+# Bu sayede dizi hiçbir zaman "taşmaz",
+# sadece başa döner (wrap-around)</code></pre>
+
+        <p><strong>Gerçek hayat analojisi:</strong> Saat kadranı! 12'den sonra 1'e döner (12 % 12 = 0, sonra 1, 2, 3...).</p>
+    </div>
+
+    <div class="nav-footer">
+        <a href="3a_queue_giris.html" class="btn">⬅️ Önceki: Queue</a>
+        <a href="3c_queue_python.html" class="btn btn-next">Sonraki: Python ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    // Visual
+    const container = document.getElementById('clock');
+    const status = document.getElementById('status');
+    const CAP = 8; const RADIUS = 130;
+    let head = 0; let tail = 0; let size = 0;
+    const items = new Array(CAP).fill(null);
+
+    function initVisual() {
+        container.innerHTML = '';
+        for(let i=0; i<CAP; i++) {
+            const angle = (i * (360 / CAP)) - 90;
+            const rad = angle * (Math.PI / 180);
+            const x = 150 + RADIUS * Math.cos(rad) - 25;
+            const y = 150 + RADIUS * Math.sin(rad) - 25;
+            const cell = document.createElement('div');
+            cell.className = 'cell'; cell.id = `cell-${i}`;
+            cell.style.left = `${x}px`; cell.style.top = `${y}px`;
+            cell.innerHTML = `<span class="idx-label">${i}</span><span class="val">-</span>`;
+            container.appendChild(cell);
+        }
+        updatePointers();
+    }
+
+    function updatePointers() {
+        for(let i=0; i<CAP; i++) {
+            const cell = document.getElementById(`cell-${i}`);
+            if(items[i] !== null) { cell.classList.add('filled'); cell.querySelector('.val').innerText = items[i]; }
+            else { cell.classList.remove('filled'); cell.querySelector('.val').innerText = '-'; }
+        }
+        status.innerText = `Head: ${head}, Tail: ${tail}, Size: ${size}`;
+    }
+
+    function demoEnqueue() {
+        if(size < CAP) { items[tail] = String.fromCharCode(65 + Math.floor(Math.random()*26)); tail = (tail + 1) % CAP; size++; updatePointers(); }
+    }
+    function demoDequeue() {
+        if(size > 0) { items[head] = null; head = (head + 1) % CAP; size--; updatePointers(); }
+    }
+    initVisual();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); await pyodide.loadPackage("numpy"); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+</body>
+</html>

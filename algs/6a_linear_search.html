@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.1: Lineer Arama (Linear Search)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .search-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .array-visual {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .array-cell .index {
+            position: absolute;
+            top: -20px;
+            font-size: 11px;
+            color: #666;
+        }
+        .array-cell.checking {
+            background: #f39c12;
+            color: white;
+            transform: scale(1.1);
+        }
+        .array-cell.found {
+            background: #27ae60;
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.5);
+        }
+        .array-cell.checked {
+            background: #ecf0f1;
+            color: #999;
+        }
+        .array-cell.not-found {
+            background: #e74c3c;
+            color: white;
+        }
+        .complexity-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .complexity-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid;
+        }
+        .complexity-item.best { border-color: #27ae60; }
+        .complexity-item.avg { border-color: #f39c12; }
+        .complexity-item.worst { border-color: #e74c3c; }
+        .step-log {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .controls input {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🔍 6.1: Lineer Arama (Linear Search)</h1>
+        <p>En Basit Arama Algoritması</p>
+    </header>
+
+    <div class="section">
+        <h2>📌 Lineer Arama Nedir?</h2>
+        <p><strong>Lineer Arama (Linear Search)</strong>, bir dizide aranan elemanı bulmak için baştan sona tüm elemanları tek tek kontrol eden en basit arama algoritmasıdır.</p>
+
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3;">
+            <h4 style="margin-top: 0; color: #1565c0;">🎯 Algoritma Mantığı</h4>
+            <ol>
+                <li>Dizinin ilk elemanından başla</li>
+                <li>Mevcut elemanı aranan değerle karşılaştır</li>
+                <li>Eşleşme varsa → indeksi döndür (BULUNDU!)</li>
+                <li>Eşleşme yoksa → sonraki elemana geç</li>
+                <li>Dizi bitene kadar tekrarla</li>
+                <li>Hiç bulunamazsa → -1 döndür (YOK!)</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <h3>🎮 İnteraktif Lineer Arama Simülasyonu</h3>
+
+        <div class="array-visual" id="arrayVisual">
+            <!-- JS ile doldurulacak -->
+        </div>
+
+        <div class="controls">
+            <input type="number" id="searchValue" placeholder="Ara..." min="1" max="99">
+            <button class="btn btn-run" onclick="startLinearSearch()">🔍 Ara</button>
+            <button class="btn" onclick="stepSearch()">⏭️ Adım</button>
+            <button class="btn btn-reset" onclick="resetSearch()">🔄 Sıfırla</button>
+        </div>
+
+        <div class="step-log" id="stepLog">
+            🎯 Bir sayı girin ve "Ara" butonuna tıklayın...
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Zaman Karmaşıklığı Analizi</h2>
+
+        <div class="complexity-box">
+            <div class="complexity-item best">
+                <h4 style="color: #27ae60; margin: 0;">En İyi Durum</h4>
+                <p style="font-size: 2em; margin: 10px 0; font-weight: bold;">O(1)</p>
+                <p style="margin: 0; font-size: 0.9em;">Aranan eleman ilk sırada</p>
+            </div>
+            <div class="complexity-item avg">
+                <h4 style="color: #f39c12; margin: 0;">Ortalama Durum</h4>
+                <p style="font-size: 2em; margin: 10px 0; font-weight: bold;">O(n/2) = O(n)</p>
+                <p style="margin: 0; font-size: 0.9em;">Ortalama ortada bulunur</p>
+            </div>
+            <div class="complexity-item worst">
+                <h4 style="color: #e74c3c; margin: 0;">En Kötü Durum</h4>
+                <p style="font-size: 2em; margin: 10px 0; font-weight: bold;">O(n)</p>
+                <p style="margin: 0; font-size: 0.9em;">Sonda veya hiç yok</p>
+            </div>
+        </div>
+
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <strong>💡 Alan Karmaşıklığı: O(1)</strong>
+            <p style="margin: 5px 0 0 0;">Sadece birkaç değişken kullanır (i, target). Ek bellek gerekmez.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Python Implementasyonu</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code1')">✏️ Düzenle</button>
+                </div>
+            </div>
+            <pre id="view-code1"><code class="language-python">def linear_search(arr, target):
+    """
+    Lineer Arama Algoritması
+
+    Args:
+        arr: Aranacak dizi
+        target: Aranan değer
+
+    Returns:
+        Bulunursa indeks, bulunamazsa -1
+    """
+    for i in range(len(arr)):
+        print(f"Adım {i+1}: arr[{i}] = {arr[i]}", end="")
+
+        if arr[i] == target:
+            print(f" ✅ BULUNDU!")
+            return i
+        else:
+            print(f" ❌ {arr[i]} ≠ {target}")
+
+    print("Eleman dizide bulunamadı!")
+    return -1
+
+# Test
+dizi = [64, 34, 25, 12, 22, 11, 90, 45]
+print(f"Dizi: {dizi}")
+print(f"Aranan: 22\n")
+
+sonuc = linear_search(dizi, 22)
+print(f"\nSonuç: İndeks = {sonuc}")
+
+print("\n" + "="*50)
+print("Olmayan bir eleman arayalım:")
+print(f"\nAranan: 100\n")
+sonuc2 = linear_search(dizi, 100)
+print(f"\nSonuç: {sonuc2} (bulunamadı)")</code></pre>
+            <textarea id="code1" class="code-editor"></textarea>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔄 Farklı Varyasyonlar</h2>
+
+        <h3>1. Tüm Eşleşmeleri Bulma</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code2"><code class="language-python">def find_all(arr, target):
+    """Tüm eşleşen indeksleri döndürür"""
+    indices = []
+    for i in range(len(arr)):
+        if arr[i] == target:
+            indices.append(i)
+    return indices
+
+# Test
+dizi = [5, 3, 7, 3, 8, 3, 2, 3]
+print(f"Dizi: {dizi}")
+print(f"Aranan: 3")
+
+sonuclar = find_all(dizi, 3)
+print(f"Bulunan indeksler: {sonuclar}")
+print(f"Toplam {len(sonuclar)} adet bulundu!")</code></pre>
+            <textarea id="code2" class="code-editor"></textarea>
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <h3>2. Minimum/Maksimum Bulma</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code3"><code class="language-python">def find_min_max(arr):
+    """Dizideki minimum ve maksimum değerleri bulur"""
+    if len(arr) == 0:
+        return None, None
+
+    min_val = arr[0]
+    max_val = arr[0]
+
+    for i in range(1, len(arr)):
+        if arr[i] < min_val:
+            min_val = arr[i]
+        if arr[i] > max_val:
+            max_val = arr[i]
+
+    return min_val, max_val
+
+# Test
+dizi = [64, 34, 25, 12, 22, 11, 90, 45]
+print(f"Dizi: {dizi}")
+
+minimum, maksimum = find_min_max(dizi)
+print(f"Minimum: {minimum}")
+print(f"Maksimum: {maksimum}")</code></pre>
+            <textarea id="code3" class="code-editor"></textarea>
+            <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ Avantajları ve ❌ Dezavantajları</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="background: #d4edda; padding: 20px; border-radius: 10px;">
+                <h4 style="color: #155724; margin-top: 0;">✅ Avantajları</h4>
+                <ul style="margin: 0;">
+                    <li><strong>Basit:</strong> Anlaması ve yazması çok kolay</li>
+                    <li><strong>Sıralama gerektirmez:</strong> Karışık dizilerde çalışır</li>
+                    <li><strong>Az bellek:</strong> O(1) ek alan</li>
+                    <li><strong>Küçük dizilerde hızlı:</strong> n < 100 için yeterli</li>
+                    <li><strong>Linked List'te çalışır:</strong> Rastgele erişim gerekmez</li>
+                </ul>
+            </div>
+            <div style="background: #f8d7da; padding: 20px; border-radius: 10px;">
+                <h4 style="color: #721c24; margin-top: 0;">❌ Dezavantajları</h4>
+                <ul style="margin: 0;">
+                    <li><strong>Yavaş:</strong> Büyük dizilerde O(n) çok yavaş</li>
+                    <li><strong>Her seferinde tarama:</strong> Cache'leme yok</li>
+                    <li><strong>Verimsiz:</strong> Sıralı dizilerde bile O(n)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌍 Ne Zaman Kullanılır?</h2>
+        <ul>
+            <li>📦 <strong>Küçük veri setleri:</strong> n < 100 eleman</li>
+            <li>🔀 <strong>Sırasız veriler:</strong> Sıralama maliyeti aramadan fazla olduğunda</li>
+            <li>1️⃣ <strong>Tek seferlik arama:</strong> Aynı dizide tekrar arama yapılmayacaksa</li>
+            <li>🔗 <strong>Linked List:</strong> Rastgele erişim mümkün olmadığında</li>
+            <li>📝 <strong>Basit uygulamalar:</strong> Hız kritik değilse</li>
+        </ul>
+    </div>
+
+    <div class="nav-footer">
+        <a href="5d_bst_ornekler.html" class="btn">⬅️ Önceki: BST Örnekler</a>
+        <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="6b_binary_search.html" class="btn btn-next">Sonraki: Binary Search ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    // Lineer Arama Simülasyonu
+    const sampleArray = [64, 34, 25, 12, 22, 11, 90, 45];
+    let currentIndex = -1;
+    let searchTarget = null;
+    let isSearching = false;
+    let found = false;
+
+    function renderArray() {
+        const container = document.getElementById('arrayVisual');
+        container.innerHTML = '';
+
+        sampleArray.forEach((val, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.id = `cell-${i}`;
+            cell.innerHTML = `<span class="index">[${i}]</span>${val}`;
+
+            if (i < currentIndex) {
+                cell.classList.add('checked');
+            } else if (i === currentIndex) {
+                if (found && val === searchTarget) {
+                    cell.classList.add('found');
+                } else if (isSearching) {
+                    cell.classList.add('checking');
+                }
+            }
+
+            container.appendChild(cell);
+        });
+    }
+
+    function startLinearSearch() {
+        const input = document.getElementById('searchValue');
+        searchTarget = parseInt(input.value);
+
+        if (isNaN(searchTarget)) {
+            alert('Lütfen geçerli bir sayı girin!');
+            return;
+        }
+
+        currentIndex = 0;
+        isSearching = true;
+        found = false;
+
+        document.getElementById('stepLog').innerHTML = `🔍 ${searchTarget} aranıyor...\n`;
+        runAutoSearch();
+    }
+
+    async function runAutoSearch() {
+        while (currentIndex < sampleArray.length && isSearching && !found) {
+            await new Promise(r => setTimeout(r, 500));
+            stepSearch();
+        }
+    }
+
+    function stepSearch() {
+        if (currentIndex >= sampleArray.length) {
+            document.getElementById('stepLog').innerHTML += `\n❌ ${searchTarget} dizide bulunamadı!`;
+            isSearching = false;
+            // Tüm hücreleri not-found yap
+            sampleArray.forEach((_, i) => {
+                document.getElementById(`cell-${i}`).classList.add('not-found');
+            });
+            return;
+        }
+
+        const log = document.getElementById('stepLog');
+        const current = sampleArray[currentIndex];
+
+        log.innerHTML += `\nAdım ${currentIndex + 1}: arr[${currentIndex}] = ${current}`;
+
+        if (current === searchTarget) {
+            log.innerHTML += ` ✅ BULUNDU!`;
+            found = true;
+            isSearching = false;
+            renderArray();
+            return;
+        } else {
+            log.innerHTML += ` ❌ ${current} ≠ ${searchTarget}`;
+        }
+
+        currentIndex++;
+        renderArray();
+    }
+
+    function resetSearch() {
+        currentIndex = -1;
+        searchTarget = null;
+        isSearching = false;
+        found = false;
+        document.getElementById('searchValue').value = '';
+        document.getElementById('stepLog').innerHTML = '🎯 Bir sayı girin ve "Ara" butonuna tıklayın...';
+        renderArray();
+    }
+
+    // Başlangıçta render
+    renderArray();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+
+    async function main() {
+        pyodide = await loadPyodide();
+        pyodideReady = true;
+    }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') {
+            editor.style.display = 'none';
+            view.style.display = 'block';
+        } else {
+            editor.style.display = 'block';
+            view.style.display = 'none';
+            editor.value = view.textContent;
+            editor.focus();
+        }
+    }
+</script>
+</body>
+</html>
+

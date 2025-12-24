@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0.2: Python Ön Bilgiler</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .concept-card {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .concept-card h4 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .syntax-box {
+            background: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .compare-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .compare-item h5 {
+            margin-top: 0;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📚 0.2: Python Ön Bilgiler</h1>
+        <p>Veri Yapıları ve Algoritmalar için Gerekli Python Temelleri</p>
+    </header>
+
+    <div class="section">
+        <h2>📌 Bu Derste Göreceğiniz Python Kavramları</h2>
+        <p>Bu ders notlarında kullanılan bazı Python özellikleri, standart programlama derslerinde anlatılmayabilir. Bu sayfa size gerekli ön bilgiyi sağlayacaktır.</p>
+    </div>
+
+    <!-- F-STRING -->
+    <div class="section">
+        <h2>1️⃣ f-string (Formatlı String)</h2>
+        <p><strong>f-string</strong>, Python 3.6+ ile gelen, string içine değişken yerleştirmenin en kolay yoludur.</p>
+
+        <div class="syntax-box">
+            <strong>Sözdizimi:</strong> <code>f"Metin {değişken} metin"</code>
+        </div>
+
+        <div class="compare-grid">
+            <div class="compare-item">
+                <h5>❌ Eski Yöntem (format)</h5>
+                <pre><code class="language-python">isim = "Ali"
+yas = 25
+print("İsim: {} Yaş: {}".format(isim, yas))</code></pre>
+            </div>
+            <div class="compare-item">
+                <h5>✅ Yeni Yöntem (f-string)</h5>
+                <pre><code class="language-python">isim = "Ali"
+yas = 25
+print(f"İsim: {isim} Yaş: {yas}")</code></pre>
+            </div>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code1"><code class="language-python"># f-string Örnekleri
+isim = "Ayşe"
+not_ortalamasi = 85.7
+
+# Basit kullanım
+print(f"Öğrenci: {isim}")
+
+# Matematiksel işlem
+print(f"5 + 3 = {5 + 3}")
+
+# Ondalık basamak formatlama
+print(f"Not ortalaması: {not_ortalamasi:.1f}")
+print(f"Pi sayısı: {3.14159265:.2f}")
+
+# Hizalama
+for i in range(1, 4):
+    print(f"Sayı: {i:3d} - Karesi: {i**2:5d}")</code></pre>
+            <textarea id="code1" class="code-editor">isim = "Ayşe"
+not_ortalamasi = 85.7
+print(f"Öğrenci: {isim}")
+print(f"Not ortalaması: {not_ortalamasi:.1f}")</textarea>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- TERNARY IF -->
+    <div class="section">
+        <h2>2️⃣ Ternary If (Tek Satırlık Koşul)</h2>
+        <p><strong>Ternary if</strong>, bir koşulu tek satırda yazmamızı sağlar. Karmaşık görünebilir ama öğrenince çok pratiktir.</p>
+
+        <div class="syntax-box">
+            <strong>Sözdizimi:</strong> <code>değer_eğer_doğruysa if koşul else değer_eğer_yanlışsa</code>
+        </div>
+
+        <div class="compare-grid">
+            <div class="compare-item">
+                <h5>📝 Uzun Yol (4 satır)</h5>
+                <pre><code class="language-python">if yas >= 18:
+    durum = "Yetişkin"
+else:
+    durum = "Çocuk"</code></pre>
+            </div>
+            <div class="compare-item">
+                <h5>⚡ Kısa Yol (1 satır)</h5>
+                <pre><code class="language-python">durum = "Yetişkin" if yas >= 18 else "Çocuk"</code></pre>
+            </div>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code2"><code class="language-python"># Ternary If Örnekleri
+
+# Örnek 1: Yaş kontrolü
+yas = 17
+durum = "Yetişkin" if yas >= 18 else "Çocuk"
+print(f"Yaş: {yas} → {durum}")
+
+# Örnek 2: Pozitif/Negatif
+sayi = -5
+isaret = "Pozitif" if sayi > 0 else "Negatif veya Sıfır"
+print(f"Sayı: {sayi} → {isaret}")
+
+# Örnek 3: Çift/Tek kontrolü
+sayi = 7
+sonuc = "Çift" if sayi % 2 == 0 else "Tek"
+print(f"{sayi} → {sonuc} sayı")
+
+# Örnek 4: Maksimum bulma
+a, b = 10, 25
+maksimum = a if a > b else b
+print(f"Max({a}, {b}) = {maksimum}")
+
+# Örnek 5: Boş liste kontrolü
+liste = []
+mesaj = "Liste dolu" if liste else "Liste boş"
+print(mesaj)</code></pre>
+            <textarea id="code2" class="code-editor">yas = 17
+durum = "Yetişkin" if yas >= 18 else "Çocuk"
+print(f"Yaş: {yas} → {durum}")</textarea>
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Dikkat:</strong> Ternary if'i sadece basit koşullarda kullanın. Karmaşık mantık için normal if-else daha okunabilirdir.
+        </div>
+    </div>
+
+    <!-- LIST COMPREHENSION -->
+    <div class="section">
+        <h2>3️⃣ List Comprehension (Liste Oluşturma Kısayolu)</h2>
+        <p>Döngü ile liste oluşturmayı tek satıra indirger.</p>
+
+        <div class="syntax-box">
+            <strong>Sözdizimi:</strong> <code>[ifade for eleman in liste]</code><br>
+            <strong>Filtreli:</strong> <code>[ifade for eleman in liste if koşul]</code>
+        </div>
+
+        <div class="compare-grid">
+            <div class="compare-item">
+                <h5>📝 Uzun Yol</h5>
+                <pre><code class="language-python">kareler = []
+for i in range(5):
+    kareler.append(i ** 2)</code></pre>
+            </div>
+            <div class="compare-item">
+                <h5>⚡ Kısa Yol</h5>
+                <pre><code class="language-python">kareler = [i ** 2 for i in range(5)]</code></pre>
+            </div>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code3"><code class="language-python"># List Comprehension Örnekleri
+
+# 1. Kareleri hesapla
+kareler = [x**2 for x in range(6)]
+print(f"Kareler: {kareler}")
+
+# 2. Sadece çift sayılar (filtreli)
+ciftler = [x for x in range(10) if x % 2 == 0]
+print(f"Çift sayılar: {ciftler}")
+
+# 3. Stringleri büyük harfe çevir
+isimler = ["ali", "veli", "ayşe"]
+buyuk_isimler = [isim.upper() for isim in isimler]
+print(f"Büyük harfli: {buyuk_isimler}")
+
+# 4. Negatif sayıları 0 yap
+sayilar = [3, -1, 4, -5, 9, -2]
+pozitifler = [x if x > 0 else 0 for x in sayilar]
+print(f"Negatifler sıfırlandı: {pozitifler}")</code></pre>
+            <textarea id="code3" class="code-editor">kareler = [x**2 for x in range(6)]
+print(f"Kareler: {kareler}")</textarea>
+            <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- UNDERSCORE IN NUMBERS -->
+    <div class="section">
+        <h2>4️⃣ Sayılarda Alt Çizgi (_)</h2>
+        <p>Büyük sayıları okunabilir yapmak için Python'da alt çizgi kullanabilirsiniz. Python bu alt çizgileri yok sayar.</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code4')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code4"><code class="language-python"># Sayılarda okunabilirlik için alt çizgi
+
+# Zor okunur:
+buyuk_sayi1 = 1000000000
+
+# Kolay okunur (Python bunu kabul eder):
+buyuk_sayi2 = 1_000_000_000
+
+print(f"Zor okunur: {buyuk_sayi1}")
+print(f"Kolay okunur: {buyuk_sayi2}")
+print(f"İkisi eşit mi? {buyuk_sayi1 == buyuk_sayi2}")
+
+# Veri yapıları derslerinde sık kullanılır:
+N = 1_000_000  # 1 Milyon
+print(f"Test boyutu: {N:,} eleman")</code></pre>
+            <textarea id="code4" class="code-editor">N = 1_000_000
+print(f"Test boyutu: {N:,} eleman")</textarea>
+            <div id="output-code4" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- TIME MODULE -->
+    <div class="section">
+        <h2>5️⃣ time Modülü ve Performans Ölçümü</h2>
+        <p>Algoritmaların hızını ölçmek için <code>time</code> modülünü kullanırız.</p>
+
+        <div class="concept-card">
+            <h4>🔑 Temel Fonksiyonlar</h4>
+            <ul>
+                <li><code>time.time()</code> → Şu anki zaman (saniye olarak)</li>
+                <li><code>time.perf_counter()</code> → Daha hassas ölçüm</li>
+            </ul>
+            <p><strong>Kullanım:</strong> Başlangıç zamanını kaydet → İşlemi yap → Bitiş zamanını kaydet → Farkı hesapla</p>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code5')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code5"><code class="language-python">import time
+
+# Basit zaman ölçümü şablonu
+def olcumlu_toplama(n):
+    baslangic = time.time()  # 1. Başlangıç
+
+    toplam = 0
+    for i in range(n):
+        toplam += i
+
+    bitis = time.time()      # 2. Bitiş
+    gecen_sure = bitis - baslangic
+    return gecen_sure
+
+# Test
+for boyut in [100_000, 1_000_000, 10_000_000]:
+    sure = olcumlu_toplama(boyut)
+    print(f"{boyut:>12,} eleman: {sure:.4f} saniye")</code></pre>
+            <textarea id="code5" class="code-editor">import time
+baslangic = time.time()
+# İşlem...
+toplam = sum(range(1_000_000))
+bitis = time.time()
+print(f"Süre: {bitis - baslangic:.4f} sn")</textarea>
+            <div id="output-code5" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- UNPACKING -->
+    <div class="section">
+        <h2>6️⃣ Tuple Unpacking (Çoklu Atama)</h2>
+        <p>Birden fazla değişkene aynı anda değer atayabilirsiniz.</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code6')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code6"><code class="language-python"># Tuple Unpacking Örnekleri
+
+# 1. Basit çoklu atama
+a, b, c = 1, 2, 3
+print(f"a={a}, b={b}, c={c}")
+
+# 2. Swap (değişkenleri takas etme)
+x, y = 10, 20
+print(f"Önce: x={x}, y={y}")
+x, y = y, x  # Geçici değişken gerekmez!
+print(f"Sonra: x={x}, y={y}")
+
+# 3. Fonksiyondan birden fazla değer döndürme
+def min_max(liste):
+    return min(liste), max(liste)
+
+minimum, maksimum = min_max([3, 1, 4, 1, 5, 9])
+print(f"Min: {minimum}, Max: {maksimum}")
+
+# 4. For döngüsünde
+koordinatlar = [(0, 0), (1, 2), (3, 4)]
+for x, y in koordinatlar:
+    print(f"Nokta: ({x}, {y})")</code></pre>
+            <textarea id="code6" class="code-editor">a, b = 5, 10
+a, b = b, a
+print(f"a={a}, b={b}")</textarea>
+            <div id="output-code6" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- ENUMERATE -->
+    <div class="section">
+        <h2>7️⃣ enumerate() - İndex ile Döngü</h2>
+        <p>Bir listeyi gezerken hem elemanı hem de indeksini almak için kullanılır.</p>
+
+        <div class="compare-grid">
+            <div class="compare-item">
+                <h5>❌ Manuel İndeks</h5>
+                <pre><code class="language-python">liste = ["a", "b", "c"]
+i = 0
+for eleman in liste:
+    print(i, eleman)
+    i += 1</code></pre>
+            </div>
+            <div class="compare-item">
+                <h5>✅ enumerate() ile</h5>
+                <pre><code class="language-python">liste = ["a", "b", "c"]
+for i, eleman in enumerate(liste):
+    print(i, eleman)</code></pre>
+            </div>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code7')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code7"><code class="language-python"># enumerate() Kullanımı
+meyveler = ["Elma", "Armut", "Kiraz", "Üzüm"]
+
+print("Meyve Listesi:")
+for indeks, meyve in enumerate(meyveler):
+    print(f"  {indeks}. {meyve}")
+
+# Başlangıç indeksini değiştirme
+print("\n1'den başlayarak:")
+for sira, meyve in enumerate(meyveler, start=1):
+    print(f"  {sira}. {meyve}")</code></pre>
+            <textarea id="code7" class="code-editor">for i, x in enumerate(["a", "b", "c"]):
+    print(f"{i}: {x}")</textarea>
+            <div id="output-code7" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- NONE AND IS -->
+    <div class="section">
+        <h2>8️⃣ None ve is Operatörü</h2>
+        <p><code>None</code>, Python'da "hiçbir şey" anlamına gelir. Linked List ve Tree yapılarında sıkça kullanılır.</p>
+
+        <div class="concept-card">
+            <h4>🔑 == vs is</h4>
+            <ul>
+                <li><code>==</code> → Değerleri karşılaştırır</li>
+                <li><code>is</code> → Aynı obje mi diye bakar (bellek adresi)</li>
+            </ul>
+            <p><strong>Kural:</strong> <code>None</code> kontrolü için her zaman <code>is</code> kullanın!</p>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code8')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code8"><code class="language-python"># None Kullanımı
+
+# Linked List Node örneği
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None  # Başlangıçta sonraki yok
+
+# Node oluştur
+node = Node(42)
+print(f"Node verisi: {node.data}")
+print(f"Sonraki node: {node.next}")
+
+# None kontrolü (doğru yol)
+if node.next is None:
+    print("Bu node'un sonrakisi yok (son eleman)")
+
+# None kontrolü (kısa yol)
+if not node.next:
+    print("Aynı anlama gelir")
+
+# is vs == farkı
+a = [1, 2, 3]
+b = [1, 2, 3]
+print(f"\na == b: {a == b}")  # True (değerler aynı)
+print(f"a is b: {a is b}")    # False (farklı objeler)</code></pre>
+            <textarea id="code8" class="code-editor">x = None
+if x is None:
+    print("x boş")</textarea>
+            <div id="output-code8" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="0a_python_bellek.html" class="btn">⬅️ Önceki: Bellek</a>
+        <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="fonksiyonlar.html" class="btn btn-next">Sonraki: Fonksiyonlar ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let pyodideReady = false;
+    let pyodide = null;
+
+    async function main() {
+        pyodide = await loadPyodide();
+        pyodideReady = true;
+    }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+</script>
+</body>
+</html>
+

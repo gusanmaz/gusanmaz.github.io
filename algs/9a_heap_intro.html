@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.1: Heap (Yığın) Veri Yapısı - Detaylı Anlatım</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .heap-visual {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .tree-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .tree-level {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .tree-level-0 .tree-node { margin: 0 auto; }
+        .tree-level-1 .tree-node { margin: 0 40px; }
+        .tree-level-2 .tree-node { margin: 0 15px; }
+        .tree-level-3 .tree-node { margin: 0 5px; }
+
+        .tree-node {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            position: relative;
+            transition: all 0.3s;
+        }
+        .tree-node .idx {
+            position: absolute;
+            top: -18px;
+            font-size: 10px;
+            color: #666;
+            background: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        .tree-node.root { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .tree-node.normal { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .tree-node.highlight {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        .tree-node.new {
+            animation: popIn 0.5s ease;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .array-rep {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .array-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s;
+        }
+        .array-cell .idx {
+            position: absolute;
+            top: -18px;
+            font-size: 10px;
+            color: #666;
+        }
+        .array-cell.root { background: #e74c3c; color: white; }
+        .array-cell.highlight { background: #f39c12; color: white; transform: scale(1.1); }
+
+        .heap-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .heap-type {
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .heap-type.max-heap {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            border: 2px solid #e74c3c;
+        }
+        .heap-type.min-heap {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
+        }
+
+        .formula-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+        .formula-box code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .complexity-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .complexity-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+        }
+        .complexity-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .term-box {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .term-item {
+            margin: 15px 0;
+            padding-left: 15px;
+            border-left: 3px solid #667eea;
+        }
+        .term-item strong { color: #667eea; }
+
+        .operation-visual {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .controls input {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🏔️ 9.1: Heap (Yığın) Veri Yapısı</h1>
+        <p>Priority Queue'nun Temel Yapısı - Detaylı Anlatım</p>
+    </header>
+
+    <div class="section">
+        <h2>📌 Heap Nedir?</h2>
+        <p><strong>Heap</strong>, <a href="5_tree_intro.html" style="color: #667eea;"><strong>tam ikili ağaç (complete binary tree)</strong></a> şeklinde düzenlenen ve <strong>heap özelliği</strong>ni koruyan özel bir veri yapısıdır. En önemli özelliği: <strong>En büyük/küçük elemana O(1)'de erişim!</strong></p>
+
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3; margin: 15px 0;">
+            <strong>📚 Ön Bilgi:</strong> Heap'i anlamak için ağaç kavramlarını bilmeniz gerekir.
+            <a href="5_tree_intro.html" style="color: #1565c0;">Ağaç Temelleri</a> sayfasında derinlik, yükseklik, complete binary tree gibi kavramları öğrenebilirsiniz.
+        </div>
+
+        <div class="term-box">
+            <h4 style="margin-top: 0; color: #667eea;">📚 Temel Terimler</h4>
+            <div class="term-item">
+                <strong>Tam İkili Ağaç (Complete Binary Tree):</strong> Tüm seviyeler tamamen dolu, son seviye soldan sağa doldurulur. Bu sayede dizi ile temsil edilebilir!
+            </div>
+            <div class="term-item">
+                <strong>Heap Özelliği:</strong> Her parent düğüm, çocuklarından büyük (max heap) veya küçük (min heap) olmalı.
+            </div>
+            <div class="term-item">
+                <strong>Priority Queue:</strong> Öncelik kuyruğu. Her elemana öncelik atanır, en yüksek öncelikli eleman ilk çıkar. Heap ile O(log n) ekleme/çıkarma.
+            </div>
+        </div>
+
+        <div class="heap-types">
+            <div class="heap-type max-heap">
+                <h4 style="color: #c62828; margin-top: 0;">🔺 Max Heap (Azami Yığın)</h4>
+                <p>Her düğüm ≥ çocukları</p>
+                <p style="font-size: 2.5em; margin: 15px 0;">Kök = En Büyük</p>
+                <p style="margin: 0; font-family: monospace;">parent(i) ≥ child(i)</p>
+            </div>
+            <div class="heap-type min-heap">
+                <h4 style="color: #1565c0; margin-top: 0;">🔻 Min Heap (Asgari Yığın)</h4>
+                <p>Her düğüm ≤ çocukları</p>
+                <p style="font-size: 2.5em; margin: 15px 0;">Kök = En Küçük</p>
+                <p style="margin: 0; font-family: monospace;">parent(i) ≤ child(i)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌳 Heap Görselleştirmesi</h2>
+
+        <div class="heap-visual">
+            <h3 style="text-align: center;">Max Heap Örneği (15 Elemanlı)</h3>
+
+            <div class="tree-container">
+                <!-- Seviye 0: Kök -->
+                <div class="tree-level tree-level-0">
+                    <div class="tree-node root"><span class="idx">0</span>90</div>
+                </div>
+                <!-- Seviye 1 -->
+                <div class="tree-level tree-level-1">
+                    <div class="tree-node normal"><span class="idx">1</span>85</div>
+                    <div class="tree-node normal"><span class="idx">2</span>70</div>
+                </div>
+                <!-- Seviye 2 -->
+                <div class="tree-level tree-level-2">
+                    <div class="tree-node normal"><span class="idx">3</span>40</div>
+                    <div class="tree-node normal"><span class="idx">4</span>80</div>
+                    <div class="tree-node normal"><span class="idx">5</span>30</div>
+                    <div class="tree-node normal"><span class="idx">6</span>25</div>
+                </div>
+                <!-- Seviye 3 -->
+                <div class="tree-level tree-level-3">
+                    <div class="tree-node normal"><span class="idx">7</span>10</div>
+                    <div class="tree-node normal"><span class="idx">8</span>35</div>
+                    <div class="tree-node normal"><span class="idx">9</span>75</div>
+                    <div class="tree-node normal"><span class="idx">10</span>50</div>
+                    <div class="tree-node normal"><span class="idx">11</span>20</div>
+                    <div class="tree-node normal"><span class="idx">12</span>15</div>
+                    <div class="tree-node normal"><span class="idx">13</span>5</div>
+                    <div class="tree-node normal"><span class="idx">14</span>22</div>
+                </div>
+            </div>
+
+            <h4 style="text-align: center; margin-top: 30px;">📦 Dizi Temsili</h4>
+            <div class="array-rep">
+                <div class="array-cell root"><span class="idx">0</span>90</div>
+                <div class="array-cell"><span class="idx">1</span>85</div>
+                <div class="array-cell"><span class="idx">2</span>70</div>
+                <div class="array-cell"><span class="idx">3</span>40</div>
+                <div class="array-cell"><span class="idx">4</span>80</div>
+                <div class="array-cell"><span class="idx">5</span>30</div>
+                <div class="array-cell"><span class="idx">6</span>25</div>
+                <div class="array-cell"><span class="idx">7</span>10</div>
+                <div class="array-cell"><span class="idx">8</span>35</div>
+                <div class="array-cell"><span class="idx">9</span>75</div>
+                <div class="array-cell"><span class="idx">10</span>50</div>
+                <div class="array-cell"><span class="idx">11</span>20</div>
+                <div class="array-cell"><span class="idx">12</span>15</div>
+                <div class="array-cell"><span class="idx">13</span>5</div>
+                <div class="array-cell"><span class="idx">14</span>22</div>
+            </div>
+
+            <p style="text-align: center; color: #666; margin-top: 10px;">
+                Heap tam ikili ağaç olduğu için, dizi ile verimli temsil edilir. Pointer gerekmez!
+            </p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔢 İndeks Formülleri</h2>
+        <p>Heap'i dizi olarak tutarken, parent-child ilişkileri matematiksel formüllerle bulunur:</p>
+
+        <div class="formula-box">
+            <p><strong>i indeksindeki düğüm için (0-tabanlı):</strong></p>
+            <ul style="list-style: none; padding-left: 0; margin: 0;">
+                <li>👆 <strong>Parent indeksi:</strong> <code>(i - 1) // 2</code></li>
+                <li>👈 <strong>Sol çocuk indeksi:</strong> <code>2 * i + 1</code></li>
+                <li>👉 <strong>Sağ çocuk indeksi:</strong> <code>2 * i + 2</code></li>
+            </ul>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>İndeks Hesaplama Örnekleri</span>
+                <button class="btn btn-run" onclick="runPython('code0')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code0"><code class="language-python"># Heap indeks formülleri
+
+def parent(i):
+    """i'nin parent indeksini döndür"""
+    return (i - 1) // 2
+
+def left_child(i):
+    """i'nin sol çocuk indeksini döndür"""
+    return 2 * i + 1
+
+def right_child(i):
+    """i'nin sağ çocuk indeksini döndür"""
+    return 2 * i + 2
+
+# Heap dizisi
+heap = [90, 85, 70, 40, 80, 30, 25, 10, 35, 75, 50, 20, 15, 5, 22]
+print(f"Heap: {heap}")
+print(f"Boyut: {len(heap)} eleman\n")
+
+# Örnek hesaplamalar
+for i in [0, 1, 4, 7]:
+    print(f"=== İndeks {i} (değer: {heap[i]}) ===")
+
+    p = parent(i)
+    l = left_child(i)
+    r = right_child(i)
+
+    if i > 0:
+        print(f"  Parent: indeks {p} → değer {heap[p]}")
+    else:
+        print(f"  Parent: Kök düğüm, parent yok")
+
+    if l < len(heap):
+        print(f"  Sol çocuk: indeks {l} → değer {heap[l]}")
+    else:
+        print(f"  Sol çocuk: yok (yaprak düğüm)")
+
+    if r < len(heap):
+        print(f"  Sağ çocuk: indeks {r} → değer {heap[r]}")
+    else:
+        print(f"  Sağ çocuk: yok")
+    print()</code></pre>
+            <textarea id="code0" class="code-editor"></textarea>
+            <div id="output-code0" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎮 İnteraktif Min Heap Simülasyonu</h2>
+
+        <div class="heap-visual">
+            <div class="tree-container" id="heapTree">
+                <!-- JS ile doldurulacak -->
+            </div>
+
+            <h4 style="text-align: center;">Dizi Temsili</h4>
+            <div class="array-rep" id="heapArray">
+                <!-- JS ile doldurulacak -->
+            </div>
+
+            <div class="controls">
+                <input type="number" id="heapInput" placeholder="Değer" min="1" max="99">
+                <button class="btn btn-run" onclick="heapInsert()">➕ Ekle (Push)</button>
+                <button class="btn" onclick="heapExtract()">⬆️ Min Çıkar (Pop)</button>
+                <button class="btn btn-reset" onclick="heapReset()">🔄 Sıfırla</button>
+            </div>
+            <p id="heapMsg" style="text-align: center; margin-top: 10px; font-weight: bold; min-height: 40px;"></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚙️ Temel İşlemler</h2>
+
+        <div class="operation-visual">
+            <h3>1. Insert (Ekleme) - Heapify Up</h3>
+            <ol>
+                <li><strong>Sona ekle:</strong> Yeni elemanı dizinin sonuna ekle</li>
+                <li><strong>Heapify Up:</strong> Parent ile karşılaştır
+                    <ul>
+                        <li>Min Heap: Parent > yeni eleman ise takas</li>
+                        <li>Max Heap: Parent < yeni eleman ise takas</li>
+                    </ul>
+                </li>
+                <li><strong>Tekrarla:</strong> Köke ulaşana veya heap özelliği sağlanana kadar yukarı çık</li>
+            </ol>
+            <p style="margin-bottom: 0;"><strong>Karmaşıklık:</strong> O(log n) - En fazla ağaç yüksekliği kadar takas</p>
+        </div>
+
+        <div class="operation-visual">
+            <h3>2. Extract Min/Max (Kökü Çıkarma) - Heapify Down</h3>
+            <ol>
+                <li><strong>Kökü al:</strong> En üstteki elemanı kaydet (min veya max)</li>
+                <li><strong>Son elemanı köke taşı:</strong> Dizinin son elemanını köke koy</li>
+                <li><strong>Heapify Down:</strong> Çocuklarla karşılaştır
+                    <ul>
+                        <li>Min Heap: Küçük çocukla takas (eğer parent > çocuk)</li>
+                        <li>Max Heap: Büyük çocukla takas (eğer parent < çocuk)</li>
+                    </ul>
+                </li>
+                <li><strong>Tekrarla:</strong> Yaprak düğüme ulaşana veya heap özelliği sağlanana kadar aşağı in</li>
+            </ol>
+            <p style="margin-bottom: 0;"><strong>Karmaşıklık:</strong> O(log n) - En fazla ağaç yüksekliği kadar takas</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Zaman Karmaşıklığı</h2>
+
+        <table class="complexity-table">
+            <thead>
+                <tr>
+                    <th>İşlem</th>
+                    <th>Zaman</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Find Min/Max (Peek)</strong></td>
+                    <td style="color: #27ae60; font-weight: bold;">O(1)</td>
+                    <td>Kök her zaman min/max, direkt oku</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td><strong>Insert (Push)</strong></td>
+                    <td style="color: #27ae60; font-weight: bold;">O(log n)</td>
+                    <td>Sona ekle + heapify up</td>
+                </tr>
+                <tr>
+                    <td><strong>Extract Min/Max (Pop)</strong></td>
+                    <td style="color: #27ae60; font-weight: bold;">O(log n)</td>
+                    <td>Kökü çıkar + heapify down</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td><strong>Build Heap (Heapify)</strong></td>
+                    <td style="color: #27ae60; font-weight: bold;">O(n)</td>
+                    <td>Aşağıdan yukarıya heapify (O(n log n) değil!)</td>
+                </tr>
+                <tr>
+                    <td><strong>Heap Sort</strong></td>
+                    <td style="color: #f39c12; font-weight: bold;">O(n log n)</td>
+                    <td>n kez extract işlemi</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td><strong>Arbitrary Search</strong></td>
+                    <td style="color: #e74c3c; font-weight: bold;">O(n)</td>
+                    <td>Rastgele eleman arama - heap bunun için değil!</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+            <strong>💡 Neden O(log n)?</strong>
+            <p style="margin: 5px 0 0 0;">Tam ikili ağacın yüksekliği log₂(n)'dir. Heapify işlemleri en fazla yükseklik kadar adım atar.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🐍 Python heapq Modülü</h2>
+        <p><strong>⚠️ Önemli:</strong> Python'un heapq modülü <strong>sadece Min Heap</strong> destekler!</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>heapq Temel Kullanım</span>
+                <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code1"><code class="language-python">import heapq
+
+# ===== MIN HEAP TEMELLERİ =====
+print("=== MIN HEAP İŞLEMLERİ ===\n")
+
+# 1. Boş heap oluştur (sadece boş liste!)
+heap = []
+
+# 2. Ekleme - heappush(heap, item)
+# Her ekleme sonrası heap özelliği korunur
+print("Elemanları ekliyoruz:")
+for val in [35, 10, 25, 5, 15, 30, 20]:
+    heapq.heappush(heap, val)
+    print(f"  {val} eklendi → heap: {heap}")
+
+# 3. En küçüğe bakma (silmeden) - heap[0]
+print(f"\nEn küçük eleman (peek): {heap[0]}")
+
+# 4. En küçüğü çıkarma - heappop(heap)
+print("\nElemanları çıkarıyoruz (sıralı çıkacak!):")
+result = []
+while heap:
+    min_val = heapq.heappop(heap)
+    result.append(min_val)
+    print(f"  Çıkan: {min_val}, Kalan heap: {heap}")
+
+print(f"\nÇıkış sırası (sıralı!): {result}")</code></pre>
+            <textarea id="code1" class="code-editor"></textarea>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔄 Listeden Heap Oluşturma</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>heapify ve Diğer Fonksiyonlar</span>
+                <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code2"><code class="language-python">import heapq
+
+# ===== HEAPIFY - Listeyi Heap'e Çevir =====
+print("=== HEAPIFY ===")
+
+# Normal liste
+data = [35, 10, 25, 5, 15, 30, 20, 8, 12]
+print(f"Orijinal liste: {data}")
+
+# heapify() - Listeyi IN-PLACE heap'e çevirir
+# Karmaşıklık: O(n) - tek tek eklemekten daha hızlı!
+heapq.heapify(data)
+print(f"Heapify sonrası: {data}")
+print(f"Minimum: {data[0]}")
+
+# ===== EN BÜYÜK/KÜÇÜK N ELEMAN =====
+print("\n=== NLARGEST / NSMALLEST ===")
+
+numbers = [64, 34, 25, 12, 22, 11, 90, 45, 78, 55]
+print(f"Liste: {numbers}")
+
+# nlargest(n, iterable) - En büyük n eleman
+# nsmallest(n, iterable) - En küçük n eleman
+print(f"En büyük 3: {heapq.nlargest(3, numbers)}")
+print(f"En küçük 3: {heapq.nsmallest(3, numbers)}")
+
+# ===== HEAPPUSHPOP ve HEAPREPLACE =====
+print("\n=== ÖZEL FONKSİYONLAR ===")
+
+heap = [5, 10, 15, 20]
+heapq.heapify(heap)
+print(f"Başlangıç heap: {heap}")
+
+# heappushpop(heap, item): Önce ekle, sonra en küçüğü çıkar
+# push ve pop'tan daha verimli!
+result = heapq.heappushpop(heap, 3)
+print(f"heappushpop(3): çıkan={result}, heap={heap}")
+
+# heapreplace(heap, item): Önce en küçüğü çıkar, sonra ekle
+result = heapq.heapreplace(heap, 25)
+print(f"heapreplace(25): çıkan={result}, heap={heap}")</code></pre>
+            <textarea id="code2" class="code-editor"></textarea>
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔺 Max Heap Nasıl Yapılır?</h2>
+        <p>Python heapq sadece min heap destekler. Max heap için <strong>negatif değerler</strong> trick'i kullanılır!</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Max Heap Wrapper Sınıfı</span>
+                <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code3"><code class="language-python">import heapq
+
+class MaxHeap:
+    """
+    Python heapq min heap olduğu için,
+    değerleri negatif yaparak max heap simüle ederiz.
+
+    Mantık: -90 < -85 < -70 olduğu için,
+    min heap'te -90 en üstte olur = aslında 90 en büyük!
+    """
+
+    def __init__(self):
+        self._heap = []  # Alt çizgi: "private" değişken
+
+    def push(self, val):
+        """Değer ekle"""
+        # Negatifini ekle
+        heapq.heappush(self._heap, -val)
+
+    def pop(self):
+        """En büyük değeri çıkar ve döndür"""
+        # Negatifi çıkar, pozitife çevir
+        return -heapq.heappop(self._heap)
+
+    def peek(self):
+        """En büyük değere bak (silmeden)"""
+        if self._heap:
+            return -self._heap[0]
+        return None
+
+    def __len__(self):
+        """len() fonksiyonu için"""
+        return len(self._heap)
+
+    def __bool__(self):
+        """bool() dönüşümü için - boş mu?"""
+        return len(self._heap) > 0
+
+# Test
+print("=== MAX HEAP KULLANIMI ===\n")
+
+max_heap = MaxHeap()
+
+# Eklemeler
+for val in [35, 10, 90, 25, 5, 70]:
+    max_heap.push(val)
+    print(f"Push({val}) → En büyük: {max_heap.peek()}")
+
+print(f"\nHeap boyutu: {len(max_heap)}")
+
+# Çıkarmalar
+print("\nÇıkarmalar (büyükten küçüğe):")
+while max_heap:  # __bool__ sayesinde çalışır
+    print(f"  Pop: {max_heap.pop()}")</code></pre>
+            <textarea id="code3" class="code-editor"></textarea>
+            <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <div class="term-box">
+            <h4 style="margin-top: 0; color: #667eea;">📝 Python Syntax Açıklamaları</h4>
+            <div class="term-item">
+                <strong>_ prefix (_heap):</strong> Python'da alt çizgi ile başlayan değişkenler "private" kabul edilir. Dışarıdan erişilmemesi gerektiğini belirtir (ama engellemez).
+            </div>
+            <div class="term-item">
+                <strong>__len__(self):</strong> Özel method. <code>len(obj)</code> çağrıldığında bu method çalışır.
+            </div>
+            <div class="term-item">
+                <strong>__bool__(self):</strong> Özel method. <code>if obj:</code> veya <code>bool(obj)</code> çağrıldığında bu method çalışır.
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🏆 Heap Sort Algoritması</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Heap Sort Implementasyonu</span>
+                <button class="btn btn-run" onclick="runPython('code4')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code4"><code class="language-python">import heapq
+
+def heap_sort(arr):
+    """
+    Heap Sort - O(n log n) garantili
+
+    Algoritma:
+    1. Diziyi heap'e çevir - O(n)
+    2. Tek tek çıkar (her çıkarma O(log n)) - O(n log n)
+
+    Toplam: O(n log n)
+    """
+    # 1. Heap oluştur (in-place)
+    heap = arr.copy()
+    heapq.heapify(heap)  # O(n)
+
+    # 2. Tek tek çıkar
+    result = []
+    while heap:
+        result.append(heapq.heappop(heap))  # O(log n)
+
+    return result
+
+# Test
+original = [64, 34, 25, 12, 22, 11, 90, 45]
+print(f"Orijinal: {original}")
+
+sorted_arr = heap_sort(original)
+print(f"Sıralı:   {sorted_arr}")
+
+# ===== HEAP SORT ÖZELLİKLERİ =====
+print("\n" + "="*50)
+print("HEAP SORT KARŞILAŞTIRMA")
+print("="*50)
+
+comparisons = [
+    ("Zaman (her durum)", "O(n log n)", "Quick Sort en kötü O(n²)"),
+    ("Alan", "O(1) in-place", "Merge Sort O(n) ek alan"),
+    ("Stabilite", "❌ Stabil değil", "Merge Sort stabil"),
+    ("Cache", "❌ Cache-unfriendly", "Quick Sort cache-friendly"),
+    ("Pratikte", "Genelde yavaş", "Quick Sort tercih edilir"),
+]
+
+for ozellik, heap, karsilastirma in comparisons:
+    print(f"\n{ozellik}:")
+    print(f"  Heap Sort: {heap}")
+    print(f"  Not: {karsilastirma}")</code></pre>
+            <textarea id="code4" class="code-editor"></textarea>
+            <div id="output-code4" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <div class="term-box">
+            <h4 style="margin-top: 0; color: #667eea;">📚 Terimler Açıklaması</h4>
+            <div class="term-item">
+                <strong>In-place:</strong> Ek bellek kullanmadan, mevcut dizi üzerinde işlem yapma. Heap sort gerçek implementasyonda O(1) ek alan kullanır.
+            </div>
+            <div class="term-item">
+                <strong>Cache-friendly:</strong> CPU önbelleği, ardışık bellek adreslerini önceden yükler. Heap'te parent-child atlama olduğu için cache miss (ıskalama) fazla olur → yavaş.
+            </div>
+            <div class="term-item">
+                <strong>Stabil sıralama:</strong> Eşit değerli elemanların orijinal sırası korunur. Heap sort'ta elemanlar yer değiştirirken bu sıra bozulabilir.
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧩 Pratik Örnekler</h2>
+
+        <h3>Örnek 1: K. En Büyük Eleman</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Kth Largest Element</span>
+                <button class="btn btn-run" onclick="runPython('code5')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code5"><code class="language-python">import heapq
+
+def kth_largest(nums, k):
+    """
+    Dizideki k. en büyük elemanı bul.
+
+    Yöntem 1: Sırala ve k. elemanı al - O(n log n)
+    Yöntem 2: Min heap ile - O(n log k)
+
+    Min heap kullanarak: k elemanlı heap tut,
+    yeni eleman heap'in minimumundan büyükse değiştir.
+    Sonunda heap'in kökü k. en büyük!
+    """
+    # k elemanlı min heap oluştur
+    min_heap = nums[:k]
+    heapq.heapify(min_heap)
+
+    # Kalan elemanları işle
+    for num in nums[k:]:
+        if num > min_heap[0]:  # Heap'in minimumundan büyükse
+            heapq.heapreplace(min_heap, num)  # Değiştir
+
+    # Heap'in kökü k. en büyük
+    return min_heap[0]
+
+# Test
+nums = [3, 2, 1, 5, 6, 4]
+k = 2
+print(f"Dizi: {nums}")
+print(f"{k}. en büyük: {kth_largest(nums, k)}")  # 5
+
+nums2 = [3, 2, 3, 1, 2, 4, 5, 5, 6]
+k2 = 4
+print(f"\nDizi: {nums2}")
+print(f"{k2}. en büyük: {kth_largest(nums2, k2)}")  # 4</code></pre>
+            <textarea id="code5" class="code-editor"></textarea>
+            <div id="output-code5" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <h3>Örnek 2: K Sıralı Listeyi Birleştirme</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Merge K Sorted Lists</span>
+                <button class="btn btn-run" onclick="runPython('code6')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code6"><code class="language-python">import heapq
+
+def merge_k_lists(lists):
+    """
+    K adet sıralı listeyi tek sıralı listede birleştir.
+
+    Heap kullanarak O(n log k):
+    - Her listeden bir eleman heap'e
+    - Her seferinde minimum çıkar, o listeden sonrakini ekle
+    """
+    result = []
+
+    # (değer, liste_indeksi, eleman_indeksi) tuple'ları
+    # Heap tuple'ları ilk elemana göre karşılaştırır
+    min_heap = []
+
+    # Her listeden ilk elemanı ekle
+    for i, lst in enumerate(lists):
+        if lst:  # Boş liste kontrolü
+            heapq.heappush(min_heap, (lst[0], i, 0))
+
+    while min_heap:
+        val, list_idx, elem_idx = heapq.heappop(min_heap)
+        result.append(val)
+
+        # O listeden sonraki eleman varsa ekle
+        if elem_idx + 1 < len(lists[list_idx]):
+            next_val = lists[list_idx][elem_idx + 1]
+            heapq.heappush(min_heap, (next_val, list_idx, elem_idx + 1))
+
+    return result
+
+# Test
+lists = [
+    [1, 4, 5],
+    [1, 3, 4],
+    [2, 6]
+]
+
+print("Giriş listeleri:")
+for i, lst in enumerate(lists):
+    print(f"  Liste {i+1}: {lst}")
+
+merged = merge_k_lists(lists)
+print(f"\nBirleşik: {merged}")</code></pre>
+            <textarea id="code6" class="code-editor"></textarea>
+            <div id="output-code6" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌍 Gerçek Hayat Kullanım Alanları</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px 0;">
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #1565c0;">⭐ Priority Queue (İşletim Sistemleri)</h4>
+                <p style="margin-bottom: 0;">İşlemci zamanlaması: Yüksek öncelikli process'ler önce çalışır. Linux kernel heap kullanır.</p>
+            </div>
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">🗺️ Dijkstra Algoritması</h4>
+                <p style="margin-bottom: 0;">En kısa yol bulma: Her adımda en küçük mesafeli düğümü seç. Min heap ile O(E log V).</p>
+            </div>
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #e65100;">📈 Running Median</h4>
+                <p style="margin-bottom: 0;">Akan veride medyan: İki heap (max + min) kullanarak O(log n) güncelleme.</p>
+            </div>
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #c2185b;">🔧 Huffman Coding</h4>
+                <p style="margin-bottom: 0;">Veri sıkıştırma: En az frekansa sahip iki düğümü birleştir. Min heap ile verimli.</p>
+            </div>
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #7b1fa2;">🎮 Event-Driven Simulation</h4>
+                <p style="margin-bottom: 0;">Oyun motorları: Olayları zamana göre sırala, en yakın olayı işle.</p>
+            </div>
+            <div style="background: #e0f7fa; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #00838f;">📊 Top-K Problemleri</h4>
+                <p style="margin-bottom: 0;">En çok aranan kelimeler, en yüksek puanlı oyuncular, trending topics...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🆚 Heap vs Diğer Veri Yapıları</h2>
+
+        <table class="complexity-table">
+            <thead>
+                <tr>
+                    <th>İşlem</th>
+                    <th>Sırasız Dizi</th>
+                    <th>Sıralı Dizi</th>
+                    <th>BST (Dengeli)</th>
+                    <th>Heap</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Find Min/Max</td>
+                    <td>O(n)</td>
+                    <td style="color: #27ae60;">O(1)</td>
+                    <td>O(log n)</td>
+                    <td style="color: #27ae60; font-weight: bold;">O(1)</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td>Insert</td>
+                    <td style="color: #27ae60;">O(1)</td>
+                    <td>O(n)</td>
+                    <td>O(log n)</td>
+                    <td style="color: #27ae60; font-weight: bold;">O(log n)</td>
+                </tr>
+                <tr>
+                    <td>Extract Min/Max</td>
+                    <td>O(n)</td>
+                    <td style="color: #27ae60;">O(1)*</td>
+                    <td>O(log n)</td>
+                    <td style="color: #27ae60; font-weight: bold;">O(log n)</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td>Search Arbitrary</td>
+                    <td>O(n)</td>
+                    <td>O(log n)</td>
+                    <td style="color: #27ae60; font-weight: bold;">O(log n)</td>
+                    <td style="color: #e74c3c;">O(n)</td>
+                </tr>
+                <tr>
+                    <td>Build from n elements</td>
+                    <td>O(n)</td>
+                    <td>O(n log n)</td>
+                    <td>O(n log n)</td>
+                    <td style="color: #27ae60; font-weight: bold;">O(n)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 0.85em; color: #666;">* Sondan çıkarma O(1), baştan çıkarma O(n)</p>
+    </div>
+
+    <div class="section">
+        <h2>📋 Özet</h2>
+
+        <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+            <h4 style="margin-top: 0; color: #2e7d32;">✅ Heap Ne Zaman Kullanılır?</h4>
+            <ul>
+                <li><strong>Priority Queue:</strong> Öncelikli işlem sırası gerektiğinde</li>
+                <li><strong>Top-K:</strong> En büyük/küçük K eleman gerektiğinde</li>
+                <li><strong>Medyan:</strong> Akan veride medyan takibi</li>
+                <li><strong>Graf Algoritmaları:</strong> Dijkstra, Prim algoritmaları</li>
+            </ul>
+
+            <h4 style="color: #c62828; margin-top: 20px;">❌ Heap Ne Zaman Kullanılmaz?</h4>
+            <ul style="margin-bottom: 0;">
+                <li><strong>Rastgele arama:</strong> Belirli bir elemanı bulmak O(n)</li>
+                <li><strong>Sıralı gezinme:</strong> Elemanları sırayla gezmek için uygun değil</li>
+                <li><strong>Range query:</strong> "10-20 arası elemanlar" gibi sorgular</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="8a_hash_intro.html" class="btn">⬅️ Önceki: Hash Table</a>
+        <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="index.html" class="btn btn-next">Ana Menüye Dön ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    // Min Heap Simülasyonu
+    let heapData = [5, 10, 15, 20, 30, 25, 35];
+
+    function renderHeap() {
+        // Ağaç görünümü
+        const treeContainer = document.getElementById('heapTree');
+        treeContainer.innerHTML = '';
+
+        if (heapData.length === 0) {
+            treeContainer.innerHTML = '<p style="text-align:center;color:#999;">Heap boş</p>';
+        } else {
+            let level = 0;
+            let idx = 0;
+            while (idx < heapData.length) {
+                const levelDiv = document.createElement('div');
+                levelDiv.className = `tree-level tree-level-${level}`;
+
+                const nodesInLevel = Math.pow(2, level);
+                for (let i = 0; i < nodesInLevel && idx < heapData.length; i++, idx++) {
+                    const node = document.createElement('div');
+                    node.className = `tree-node ${idx === 0 ? 'root' : 'normal'}`;
+                    node.innerHTML = `<span class="idx">${idx}</span>${heapData[idx]}`;
+                    levelDiv.appendChild(node);
+                }
+
+                treeContainer.appendChild(levelDiv);
+                level++;
+            }
+        }
+
+        // Dizi görünümü
+        const arrayContainer = document.getElementById('heapArray');
+        arrayContainer.innerHTML = '';
+
+        heapData.forEach((val, i) => {
+            const cell = document.createElement('div');
+            cell.className = `array-cell ${i === 0 ? 'root' : ''}`;
+            cell.innerHTML = `<span class="idx">${i}</span>${val}`;
+            arrayContainer.appendChild(cell);
+        });
+    }
+
+    function heapifyUp(i) {
+        while (i > 0) {
+            const parent = Math.floor((i - 1) / 2);
+            if (heapData[i] < heapData[parent]) {
+                [heapData[i], heapData[parent]] = [heapData[parent], heapData[i]];
+                i = parent;
+            } else {
+                break;
+            }
+        }
+    }
+
+    function heapifyDown(i) {
+        const n = heapData.length;
+        while (true) {
+            let smallest = i;
+            const left = 2 * i + 1;
+            const right = 2 * i + 2;
+
+            if (left < n && heapData[left] < heapData[smallest]) smallest = left;
+            if (right < n && heapData[right] < heapData[smallest]) smallest = right;
+
+            if (smallest !== i) {
+                [heapData[i], heapData[smallest]] = [heapData[smallest], heapData[i]];
+                i = smallest;
+            } else {
+                break;
+            }
+        }
+    }
+
+    function heapInsert() {
+        const input = document.getElementById('heapInput');
+        const val = parseInt(input.value);
+
+        if (isNaN(val) || val < 1 || val > 99) {
+            document.getElementById('heapMsg').innerHTML = '⚠️ 1-99 arası bir sayı girin!';
+            document.getElementById('heapMsg').style.color = '#e74c3c';
+            return;
+        }
+
+        if (heapData.length >= 15) {
+            document.getElementById('heapMsg').innerHTML = '⚠️ Heap dolu (max 15 eleman)';
+            document.getElementById('heapMsg').style.color = '#e74c3c';
+            return;
+        }
+
+        heapData.push(val);
+        heapifyUp(heapData.length - 1);
+        renderHeap();
+
+        document.getElementById('heapMsg').innerHTML = `✅ ${val} eklendi, heapify up yapıldı<br>Min: ${heapData[0]}`;
+        document.getElementById('heapMsg').style.color = '#27ae60';
+        input.value = '';
+    }
+
+    function heapExtract() {
+        if (heapData.length === 0) {
+            document.getElementById('heapMsg').innerHTML = '⚠️ Heap boş!';
+            document.getElementById('heapMsg').style.color = '#e74c3c';
+            return;
+        }
+
+        const min = heapData[0];
+        heapData[0] = heapData[heapData.length - 1];
+        heapData.pop();
+
+        if (heapData.length > 0) {
+            heapifyDown(0);
+        }
+
+        renderHeap();
+        document.getElementById('heapMsg').innerHTML = `⬆️ Çıkarılan min: <b>${min}</b><br>${heapData.length > 0 ? 'Yeni min: ' + heapData[0] : 'Heap boş'}`;
+        document.getElementById('heapMsg').style.color = '#667eea';
+    }
+
+    function heapReset() {
+        heapData = [5, 10, 15, 20, 30, 25, 35];
+        renderHeap();
+        document.getElementById('heapMsg').innerHTML = '🔄 Heap sıfırlandı';
+        document.getElementById('heapMsg').style.color = '#667eea';
+    }
+
+    renderHeap();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor, lütfen bekleyin..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = "Hata: " + e; }
+    }
+</script>
+</body>
+</html>
+

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.2: Numpy ile Stack</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .array-cell { 
+            width: 50px; height: 50px; border: 2px solid #333; display: flex; 
+            align-items: center; justify-content: center; margin-right: 2px; background: white;
+            font-weight: bold;
+        }
+        .array-cell.active { background: #e8f6f3; border-color: #16a085; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🏗️ 2.2: Numpy ile Stack Kodlama</h1>
+        <p>Donanım Seviyesinde Stack Mantığı</p>
+    </header>
+
+    <div class="section" style="background: #e3f2fd; border-left-color: #2196f3;">
+        <h2>📌 Ön Bilgi: Bu Sayfada Ne Öğreneceğiz?</h2>
+        <p>Bu sayfada <strong>sabit boyutlu</strong> bir stack nasıl oluşturulur göreceğiz. Numpy kullanmamızın sebebi, C dilindeki diziler gibi sabit boyutlu, bitişik bellekte tutulan bir yapı elde etmektir.</p>
+
+        <h4>Neden Sabit Boyutlu Stack?</h4>
+        <ul>
+            <li>Gerçek dünyada (gömülü sistemler, oyun motorları) bellek önceden ayrılır</li>
+            <li>Performans kritik uygulamalarda dinamik bellek ayırma maliyetli olabilir</li>
+            <li>Bu örnek, stack'in temel mantığını anlamanıza yardımcı olacak</li>
+        </ul>
+
+        <p><strong>Not:</strong> Pratikte Python'da stack için <code>list</code> kullanmak daha yaygındır (bir sonraki ders).</p>
+    </div>
+
+    <div class="section">
+        <h2>Stack Pointer (Top) Görselleştirme</h2>
+        <div style="display: flex; justify-content: center; margin: 20px 0;" id="visual"></div>
+        <div style="text-align: center;">
+            <button class="btn btn-run" onclick="demoPush()">Sanal Push</button>
+            <button class="btn btn-reset" onclick="demoPop()">Sanal Pop</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Tam Kod Implementasyonu</h2>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="runPython('code')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code"><code class="language-python">import numpy as np
+
+class NumpyStack:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)
+        self.top = 0
+        
+    def push(self, value):
+        if self.top == self.capacity:
+            print("❌ Dolu!")
+            return
+        self.data[self.top] = value
+        self.top += 1
+        print(f"Push({value}) -> {self.data} (Top: {self.top})")
+        
+    def pop(self):
+        if self.top == 0:
+            print("❌ Boş!")
+            return None
+        self.top -= 1
+        val = self.data[self.top]
+        self.data[self.top] = 0 
+        print(f"Pop() -> {val}")
+        return val
+
+# Test
+s = NumpyStack(3)
+s.push(10)
+s.push(20)
+s.push(30)
+s.push(40) # Hata!
+s.pop()
+s.push(99)</code></pre>
+
+            <textarea id="code" class="code-editor">import numpy as np
+
+class NumpyStack:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)
+        self.top = 0
+    def push(self, value):
+        if self.top == self.capacity:
+            print("❌ Dolu!")
+            return
+        self.data[self.top] = value
+        self.top += 1
+        print(f"Push({value}) -> {self.data} (Top: {self.top})")
+    def pop(self):
+        if self.top == 0:
+            print("❌ Boş!")
+            return None
+        self.top -= 1
+        val = self.data[self.top]
+        self.data[self.top] = 0 
+        print(f"Pop() -> {val}")
+        return val
+
+s = NumpyStack(3)
+s.push(10)
+s.push(20)
+s.push(30)
+s.push(40) 
+s.pop()
+s.push(99)</textarea>
+            
+            <div id="output-code" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="2a_stack_giris.html" class="btn">⬅️ Önceki: Stack</a>
+        <a href="2c_stack_analiz.html" class="btn btn-next">Sonraki: Analiz ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    // Visual Demo - Sabit değerlerle daha anlaşılır
+    let topIdx = 0;
+    const cap = 5;
+    const container = document.getElementById('visual');
+    const sampleValues = [10, 20, 30, 40, 50]; // Sabit, anlaşılır değerler
+    let visualData = new Array(cap).fill(0);
+
+    function render() {
+        container.innerHTML = '';
+        for(let i=0; i<cap; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            if (i < topIdx) {
+                cell.innerText = visualData[i];
+                cell.classList.add('active');
+            } else {
+                cell.innerText = "-";
+            }
+            container.appendChild(cell);
+        }
+        // Top pointer göster
+        const topLabel = document.createElement('div');
+        topLabel.style.cssText = 'text-align:center; margin-top:10px; font-weight:bold; color:#27ae60;';
+        topLabel.innerText = `Top = ${topIdx} (${topIdx === 0 ? 'Boş' : topIdx === cap ? 'Dolu' : topIdx + ' eleman'})`;
+        container.appendChild(topLabel);
+    }
+
+    function demoPush() {
+        if(topIdx < cap) {
+            visualData[topIdx] = sampleValues[topIdx];
+            topIdx++;
+            render();
+        } else {
+            alert("❌ Stack Overflow! (Kapasite: " + cap + ")");
+        }
+    }
+
+    function demoPop() {
+        if(topIdx > 0) {
+            topIdx--; 
+            visualData[topIdx] = 0;
+            render();
+        } else {
+            alert("❌ Stack Underflow! (Yığın Boş)");
+        }
+    }
+    
+    // Başlangıçta render
+    render();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); await pyodide.loadPackage("numpy"); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const editor = document.getElementById(id);
+        if (editor.style.display === 'block') { editor.style.display = 'none'; view.style.display = 'block'; }
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+</body>
+</html>

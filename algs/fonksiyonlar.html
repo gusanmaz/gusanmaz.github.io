@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0.3: Python Fonksiyonlar - İnteraktif Ders</title>
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <!-- Mermaid for flowcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- Skulpt for Python execution -->
+    <script src="https://skulpt.org/js/skulpt.min.js"></script>
+    <script src="https://skulpt.org/js/skulpt-stdlib.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+        }
+        
+        .nav-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 25px;
+            background: #764ba2;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .section h4 {
+            color: #555;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .concept-box {
+            background: #f8f9ff;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .concept-box strong {
+            color: #764ba2;
+            font-size: 1.1em;
+        }
+        
+        .important-note {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .warning-box {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .code-container {
+            margin: 20px 0;
+            background: #2d2d30;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .code-header {
+            background: #1e1e1e;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        .code-header span {
+            color: #fff;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .code-header span::before {
+            content: "🐍";
+            font-size: 18px;
+        }
+        
+        .run-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .run-button:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+        
+        .run-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .code-editor {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .code-editor pre {
+            margin: 0 !important;
+            padding: 20px !important;
+            background: #2d2d30 !important;
+            border-radius: 0 !important;
+        }
+        
+        .code-editor code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+        }
+        
+        .code-output {
+            background: #0a0a0a;
+            color: #0f0;
+            padding: 15px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            border-top: 2px solid #444;
+            min-height: 50px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .code-output:empty::before {
+            content: "Çıktı burada görünecek...";
+            color: #666;
+            font-style: italic;
+        }
+        
+        .code-output.error {
+            color: #ff6b6b;
+        }
+        
+        .diagram-container {
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .mermaid {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .svg-diagram {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+        }
+        
+        table tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .example-card {
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .example-card h4 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        
+        footer {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 10px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .visual-anatomy {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .anatomy-parts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .anatomy-part {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .anatomy-part h5 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        /* Editable code */
+        .editable-code {
+            min-height: 150px;
+            padding: 20px;
+            background: #2d2d30;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            border: none;
+            outline: none;
+            resize: vertical;
+            width: 100%;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐍 0.3: Python Fonksiyonlar</h1>
+            <p>Algoritmalar ve Veri Yapıları Dersi - İnteraktif Konu Anlatımı</p>
+            <div class="nav-links">
+                <a href="index.html">🏠 Ana Menü</a>
+                <a href="0b_python_onfazla.html">⬅️ Önceki: Python Ön Bilgiler</a>
+                <a href="siniflar.html">➡️ Sonraki: Sınıflar</a>
+            </div>
+        </header>
+
+        <div id="loading" class="loading">✅ Python yorumlayıcısı hazır! Kodları çalıştırabilirsiniz.</div>
+
+        <!-- Giriş Bölümü -->
+        <div class="section">
+            <h2>📖 Fonksiyon Nedir?</h2>
+            
+            <p style="font-size: 1.1em; margin-bottom: 20px;">
+                <strong>Fonksiyon</strong>, belirli bir görevi yerine getiren, yeniden kullanılabilir kod bloklarıdır. 
+                Fonksiyonlar sayesinde kodlarımızı daha organize, okunabilir ve bakımı kolay hale getiririz.
+            </p>
+            
+            <div class="concept-box">
+                <strong>🎯 Fonksiyonların Faydaları:</strong>
+                <ul>
+                    <li><strong>Kod Tekrarını Önler:</strong> Aynı işlemi farklı yerlerde kullanmak için kodu kopyalamaya gerek kalmaz</li>
+                    <li><strong>Modüler Yapı:</strong> Büyük programları küçük parçalara böleriz</li>
+                    <li><strong>Kolay Bakım:</strong> Bir değişikliği sadece fonksiyon içinde yaparız</li>
+                    <li><strong>Okunabilirlik:</strong> Kod daha anlaşılır ve düzenli olur</li>
+                    <li><strong>Test Edilebilirlik:</strong> Her fonksiyonu ayrı ayrı test edebiliriz</li>
+                </ul>
+            </div>
+
+            <h3>📊 Fonksiyon Anatomisi</h3>
+            
+            <div class="visual-anatomy">
+                <pre><code class="language-python">def fonksiyon_adi(parametre1, parametre2):
+    """Docstring - fonksiyonun açıklaması"""
+    # Fonksiyon gövdesi
+    sonuc = parametre1 + parametre2
+    return sonuc</code></pre>
+                
+                <div class="anatomy-parts">
+                    <div class="anatomy-part">
+                        <h5>🔑 def</h5>
+                        <p>Fonksiyon tanımlama anahtar kelimesi</p>
+                    </div>
+                    <div class="anatomy-part">
+                        <h5>📛 İsim</h5>
+                        <p>Fonksiyonun benzersiz adı</p>
+                    </div>
+                    <div class="anatomy-part">
+                        <h5>📥 Parametreler</h5>
+                        <p>Fonksiyona gönderilen değişkenler</p>
+                    </div>
+                    <div class="anatomy-part">
+                        <h5>📤 Return</h5>
+                        <p>Fonksiyonun döndürdüğü değer</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="important-note">
+                <strong>⚡ Önemli Terimler:</strong><br>
+                <strong>Parametre:</strong> Fonksiyon tanımında parantez içinde belirtilen değişkenler<br>
+                <strong>Argüman:</strong> Fonksiyonu çağırırken gönderdiğimiz gerçek değerler<br>
+                <strong>Return:</strong> Fonksiyonun geri döndürdüğü değer<br>
+                <strong>def:</strong> Fonksiyon tanımlamak için kullanılan anahtar kelime
+            </div>
+        </div>
+
+        <!-- Fonksiyon Tanımlama ve Çağırma -->
+        <div class="section">
+            <h2>🔧 Fonksiyon Tanımlama ve Çağırma</h2>
+            
+            <h3>Basit Bir Fonksiyon</h3>
+            <p>En basit haliyle, hiç parametre almayan ve değer döndürmeyen bir fonksiyon:</p>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(1)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code1">def selamla():
+    """Bu fonksiyon basit bir selamlama yapar"""
+    print("Merhaba Dünya!")
+    print("Python öğreniyorum!")
+
+# Fonksiyonu çağırma
+selamla()
+print("---")
+selamla()  # Birden fazla kez çağırabiliriz</code></pre>
+                </div>
+                <div class="code-output" id="output1"></div>
+            </div>
+
+            <h3>Parametreli Fonksiyonlar</h3>
+            <p>Fonksiyonlara dışarıdan veri göndererek daha esnek hale getirebiliriz:</p>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(2)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code2">def selamla_kisi(isim):
+    """Belirtilen kişiye selamlar"""
+    print(f"Merhaba {isim}!")
+    print(f"{isim}, nasılsın?")
+
+# Farklı argümanlarla çağırma
+selamla_kisi("Ahmet")
+print("---")
+selamla_kisi("Ayşe")
+print("---")
+selamla_kisi("Mehmet")</code></pre>
+                </div>
+                <div class="code-output" id="output2"></div>
+            </div>
+
+            <h3>Return ile Değer Döndürme</h3>
+            <p><code>return</code> anahtar kelimesi, fonksiyonun bir değer döndürmesini sağlar:</p>
+            
+            <div class="diagram-container">
+                <div class="mermaid">
+flowchart LR
+    A[Fonksiyon Çağırma] --> B[Fonksiyon Çalışır]
+    B --> C{Return var mı?}
+    C -->|Evet| D[Değer Döndür]
+    C -->|Hayır| E[None Döndür]
+    D --> F[Değer Kullanılabilir]
+    E --> F
+    style A fill:#667eea,color:#fff
+    style D fill:#28a745,color:#fff
+    style E fill:#ffc107,color:#333
+                </div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(3)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code3">def topla(a, b):
+    """İki sayıyı toplar ve sonucu döndürür"""
+    sonuc = a + b
+    return sonuc
+
+def kare_al(sayi):
+    """Bir sayının karesini döndürür"""
+    return sayi * sayi
+
+# Return değerlerini kullanma
+toplam = topla(15, 25)
+print(f"Toplam: {toplam}")
+
+kare = kare_al(7)
+print(f"7'nin karesi: {kare}")
+
+# Return değerini doğrudan kullanma
+print(f"5 + 8 = {topla(5, 8)}")
+print(f"12'nin karesi: {kare_al(12)}")
+
+# Return değerini başka işlemlerde kullanma
+sonuc = topla(10, 20) + kare_al(5)
+print(f"10+20 + 5^2 = {sonuc}")</code></pre>
+                </div>
+                <div class="code-output" id="output3"></div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Dikkat:</strong> <code>return</code> olmadan bir fonksiyon <code>None</code> döndürür.
+                <code>print()</code> ile <code>return</code> farklıdır! <code>print()</code> sadece ekrana yazar,
+                <code>return</code> ise değeri fonksiyondan çıkartır.
+            </div>
+        </div>
+
+        <!-- Min Bulma Algoritması -->
+        <div class="section">
+            <h2>🎨 Örnek: Dizide Minimum Bulma</h2>
+            
+            <h3>📋 Flowchart (Akış Şeması)</h3>
+            
+            <div class="diagram-container">
+                <div class="mermaid">
+flowchart TD
+    A([BAŞLA]) --> B[liste parametresini al]
+    B --> C[min = liste'#91;0'#93;]
+    C --> D[i = 0]
+    D --> E{i < liste uzunluğu?}
+    E -->|Evet| F{liste'#91;i'#93; < min?}
+    F -->|Evet| G[min = liste'#91;i'#93;]
+    F -->|Hayır| H[i = i + 1]
+    G --> H
+    H --> E
+    E -->|Hayır| I[return min]
+    I --> J([BİTİR])
+    
+    style A fill:#667eea,color:#fff
+    style J fill:#667eea,color:#fff
+    style I fill:#28a745,color:#fff
+    style G fill:#f093fb,color:#fff
+    style E fill:#ffc107,color:#333
+    style F fill:#17a2b8,color:#fff
+                </div>
+            </div>
+
+            <h3>📝 Pseudocode (Sözde Kod)</h3>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Pseudocode</span>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-plaintext">FUNCTION min_bul(liste):
+    min ← liste[0]
+    
+    FOR her eleman IN liste:
+        IF eleman < min:
+            min ← eleman
+        END IF
+    END FOR
+    
+    RETURN min
+END FUNCTION
+
+// Kullanım
+sayilar ← [45, 23, 67, 12, 89]
+sonuc ← min_bul(sayilar)
+PRINT sonuc</code></pre>
+                </div>
+            </div>
+
+            <h3>🐍 Python Kodu</h3>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(4)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code4">def min_bul(liste):
+    """Listedeki minimum değeri bulur"""
+    if len(liste) == 0:
+        return None
+    
+    min_deger = liste[0]
+    
+    for eleman in liste:
+        if eleman < min_deger:
+            min_deger = eleman
+    
+    return min_deger
+
+# Test edelim
+sayilar1 = [45, 23, 67, 12, 89, 34]
+sayilar2 = [100, 50, 75, 25, 90]
+sayilar3 = [-5, -10, -3, -20, -1]
+
+print(f"Liste 1: {sayilar1}")
+print(f"Minimum: {min_bul(sayilar1)}")
+print()
+print(f"Liste 2: {sayilar2}")
+print(f"Minimum: {min_bul(sayilar2)}")
+print()
+print(f"Liste 3: {sayilar3}")
+print(f"Minimum: {min_bul(sayilar3)}")</code></pre>
+                </div>
+                <div class="code-output" id="output4"></div>
+            </div>
+        </div>
+
+        <!-- Daha fazla örnek -->
+        <div class="section">
+            <h2>💪 Daha Fazla Algoritma Örnekleri</h2>
+            
+            <h3>Ortalama Hesaplama</h3>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(5)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code5">def ortalama_hesapla(liste):
+    """Listedeki sayıların ortalamasını hesaplar"""
+    if len(liste) == 0:
+        return 0
+    
+    toplam = 0
+    for sayi in liste:
+        toplam += sayi
+    
+    ortalama = toplam / len(liste)
+    return ortalama
+
+# Test
+notlar1 = [85, 90, 78, 92, 88]
+notlar2 = [60, 70, 65, 80, 75]
+
+print(f"Notlar 1: {notlar1}")
+print(f"Ortalama: {ortalama_hesapla(notlar1):.2f}")
+print()
+print(f"Notlar 2: {notlar2}")
+print(f"Ortalama: {ortalama_hesapla(notlar2):.2f}")</code></pre>
+                </div>
+                <div class="code-output" id="output5"></div>
+            </div>
+
+            <h3>Linear Search (Doğrusal Arama)</h3>
+            
+            <div class="diagram-container">
+                <div class="mermaid">
+flowchart TD
+    A([BAŞLA]) --> B[liste, aranan al]
+    B --> C[i = 0]
+    C --> D{i < liste uzunluğu?}
+    D -->|Evet| E{liste i == aranan?}
+    E -->|Evet| F[return i]
+    E -->|Hayır| G[i = i + 1]
+    G --> D
+    D -->|Hayır| H[return -1]
+    F --> I([BİTİR])
+    H --> I
+    
+    style A fill:#667eea,color:#fff
+    style I fill:#667eea,color:#fff
+    style F fill:#28a745,color:#fff
+    style H fill:#dc3545,color:#fff
+                </div>
+            </div>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(6)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code6">def linear_search(liste, aranan):
+    """
+    Listedeki bir elemanı arar ve indeksini döndürür.
+    Bulunamazsa -1 döndürür.
+    """
+    for i in range(len(liste)):
+        if liste[i] == aranan:
+            return i  # Bulundu, indeksini döndür
+    
+    return -1  # Bulunamadı
+
+# Test
+isimler = ["Ali", "Ayşe", "Mehmet", "Fatma", "Ahmet"]
+sayilar = [10, 25, 30, 45, 50, 75]
+
+print(f"İsimler: {isimler}")
+print(f"'Mehmet' aranıyor...")
+indeks = linear_search(isimler, "Mehmet")
+if indeks != -1:
+    print(f"Bulundu! İndeks: {indeks}")
+else:
+    print("Bulunamadı!")
+
+print()
+print(f"'Zeynep' aranıyor...")
+indeks = linear_search(isimler, "Zeynep")
+if indeks != -1:
+    print(f"Bulundu! İndeks: {indeks}")
+else:
+    print("Bulunamadı!")
+
+print()
+print(f"Sayılar: {sayilar}")
+print(f"45 aranıyor: İndeks = {linear_search(sayilar, 45)}")
+print(f"100 aranıyor: İndeks = {linear_search(sayilar, 100)}")</code></pre>
+                </div>
+                <div class="code-output" id="output6"></div>
+            </div>
+
+            <h3>Asal Sayı Kontrolü</h3>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(7)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code7">def asal_mi(sayi):
+    """
+    Bir sayının asal olup olmadığını kontrol eder
+    Return: True (asal) veya False (asal değil)
+    """
+    if sayi < 2:
+        return False
+    
+    if sayi == 2:
+        return True
+    
+    if sayi % 2 == 0:
+        return False
+    
+    # 3'ten başlayarak sayının kareköküne kadar kontrol et
+    for i in range(3, int(sayi**0.5) + 1, 2):
+        if sayi % i == 0:
+            return False
+    
+    return True
+
+def asal_sayilari_listele(baslangic, bitis):
+    """Verilen aralıktaki asal sayıları listeler"""
+    asal_liste = []
+    for sayi in range(baslangic, bitis + 1):
+        if asal_mi(sayi):
+            asal_liste.append(sayi)
+    return asal_liste
+
+# Test
+print("Asal mı kontrolleri:")
+test_sayilar = [2, 3, 4, 5, 10, 17, 19, 20, 23, 25]
+for sayi in test_sayilar:
+    sonuc = "ASAL" if asal_mi(sayi) else "ASAL DEĞİL"
+    print(f"{sayi}: {sonuc}")
+
+print("\n1-50 arası asal sayılar:")
+asallar = asal_sayilari_listele(1, 50)
+print(asallar)
+print(f"Toplam {len(asallar)} adet asal sayı var")</code></pre>
+                </div>
+                <div class="code-output" id="output7"></div>
+            </div>
+        </div>
+
+        <!-- Pass by Reference -->
+        <div class="section">
+            <h2>🔄 Pass by Value vs Pass by Reference</h2>
+            
+            <div class="concept-box">
+                <strong>🧠 Önemli Kavram:</strong><br>
+                Python'da değişkenler iki şekilde davranır:
+                <ul>
+                    <li><strong>Immutable (Değiştirilemez):</strong> int, float, str, tuple → Pass by Value gibi davranır</li>
+                    <li><strong>Mutable (Değiştirilebilir):</strong> list, dict, set → Pass by Reference gibi davranır</li>
+                </ul>
+            </div>
+
+            <h3>Immutable Tipler (Sayılar, String'ler)</h3>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(8)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code8">def sayi_degistir(x):
+    """Sayıyı değiştirmeye çalışır"""
+    print(f"Fonksiyon içinde (önce): x = {x}")
+    x = x + 10
+    print(f"Fonksiyon içinde (sonra): x = {x}")
+    return x
+
+# Ana program
+sayi = 5
+print(f"Fonksiyon öncesi: sayi = {sayi}")
+sonuc = sayi_degistir(sayi)
+print(f"Fonksiyon sonrası: sayi = {sayi}")
+print(f"Return değeri: sonuc = {sonuc}")
+print("\nGöründüğü gibi, orijinal 'sayi' değişmedi!")</code></pre>
+                </div>
+                <div class="code-output" id="output8"></div>
+            </div>
+
+            <h3>Mutable Tipler (Listeler) - Pass by Reference</h3>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(9)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code9">def liste_degistir(liste):
+    """Listeyi değiştirir"""
+    print(f"Fonksiyon içinde (önce): {liste}")
+    liste.append(99)
+    liste[0] = 999
+    print(f"Fonksiyon içinde (sonra): {liste}")
+
+# Ana program
+sayilar = [1, 2, 3, 4, 5]
+print(f"Fonksiyon öncesi: {sayilar}")
+liste_degistir(sayilar)
+print(f"Fonksiyon sonrası: {sayilar}")
+print("\n⚠️ DİKKAT: Orijinal liste değişti!")</code></pre>
+                </div>
+                <div class="code-output" id="output9"></div>
+            </div>
+        </div>
+
+        <!-- Recursive Functions -->
+        <div class="section">
+            <h2>♻️ Recursive (Özyinelemeli) Fonksiyonlar</h2>
+            
+            <div class="concept-box">
+                <strong>📌 Recursion Nedir?</strong><br>
+                Bir fonksiyonun kendi kendini çağırmasına <strong>recursion</strong> denir.
+            </div>
+
+            <h3>Faktöriyel Hesaplama</h3>
+            
+            <div class="diagram-container">
+                <div class="mermaid">
+graph TD
+    A["faktoriyel(5)"] --> B["5 × faktoriyel(4)"]
+    B --> C["5 × 4 × faktoriyel(3)"]
+    C --> D["5 × 4 × 3 × faktoriyel(2)"]
+    D --> E["5 × 4 × 3 × 2 × faktoriyel(1)"]
+    E --> F["5 × 4 × 3 × 2 × 1"]
+    F --> G["120"]
+    
+    style A fill:#667eea,color:#fff
+    style E fill:#ffc107,color:#333
+    style G fill:#28a745,color:#fff
+                </div>
+            </div>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(10)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code10">def faktoriyel(n):
+    """Recursive faktöriyel hesaplama"""
+    # Base case
+    if n == 0 or n == 1:
+        return 1
+    
+    # Recursive case
+    return n * faktoriyel(n - 1)
+
+# Test
+print("Faktöriyel hesaplamaları:")
+for i in range(1, 8):
+    print(f"{i}! = {faktoriyel(i)}")</code></pre>
+                </div>
+                <div class="code-output" id="output10"></div>
+            </div>
+
+            <h3>Fibonacci Serisi</h3>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="run-button" onclick="runCode(11)">▶ Çalıştır</button>
+                </div>
+                <div class="code-editor">
+                    <pre><code class="language-python" id="code11">def fibonacci(n):
+    """
+    N. Fibonacci sayısını hesaplar
+    Fibonacci: 0, 1, 1, 2, 3, 5, 8, 13, 21, ...
+    """
+    # Base cases
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+    
+    # Recursive case
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+# İlk 10 Fibonacci sayısı
+print("Fibonacci Serisi:")
+for i in range(10):
+    print(f"F({i}) = {fibonacci(i)}")</code></pre>
+                </div>
+                <div class="code-output" id="output11"></div>
+            </div>
+        </div>
+
+        <!-- Editable Code -->
+        <div class="section">
+            <h2>📝 Kendiniz Deneyin!</h2>
+            
+            <p>Aşağıdaki kod alanını düzenleyebilir ve kendi kodlarınızı yazabilirsiniz:</p>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Düzenlenebilir Python Kodu</span>
+                    <button class="run-button" onclick="runCode(99)">▶ Çalıştır</button>
+                </div>
+                <textarea class="editable-code" id="code99"># Buraya kendi kodunuzu yazın!
+
+def merhaba():
+    print("Merhaba Dünya!")
+
+merhaba()
+
+# Örnek: Bir liste oluşturup işlemler yapın
+sayilar = [1, 2, 3, 4, 5]
+print(f"Sayılar: {sayilar}")
+print(f"Toplam: {sum(sayilar)}")
+</textarea>
+                <div class="code-output" id="output99"></div>
+            </div>
+        </div>
+
+        <footer>
+            <h3>📚 Özet</h3>
+            <p><strong>Bu derste öğrendiklerimiz:</strong></p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>Fonksiyon tanımlama ve çağırma (<code>def</code>, <code>return</code>)</li>
+                <li>Parametreler ve argümanlar</li>
+                <li>Pass by Value vs Pass by Reference</li>
+                <li>Önceki algoritmaları fonksiyon olarak yazdık</li>
+                <li>Recursive fonksiyonlar</li>
+                <li>Pratik örnekler ve uygulamalar</li>
+            </ul>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <a href="index.html" style="color: #667eea;">🏠 Ana Menü</a>
+                <a href="siniflar.html" style="color: #667eea;">Sonraki: Sınıflar ve Objeler →</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#764ba2',
+                secondaryColor: '#f093fb',
+                tertiaryColor: '#f8f9ff'
+            }
+        });
+        
+        // Skulpt output function
+        function outf(text) {
+            const output = document.getElementById(`output${window.currentRunId}`);
+            output.textContent += text;
+        }
+        
+        // Skulpt error function
+        function builtinRead(x) {
+            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                throw "File not found: '" + x + "'";
+            return Sk.builtinFiles["files"][x];
+        }
+        
+        // Run Python code
+        function runCode(id) {
+            window.currentRunId = id;
+            
+            const codeElement = document.getElementById(`code${id}`);
+            const outputElement = document.getElementById(`output${id}`);
+            const button = event.target;
+            
+            // Get code from either pre>code or textarea
+            let code;
+            if (codeElement.tagName === 'TEXTAREA') {
+                code = codeElement.value;
+            } else {
+                code = codeElement.textContent;
+            }
+            
+            // Clear previous output
+            outputElement.textContent = '';
+            outputElement.className = 'code-output';
+            
+            // Disable button
+            button.disabled = true;
+            button.textContent = '⏳ Çalıştırılıyor...';
+            
+            // Configure Skulpt
+            Sk.pre = "output" + id;
+            Sk.configure({
+                output: outf,
+                read: builtinRead,
+                __future__: Sk.python3
+            });
+            
+            // Run code
+            const myPromise = Sk.misceval.asyncToPromise(function() {
+                return Sk.importMainWithBody("<stdin>", false, code, true);
+            });
+            
+            myPromise.then(
+                function(mod) {
+                    button.disabled = false;
+                    button.textContent = '▶ Çalıştır';
+                    if (outputElement.textContent === '') {
+                        outputElement.textContent = '(Çıktı yok)';
+                        outputElement.style.color = '#666';
+                    } else {
+                        outputElement.style.color = '#0f0';
+                    }
+                },
+                function(err) {
+                    button.disabled = false;
+                    button.textContent = '▶ Çalıştır';
+                    outputElement.textContent = err.toString();
+                    outputElement.className = 'code-output error';
+                }
+            );
+        }
+        
+        // Highlight all code blocks
+        document.addEventListener('DOMContentLoaded', (event) => {
+            Prism.highlightAll();
+        });
+    </script>
+</body>
+</html>

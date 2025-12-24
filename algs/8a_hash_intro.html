@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.1: Hash Table (Hash Tablosu) - Detaylı Anlatım</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .hash-visual {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .hash-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .flow-box {
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 100px;
+        }
+        .flow-box.key { background: #e3f2fd; border: 2px solid #2196f3; }
+        .flow-box.hash { background: #fce4ec; border: 2px solid #e91e63; }
+        .flow-box.index { background: #e8f5e9; border: 2px solid #4caf50; }
+        .flow-arrow { font-size: 1.5em; color: #667eea; }
+
+        .bucket-table {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .bucket-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .bucket-index {
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .bucket-content {
+            flex: 1;
+            min-height: 35px;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .bucket-content.empty { color: #999; font-style: italic; font-size: 13px; }
+        .bucket-content.filled { background: #e8f5e9; border-color: #4caf50; }
+        .bucket-content.collision { background: #fff3e0; border-color: #ff9800; }
+
+        .kv-pair {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+        }
+        .kv-pair.new { animation: highlight 0.5s ease; }
+        @keyframes highlight {
+            0% { background: #fff9c4; transform: scale(1.1); }
+            100% { background: white; transform: scale(1); }
+        }
+
+        .complexity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .complexity-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .complexity-card .op { font-size: 1.1em; font-weight: bold; margin-bottom: 10px; }
+        .complexity-card .time { font-size: 1.8em; font-weight: bold; color: #27ae60; }
+        .complexity-card .worst { font-size: 0.85em; color: #e74c3c; margin-top: 5px; }
+
+        .term-box {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .term-item {
+            margin: 15px 0;
+            padding-left: 15px;
+            border-left: 3px solid #667eea;
+        }
+        .term-item strong { color: #667eea; }
+
+        .collision-visual {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .collision-method {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            max-width: 350px;
+        }
+
+        .python-internal {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🗂️ 8.1: Hash Table (Hash Tablosu)</h1>
+        <p>O(1) Arama, Ekleme ve Silme - Detaylı Anlatım</p>
+    </header>
+
+    <div class="section">
+        <h2>📌 Hash Table Nedir?</h2>
+        <p><strong>Hash Table</strong> (diğer adlarıyla Hash Map, Dictionary, Associative Array), <strong>anahtar-değer (key-value)</strong> çiftlerini depolayan ve ortalama <strong>O(1)</strong> yani sabit zamanda arama, ekleme, silme yapabilen güçlü bir veri yapısıdır.</p>
+
+        <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: #2e7d32;">🚀 Neden Bu Kadar Hızlı?</h4>
+            <p>Normal bir dizide "Ali" isimli kişiyi bulmak için tüm elemanları tek tek kontrol etmeniz gerekir → O(n)</p>
+            <p style="margin-bottom: 0;">Hash Table ise anahtarı matematiksel bir formülle doğrudan bellek adresine çevirir → O(1)</p>
+        </div>
+
+        <h3>🆚 Karşılaştırma: "Ali" İsimli Kişiyi Bul</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+            <thead>
+                <tr style="background: #667eea; color: white;">
+                    <th style="padding: 12px;">Yöntem</th>
+                    <th style="padding: 12px;">İşlem</th>
+                    <th style="padding: 12px;">Karmaşıklık</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>Liste ile Arama</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Baştan sona tüm elemanları kontrol et</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #e74c3c;">O(n) - 1 milyon kayıt = 1 milyon kontrol</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>Hash Table</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">hash("Ali") → direkt indekse git</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">O(1) - 1 milyon kayıt = 1 hesaplama!</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🔑 Hash Fonksiyonu Nasıl Çalışır?</h2>
+
+        <p><strong>Hash Fonksiyonu</strong>, herhangi bir veriyi (string, sayı, obje) sabit boyutlu bir sayıya dönüştüren matematiksel fonksiyondur.</p>
+
+        <div class="hash-visual">
+            <h3 style="text-align: center;">Anahtar → Hash Değeri → Dizi İndeksi</h3>
+
+            <div class="hash-flow">
+                <div class="flow-box key">
+                    <div style="font-size: 0.85em; color: #666;">Anahtar</div>
+                    <div style="font-size: 1.3em; font-weight: bold;">"Ali"</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box hash">
+                    <div style="font-size: 0.85em; color: #666;">hash("Ali")</div>
+                    <div style="font-size: 1.1em;">193419287</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div style="font-size: 1.1em; font-weight: bold;">% 11</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box index">
+                    <div style="font-size: 0.85em; color: #666;">İndeks</div>
+                    <div style="font-size: 1.3em; font-weight: bold;">3</div>
+                </div>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                <p style="margin: 0; text-align: center;"><strong>Formül:</strong> <code>indeks = hash(anahtar) % tablo_boyutu</code></p>
+                <p style="margin: 10px 0 0 0; text-align: center; font-size: 0.9em; color: #666;">
+                    % (modülo) operatörü, bölümden kalanı verir. Bu sayede her zaman 0 ile (tablo_boyutu-1) arası bir indeks elde ederiz.
+                </p>
+            </div>
+        </div>
+
+        <h3>🐍 Python'da hash() Fonksiyonu</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <button class="btn btn-run" onclick="runPython('code0')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code0"><code class="language-python"># Python'un yerleşik hash() fonksiyonu
+# Her obje için benzersiz bir tamsayı üretir
+
+# String'lerin hash değerleri
+print("String hash değerleri:")
+print(f"hash('Ali') = {hash('Ali')}")
+print(f"hash('Ayşe') = {hash('Ayşe')}")
+print(f"hash('ali') = {hash('ali')}")  # Büyük/küçük harf fark eder!
+
+# Sayıların hash değerleri (kendileri)
+print(f"\nhash(42) = {hash(42)}")
+print(f"hash(3.14) = {hash(3.14)}")
+
+# Tuple hash'lenebilir, list hash'lenemez!
+print(f"\nhash((1, 2, 3)) = {hash((1, 2, 3))}")
+# hash([1, 2, 3])  # TypeError: unhashable type: 'list'
+
+# Modülo ile indeks hesaplama
+tablo_boyutu = 11
+anahtar = "Ali"
+indeks = hash(anahtar) % tablo_boyutu
+print(f"\nTablo boyutu: {tablo_boyutu}")
+print(f"'{anahtar}' için indeks: {indeks}")</code></pre>
+            <textarea id="code0" class="code-editor"></textarea>
+            <div id="output-code0" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-top: 15px;">
+            <strong>⚠️ Dikkat:</strong> Python'da <code>hash()</code> değerleri program her çalıştığında değişebilir (güvenlik nedeniyle). Bu yüzden hash değerlerini dosyaya kaydetmeyin!
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎮 İnteraktif Hash Table Simülasyonu</h2>
+        <p>11 hücreli bir hash table ile deney yapın. Anahtar-değer çiftleri ekleyin ve çarpışmaları gözlemleyin!</p>
+
+        <div class="hash-visual">
+            <div class="bucket-table" id="hashTable">
+                <!-- JS ile doldurulacak -->
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <input type="text" id="keyInput" placeholder="Anahtar (örn: Ali)" style="padding: 10px; border: 2px solid #ddd; border-radius: 8px; width: 120px;">
+                <input type="text" id="valueInput" placeholder="Değer (örn: 25)" style="padding: 10px; border: 2px solid #ddd; border-radius: 8px; width: 120px;">
+                <button class="btn btn-run" onclick="insertToHash()">➕ Ekle</button>
+                <button class="btn" onclick="searchHash()">🔍 Ara</button>
+                <button class="btn" onclick="deleteFromHash()">🗑️ Sil</button>
+                <button class="btn btn-reset" onclick="resetHash()">🔄 Sıfırla</button>
+            </div>
+            <p id="hashMsg" style="text-align: center; margin-top: 10px; font-weight: bold; min-height: 20px;"></p>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <strong>🧪 Deneyin:</strong> "Ali", "Ayşe", "Mehmet", "Fatma", "Zeynep", "Ahmet", "Elif" ekleyin ve çarpışmaları gözlemleyin!
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💥 Çarpışma (Collision) Nedir?</h2>
+        <p>Farklı anahtarlar aynı indekse hash'lendiğinde <strong>çarpışma (collision)</strong> oluşur. Bu kaçınılmazdır çünkü sonsuz sayıda anahtar, sınırlı sayıda hücreye eşlenir.</p>
+
+        <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: #c62828;">Örnek Çarpışma</h4>
+            <p style="font-family: monospace;">
+                hash("Ali") % 11 = 3<br>
+                hash("Veli") % 11 = 3  ← Aynı indeks! ÇARPIŞMA!
+            </p>
+        </div>
+
+        <h3>🛠️ Çarpışma Çözüm Yöntemleri</h3>
+
+        <div class="collision-visual">
+            <div class="collision-method" style="border-top: 4px solid #2196f3;">
+                <h4 style="color: #1565c0; margin-top: 0;">🔗 1. Chaining (Zincirleme)</h4>
+                <p>Her hücrede bir <strong>linked list</strong> tutulur. Çarpışan elemanlar listeye eklenir.</p>
+                <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+                    [0] → boş<br>
+                    [1] → (Ayşe:22)<br>
+                    [2] → boş<br>
+                    [3] → (Ali:25) → (Veli:30) → (Can:28)<br>
+                    [4] → (Fatma:27)<br>
+                    ...
+                </div>
+                <p style="margin-bottom: 0; font-size: 0.9em;"><strong>✅ Avantaj:</strong> Silme kolay, tablo hiç dolmaz<br><strong>❌ Dezavantaj:</strong> Ek bellek (pointer'lar)</p>
+            </div>
+
+            <div class="collision-method" style="border-top: 4px solid #e91e63;">
+                <h4 style="color: #c2185b; margin-top: 0;">📍 2. Open Addressing</h4>
+                <p>Çarpışmada <strong>başka boş hücre</strong> aranır. Tüm veriler tablonun içinde kalır.</p>
+                <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px;">
+                    <strong>Linear Probing:</strong> i+1, i+2, i+3...<br>
+                    <strong>Quadratic Probing:</strong> i+1², i+2², i+3²...<br>
+                    <strong>Double Hashing:</strong> i + j×hash2(key)
+                </div>
+                <p style="margin-bottom: 0; font-size: 0.9em;"><strong>✅ Avantaj:</strong> Cache-friendly (veriler bitişik)<br><strong>❌ Dezavantaj:</strong> Clustering problemi</p>
+            </div>
+        </div>
+
+        <div class="term-box">
+            <h4 style="margin-top: 0; color: #667eea;">📚 Terimler Sözlüğü</h4>
+            <div class="term-item">
+                <strong>Cache-friendly:</strong> Veriler bellekte yan yana olduğunda CPU önbelleği (cache) daha verimli çalışır. Open addressing cache-friendly çünkü tüm veriler aynı dizide.
+            </div>
+            <div class="term-item">
+                <strong>Clustering:</strong> Linear probing'de çarpışan elemanlar gruplar (kümeler) oluşturur. Bu gruplar büyüdükçe arama yavaşlar.
+            </div>
+            <div class="term-item">
+                <strong>Load Factor (Yük Faktörü):</strong> Tablodaki dolu hücre oranı. load_factor = eleman_sayısı / tablo_boyutu. Genelde 0.7'yi geçince tablo büyütülür.
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚡ Zaman Karmaşıklığı Analizi</h2>
+
+        <div class="complexity-grid">
+            <div class="complexity-card">
+                <div class="op">🔍 Arama</div>
+                <div class="time">O(1)*</div>
+                <div class="worst">En kötü: O(n)</div>
+            </div>
+            <div class="complexity-card">
+                <div class="op">➕ Ekleme</div>
+                <div class="time">O(1)*</div>
+                <div class="worst">En kötü: O(n)</div>
+            </div>
+            <div class="complexity-card">
+                <div class="op">🗑️ Silme</div>
+                <div class="time">O(1)*</div>
+                <div class="worst">En kötü: O(n)</div>
+            </div>
+            <div class="complexity-card">
+                <div class="op">💾 Alan</div>
+                <div class="time">O(n)</div>
+                <div class="worst">n eleman için n hücre</div>
+            </div>
+        </div>
+        <p style="text-align: center; color: #666;">* Ortalama durum, iyi bir hash fonksiyonu ve düşük load factor ile</p>
+
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-top: 15px;">
+            <strong>⚠️ En Kötü Durum Ne Zaman?</strong>
+            <p style="margin: 5px 0 0 0;">Kötü bir hash fonksiyonu tüm anahtarları aynı indekse atarsa, hash table linked list'e dönüşür → O(n). Bu yüzden iyi hash fonksiyonu kritik!</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🐍 Python dict: Güçlü Bir Hash Table</h2>
+        <p>Python'un <code>dict</code> (dictionary) yapısı, C dilinde yazılmış yüksek performanslı bir hash table implementasyonudur.</p>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python dict Kullanımı</span>
+                <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code1"><code class="language-python"># ===== PYTHON DICT TEMELLERİ =====
+
+# 1. Oluşturma - Süslü parantez {} ile
+ogrenciler = {
+    "Ali": 85,      # anahtar: değer
+    "Ayşe": 92,
+    "Mehmet": 78
+}
+print(f"Öğrenciler: {ogrenciler}")
+
+# 2. Ekleme - O(1) ortalama
+# Yeni bir anahtar ile değer atama
+ogrenciler["Fatma"] = 88
+ogrenciler["Zeynep"] = 95
+print(f"\nYeni eklemeler: {ogrenciler}")
+
+# 3. Arama/Erişim - O(1) ortalama
+# Köşeli parantez ile değere erişim
+ali_notu = ogrenciler["Ali"]
+print(f"\nAli'nin notu: {ali_notu}")
+
+# 4. Güncelleme - O(1) ortalama
+# Var olan anahtara yeni değer atama
+ogrenciler["Ali"] = 90  # 85'ten 90'a güncellendi
+print(f"Ali'nin yeni notu: {ogrenciler['Ali']}")
+
+# 5. Silme - O(1) ortalama
+# del anahtar kelimesi ile
+del ogrenciler["Mehmet"]
+print(f"\nMehmet silindi: {ogrenciler}")
+
+# 6. Anahtar Kontrolü - O(1) ortalama
+# 'in' operatörü ile
+print(f"\n'Ayşe' var mı? {'Ayşe' in ogrenciler}")  # True
+print(f"'Zehra' var mı? {'Zehra' in ogrenciler}")  # False
+
+# 7. Güvenli Erişim - get() metodu
+# Anahtar yoksa hata vermez, varsayılan değer döner
+zehra_notu = ogrenciler.get("Zehra", "Kayıt yok")
+print(f"Zehra'nın notu: {zehra_notu}")
+
+# 8. Tüm Anahtarlar ve Değerler
+print(f"\nTüm anahtarlar: {list(ogrenciler.keys())}")
+print(f"Tüm değerler: {list(ogrenciler.values())}")
+print(f"Tüm çiftler: {list(ogrenciler.items())}")</code></pre>
+            <textarea id="code1" class="code-editor"></textarea>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Python dict İleri Kullanım</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>İleri dict Teknikleri</span>
+                <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code2"><code class="language-python"># ===== DİCT COMPREHENSION =====
+# Liste comprehension'ın dict versiyonu
+# Sözdizimi: {anahtar: değer for eleman in iterable}
+
+# 1-10 arası sayıların kareleri
+kareler = {x: x**2 for x in range(1, 11)}
+print(f"Kareler: {kareler}")
+
+# ===== SETDEFAULT =====
+# Anahtar yoksa ekle, varsa mevcut değeri döndür
+sayac = {}
+kelimeler = ["elma", "armut", "elma", "kiraz", "elma"]
+
+for kelime in kelimeler:
+    # Eğer kelime yoksa 0 ile başlat, sonra 1 ekle
+    sayac[kelime] = sayac.get(kelime, 0) + 1
+
+print(f"\nKelime sayıları: {sayac}")
+
+# ===== DEFAULTDICT =====
+# collections modülünden - varsayılan değer fabrikası
+from collections import defaultdict
+
+# int() varsayılan olarak 0 döner
+sayac2 = defaultdict(int)
+for kelime in kelimeler:
+    sayac2[kelime] += 1  # Olmayan anahtar otomatik 0 olur
+
+print(f"defaultdict ile: {dict(sayac2)}")
+
+# list() varsayılan olarak [] döner
+gruplar = defaultdict(list)
+ogrenciler = [("A", "Ali"), ("B", "Ayşe"), ("A", "Ahmet"), ("B", "Berk")]
+for sinif, isim in ogrenciler:
+    gruplar[sinif].append(isim)
+
+print(f"\nSınıf grupları: {dict(gruplar)}")
+
+# ===== COUNTER =====
+# Sayma işlemi için özel dict
+from collections import Counter
+
+metin = "merhaba dünya merhaba python"
+kelime_sayisi = Counter(metin.split())
+print(f"\nCounter ile: {kelime_sayisi}")
+print(f"En sık 2 kelime: {kelime_sayisi.most_common(2)}")</code></pre>
+            <textarea id="code2" class="code-editor"></textarea>
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <div class="term-box">
+            <h4 style="margin-top: 0; color: #667eea;">📝 Python Syntax Açıklamaları</h4>
+            <div class="term-item">
+                <strong>Dict Comprehension:</strong> <code>{x: x**2 for x in range(5)}</code> → Liste comprehension gibi ama dict üretir. <code>x: x**2</code> anahtar-değer çiftini tanımlar.
+            </div>
+            <div class="term-item">
+                <strong>get(key, default):</strong> Anahtar varsa değerini, yoksa default'u döner. <code>d.get("yok", 0)</code> → KeyError vermez, 0 döner.
+            </div>
+            <div class="term-item">
+                <strong>defaultdict(factory):</strong> Olmayan anahtara erişildiğinde factory fonksiyonunu çağırıp varsayılan değer oluşturur. <code>int</code> → 0, <code>list</code> → [], <code>str</code> → ""
+            </div>
+            <div class="term-item">
+                <strong>Counter:</strong> Elemanları sayan özel dict. <code>most_common(n)</code> en sık n elemanı döner.
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🏗️ Kendi Hash Table Sınıfımızı Yazalım</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Hash Table Implementasyonu (Chaining)</span>
+                <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code3"><code class="language-python">class HashTable:
+    """
+    Chaining yöntemi ile Hash Table implementasyonu.
+    Her bucket bir liste (linked list yerine Python list).
+    """
+
+    def __init__(self, size=11):
+        """
+        Hash table oluştur.
+
+        Args:
+            size: Bucket sayısı (asal sayı tercih edilir)
+        """
+        self.size = size
+        # Her bucket için boş liste oluştur
+        self.buckets = [[] for _ in range(size)]
+        self.count = 0  # Eleman sayısı
+
+    def _hash(self, key):
+        """Anahtarı indekse çevir."""
+        return hash(key) % self.size
+
+    def put(self, key, value):
+        """Anahtar-değer çifti ekle veya güncelle."""
+        index = self._hash(key)
+        bucket = self.buckets[index]
+
+        # Anahtar zaten var mı kontrol et
+        for i, (k, v) in enumerate(bucket):
+            if k == key:
+                bucket[i] = (key, value)  # Güncelle
+                return
+
+        # Yeni eleman ekle
+        bucket.append((key, value))
+        self.count += 1
+
+    def get(self, key):
+        """Anahtarın değerini döndür."""
+        index = self._hash(key)
+        bucket = self.buckets[index]
+
+        for k, v in bucket:
+            if k == key:
+                return v
+
+        raise KeyError(f"Anahtar bulunamadı: {key}")
+
+    def remove(self, key):
+        """Anahtarı sil."""
+        index = self._hash(key)
+        bucket = self.buckets[index]
+
+        for i, (k, v) in enumerate(bucket):
+            if k == key:
+                del bucket[i]
+                self.count -= 1
+                return v
+
+        raise KeyError(f"Anahtar bulunamadı: {key}")
+
+    def __contains__(self, key):
+        """'in' operatörü için."""
+        try:
+            self.get(key)
+            return True
+        except KeyError:
+            return False
+
+    def __str__(self):
+        """Görselleştirme."""
+        result = []
+        for i, bucket in enumerate(self.buckets):
+            if bucket:
+                items = ", ".join(f"{k}:{v}" for k, v in bucket)
+                result.append(f"[{i}] → {items}")
+            else:
+                result.append(f"[{i}] → boş")
+        return "\n".join(result)
+
+# Test
+ht = HashTable(7)
+
+# Eklemeler
+for isim, yas in [("Ali", 25), ("Ayşe", 22), ("Mehmet", 30),
+                   ("Fatma", 28), ("Zeynep", 24), ("Ahmet", 27)]:
+    ht.put(isim, yas)
+    print(f"Eklendi: {isim} → {yas}")
+
+print(f"\n=== Hash Table Durumu ===")
+print(ht)
+print(f"\nToplam eleman: {ht.count}")
+
+# Arama
+print(f"\nAli'nin yaşı: {ht.get('Ali')}")
+print(f"'Zeynep' var mı? {'Zeynep' in ht}")</code></pre>
+            <textarea id="code3" class="code-editor"></textarea>
+            <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧩 Pratik Örnekler</h2>
+
+        <h3>Örnek 1: İki Sayının Toplamı (Two Sum)</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>LeetCode #1 - Two Sum</span>
+                <button class="btn btn-run" onclick="runPython('code4')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code4"><code class="language-python">def two_sum(nums, target):
+    """
+    Dizide toplamı target olan iki sayının indekslerini bul.
+
+    Brute Force: O(n²) - Her çift için kontrol
+    Hash Table: O(n) - Tek geçiş!
+
+    Mantık: Her sayı için "target - sayı" değerini hash'te ara.
+    """
+    # Gördüğümüz sayıları ve indekslerini sakla
+    seen = {}  # {değer: indeks}
+
+    for i, num in enumerate(nums):
+        # enumerate(liste): (indeks, değer) çiftleri döner
+        complement = target - num  # Aranan tamamlayıcı
+
+        if complement in seen:
+            # Bulundu! Tamamlayıcının indeksi ve şimdiki indeks
+            return [seen[complement], i]
+
+        # Bu sayıyı kaydet
+        seen[num] = i
+
+    return []  # Bulunamadı
+
+# Test
+nums = [2, 7, 11, 15]
+target = 9
+print(f"Dizi: {nums}")
+print(f"Hedef: {target}")
+print(f"Sonuç: {two_sum(nums, target)}")  # [0, 1] çünkü 2 + 7 = 9
+
+nums2 = [3, 2, 4]
+target2 = 6
+print(f"\nDizi: {nums2}")
+print(f"Hedef: {target2}")
+print(f"Sonuç: {two_sum(nums2, target2)}")  # [1, 2] çünkü 2 + 4 = 6</code></pre>
+            <textarea id="code4" class="code-editor"></textarea>
+            <div id="output-code4" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <h3>Örnek 2: İlk Tekrar Eden Karakter</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>First Repeating Character</span>
+                <button class="btn btn-run" onclick="runPython('code5')">▶ Çalıştır</button>
+            </div>
+            <pre id="view-code5"><code class="language-python">def first_repeating(s):
+    """
+    String'deki ilk tekrar eden karakteri bul.
+
+    Hash Set kullanarak O(n) çözüm.
+    Set, sadece anahtarları tutan bir hash table'dır.
+    """
+    seen = set()  # Gördüğümüz karakterler
+
+    for char in s:
+        if char in seen:  # O(1) kontrol
+            return char
+        seen.add(char)  # O(1) ekleme
+
+    return None  # Tekrar yok
+
+# Test
+test_strings = ["abcabc", "abcdef", "aabbcc", "python"]
+
+for s in test_strings:
+    result = first_repeating(s)
+    if result:
+        print(f"'{s}' → İlk tekrar: '{result}'")
+    else:
+        print(f"'{s}' → Tekrar yok")</code></pre>
+            <textarea id="code5" class="code-editor"></textarea>
+            <div id="output-code5" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔬 Python dict İç Yapısı</h2>
+        <p>Python'un dict implementasyonu çok optimize edilmiştir. Python 3.7+ ile dict'ler <strong>ekleme sırasını korur</strong>.</p>
+
+        <div class="python-internal">
+            <strong># Python dict iç yapısı (basitleştirilmiş)</strong><br><br>
+            # Her dict şunları tutar:<br>
+            # 1. Hash tablosu (sparse array) - indeksler<br>
+            # 2. Compact array - anahtar-değer çiftleri<br><br>
+            # Örnek: {"a": 1, "b": 2, "c": 3}<br><br>
+            # Hash tablosu (8 slot):<br>
+            # [None, 0, None, None, 1, None, 2, None]<br>
+            # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br><br>
+            # Compact array (sıralı):<br>
+            # [(hash_a, "a", 1), (hash_b, "b", 2), (hash_c, "c", 3)]<br><br>
+            # Bu tasarım:<br>
+            # ✅ Bellek verimli (eski dict'lerden %25 daha az)<br>
+            # ✅ Ekleme sırasını korur<br>
+            # ✅ Hızlı iteration
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌍 Gerçek Hayat Kullanım Alanları</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px 0;">
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #1565c0;">📚 Veritabanı İndeksleri</h4>
+                <p style="margin-bottom: 0;">Veritabanları kayıtları hızlı bulmak için hash indeksleri kullanır. SELECT * WHERE id = 12345 → O(1)</p>
+            </div>
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">🔐 Şifre Depolama</h4>
+                <p style="margin-bottom: 0;">Şifreler düz metin değil, hash'lenmiş hali saklanır. bcrypt, sha256 gibi güvenli hash fonksiyonları kullanılır.</p>
+            </div>
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #e65100;">🌐 DNS Cache</h4>
+                <p style="margin-bottom: 0;">Tarayıcınız domain → IP eşlemelerini hash table'da cache'ler. google.com → 142.250.185.78</p>
+            </div>
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #c2185b;">📦 Cache Sistemleri</h4>
+                <p style="margin-bottom: 0;">Redis, Memcached gibi sistemler tamamen hash table tabanlıdır. Web sitelerinde sık erişilen veriler cache'lenir.</p>
+            </div>
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #7b1fa2;">🐍 Python İç Yapısı</h4>
+                <p style="margin-bottom: 0;">Python'da her şey dict: global/local değişkenler, class attribute'ları, module namespace'leri...</p>
+            </div>
+            <div style="background: #e0f7fa; padding: 20px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #00838f;">🔍 Derleyiciler</h4>
+                <p style="margin-bottom: 0;">Symbol table'lar hash table'dır. Değişken isimlerini hızlıca bulup türünü, adresini getirir.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🆚 Hash Table vs Diğer Veri Yapıları</h2>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #667eea; color: white;">
+                    <th style="padding: 12px;">İşlem</th>
+                    <th style="padding: 12px;">Array</th>
+                    <th style="padding: 12px;">Linked List</th>
+                    <th style="padding: 12px;">BST (Dengeli)</th>
+                    <th style="padding: 12px;">Hash Table</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Arama (key)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(log n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(1)*</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #ddd;">Ekleme</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(1)**</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(log n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(1)*</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Silme</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(log n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(1)*</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td style="padding: 10px; border: 1px solid #ddd;">Sıralı Gezinme</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">✅ O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">✅ O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">✅ O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #e74c3c;">❌ Sıra yok</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Min/Max Bulma</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">O(log n)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #e74c3c;">O(n)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+            * Ortalama durum, ** Başa ekleme
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>📋 Özet ve Önemli Noktalar</h2>
+
+        <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+            <h4 style="margin-top: 0; color: #2e7d32;">✅ Ne Zaman Hash Table Kullan?</h4>
+            <ul>
+                <li><strong>Hızlı arama gerektiğinde:</strong> O(1) arama kritik</li>
+                <li><strong>Anahtar-değer eşlemesi:</strong> İsim → telefon, ID → kayıt</li>
+                <li><strong>Duplicate kontrolü:</strong> set kullanarak</li>
+                <li><strong>Sayma/gruplama:</strong> Counter, groupby işlemleri</li>
+                <li><strong>Caching:</strong> Hesaplanmış sonuçları sakla</li>
+            </ul>
+
+            <h4 style="color: #c62828; margin-top: 20px;">❌ Ne Zaman Hash Table Kullanma?</h4>
+            <ul style="margin-bottom: 0;">
+                <li><strong>Sıralı veri gerektiğinde:</strong> Hash table sıra tutmaz (Python 3.7+ hariç)</li>
+                <li><strong>Range query:</strong> "10-20 arası değerler" gibi sorgular</li>
+                <li><strong>Min/max sık gerekiyorsa:</strong> Heap daha iyi</li>
+                <li><strong>Bellek çok kısıtlı:</strong> Hash table boş alan bırakır</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="7f_quick_sort.html" class="btn">⬅️ Önceki: Quick Sort</a>
+        <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="9a_heap_intro.html" class="btn btn-next">Sonraki: Heap ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    // Hash Table Simülasyonu
+    const TABLE_SIZE = 11;
+    let hashTable = new Array(TABLE_SIZE).fill(null).map(() => []);
+
+    function simpleHash(key) {
+        let hash = 0;
+        for (let char of String(key)) {
+            hash = (hash * 31 + char.charCodeAt(0)) % 1000000007;
+        }
+        return hash % TABLE_SIZE;
+    }
+
+    function renderHashTable() {
+        const container = document.getElementById('hashTable');
+        container.innerHTML = '';
+
+        for (let i = 0; i < TABLE_SIZE; i++) {
+            const row = document.createElement('div');
+            row.className = 'bucket-row';
+
+            const index = document.createElement('div');
+            index.className = 'bucket-index';
+            index.innerText = i;
+
+            const content = document.createElement('div');
+            content.className = 'bucket-content';
+
+            if (hashTable[i].length === 0) {
+                content.classList.add('empty');
+                content.innerText = 'boş';
+            } else {
+                content.classList.add(hashTable[i].length > 1 ? 'collision' : 'filled');
+                hashTable[i].forEach(item => {
+                    const kv = document.createElement('span');
+                    kv.className = 'kv-pair';
+                    kv.innerText = `${item.key}:${item.value}`;
+                    content.appendChild(kv);
+                });
+            }
+
+            row.appendChild(index);
+            row.appendChild(content);
+            container.appendChild(row);
+        }
+    }
+
+    function insertToHash() {
+        const key = document.getElementById('keyInput').value.trim();
+        const value = document.getElementById('valueInput').value.trim();
+
+        if (!key || !value) {
+            document.getElementById('hashMsg').innerText = '⚠️ Anahtar ve değer girin!';
+            document.getElementById('hashMsg').style.color = '#e74c3c';
+            return;
+        }
+
+        const index = simpleHash(key);
+
+        const existing = hashTable[index].find(item => item.key === key);
+        if (existing) {
+            existing.value = value;
+            document.getElementById('hashMsg').innerHTML = `🔄 "<b>${key}</b>" güncellendi! İndeks: ${index}`;
+            document.getElementById('hashMsg').style.color = '#f39c12';
+        } else {
+            hashTable[index].push({ key, value });
+            const collision = hashTable[index].length > 1 ? ' <span style="color:#e74c3c">⚠️ ÇARPIŞMA!</span>' : '';
+            document.getElementById('hashMsg').innerHTML = `✅ hash("<b>${key}</b>") = ${index}${collision}`;
+            document.getElementById('hashMsg').style.color = '#27ae60';
+        }
+
+        renderHashTable();
+        document.getElementById('keyInput').value = '';
+        document.getElementById('valueInput').value = '';
+    }
+
+    function searchHash() {
+        const key = document.getElementById('keyInput').value.trim();
+        if (!key) {
+            document.getElementById('hashMsg').innerText = '⚠️ Aranacak anahtar girin!';
+            document.getElementById('hashMsg').style.color = '#e74c3c';
+            return;
+        }
+
+        const index = simpleHash(key);
+        const found = hashTable[index].find(item => item.key === key);
+
+        if (found) {
+            document.getElementById('hashMsg').innerHTML = `🔍 "<b>${key}</b>" bulundu! Değer: <b>${found.value}</b> (İndeks: ${index})`;
+            document.getElementById('hashMsg').style.color = '#27ae60';
+        } else {
+            document.getElementById('hashMsg').innerHTML = `❌ "<b>${key}</b>" bulunamadı (İndeks ${index}'te yok)`;
+            document.getElementById('hashMsg').style.color = '#e74c3c';
+        }
+    }
+
+    function deleteFromHash() {
+        const key = document.getElementById('keyInput').value.trim();
+        if (!key) {
+            document.getElementById('hashMsg').innerText = '⚠️ Silinecek anahtar girin!';
+            document.getElementById('hashMsg').style.color = '#e74c3c';
+            return;
+        }
+
+        const index = simpleHash(key);
+        const idx = hashTable[index].findIndex(item => item.key === key);
+
+        if (idx !== -1) {
+            hashTable[index].splice(idx, 1);
+            document.getElementById('hashMsg').innerHTML = `🗑️ "<b>${key}</b>" silindi! (İndeks: ${index})`;
+            document.getElementById('hashMsg').style.color = '#27ae60';
+            renderHashTable();
+        } else {
+            document.getElementById('hashMsg').innerHTML = `❌ "<b>${key}</b>" bulunamadı`;
+            document.getElementById('hashMsg').style.color = '#e74c3c';
+        }
+    }
+
+    function resetHash() {
+        hashTable = new Array(TABLE_SIZE).fill(null).map(() => []);
+        renderHashTable();
+        document.getElementById('hashMsg').innerText = '🔄 Tablo sıfırlandı';
+        document.getElementById('hashMsg').style.color = '#667eea';
+    }
+
+    renderHashTable();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor, lütfen bekleyin..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = "Hata: " + e; }
+    }
+</script>
+</body>
+</html>
+
