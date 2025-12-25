@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.3: Heap Sort - Sıralama Algoritması</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .sort-visual {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 30px 0;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: 250px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .bar {
+            flex: 1;
+            max-width: 60px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .bar.sorted {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+        }
+
+        .bar.comparing {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            transform: translateY(-10px);
+        }
+
+        .bar.heap {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        }
+
+        .bar-value {
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .control-btn.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .status-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+            min-height: 60px;
+        }
+
+        .step-visualization {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 9.3: Heap Sort</h1>
+            <p>Heap Kullanarak O(n log n) Sıralama</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Heap Sort Nedir?</h2>
+            <p><strong>Heap Sort</strong>, heap veri yapısını kullanarak dizi sıralama algoritmasıdır.</p>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">💡 Ana Fikir</h4>
+                <ol style="margin: 10px 0; padding-left: 25px;">
+                    <li>Diziyi <strong>Max Heap'e</strong> çevir (Heapify)</li>
+                    <li>Root (en büyük) her seferinde <strong>son eleman ile swap</strong> yap</li>
+                    <li>Heap boyutunu 1 azalt, root'u tekrar heapify yap</li>
+                    <li>Heap boşalana kadar tekrarla</li>
+                </ol>
+                <p style="margin: 10px 0 0 0;"><strong>Sonuç:</strong> Küçükten büyüğe sıralı dizi!</p>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h3 style="margin-top: 0;">⚡ Heap Sort Özellikleri</h3>
+                <ul>
+                    <li>✅ <strong>Zaman:</strong> Her durumda O(n log n)</li>
+                    <li>✅ <strong>Yer:</strong> O(1) - In-place sorting</li>
+                    <li>❌ <strong>Stable değil:</strong> Aynı değerli elemanların sırası bozulabilir</li>
+                    <li>✅ <strong>Worst case garantili:</strong> Quick sort'tan daha güvenilir</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎬 İnteraktif Heap Sort Animasyonu</h2>
+            <p>Heap sort algoritmasının çalışmasını adım adım izleyin!</p>
+
+            <div class="sort-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Heap Sort Görselleştirme</h3>
+
+                <div id="sortStatus" class="status-info">
+                    <strong>Durum:</strong> Başlamaya hazır. "Başlat" butonuna basın!
+                </div>
+
+                <div id="barContainer" class="bar-container"></div>
+
+                <div class="controls">
+                    <button class="control-btn secondary" onclick="heapSortViz.reset()">🔄 Sıfırla</button>
+                    <button class="control-btn secondary" onclick="heapSortViz.randomize()">🎲 Rastgele Dizi</button>
+                    <button class="control-btn primary" onclick="heapSortViz.start()">▶ Başlat</button>
+                    <button class="control-btn primary" onclick="heapSortViz.step()">⏯️ Adım İlerle</button>
+                    <button class="control-btn secondary" onclick="heapSortViz.toggleSpeed()">⚡ Hız: <span id="speedLabel">Normal</span></button>
+                </div>
+
+                <div class="step-visualization">
+                    <h4 style="margin-top: 0;">📊 Adım Detayları</h4>
+                    <div id="stepDetails" style="font-family: monospace; font-size: 14px; line-height: 1.8;">
+                        Algoritma başlamadı...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🌳 Heap Sort - Ağaç Görselleştirmesi</h2>
+            <p>Heap yapısının her adımda nasıl değiştiğini görün</p>
+
+            <div class="sort-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Heap Ağacı Animasyonu</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">Build heap ve extract adımlarını izleyin</p>
+
+                <canvas id="heapTreeCanvas" width="700" height="450"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="treeStatus" class="status-info">
+                    <strong>Adım 1:</strong> Rastgele diziyi max heap'e çevirme
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn secondary" onclick="heapTreeViz.reset()">🔄 Sıfırla</button>
+                    <button class="control-btn primary" onclick="heapTreeViz.nextStep()">▶ Sonraki Adım</button>
+                    <button class="control-btn primary" onclick="heapTreeViz.autoPlay()">⏩ Otomatik</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Heap Sort Algoritması - Python Kodu</h2>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Heap Sort - Adım Adım</span>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code1"><code class="language-python">def heapify(arr, n, i):
+    """i'nci elemanı heap'te aşağı batır"""
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < n and arr[left] > arr[largest]:
+        largest = left
+
+    if right < n and arr[right] > arr[largest]:
+        largest = right
+
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest)
+
+def heap_sort(arr):
+    """Heap sort algoritması"""
+    n = len(arr)
+
+    print("=== HEAP SORT ===\n")
+    print(f"Başlangıç: {arr}\n")
+
+    # ADIM 1: Build Max Heap (Max Heap Oluştur)
+    print("ADIM 1: Build Max Heap (Max Heap Oluştur)")
+    print("-" * 40)
+
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+
+    print(f"Max Heap: {arr}")
+    print(f"Root (en büyük): {arr[0]}\n")
+
+    # ADIM 2: Extract elemanları tek tek (Elemanları Çıkar ve Sırala)
+    print("ADIM 2: Extract & Sort (Çıkar ve Sırala)")
+    print("-" * 40)
+
+    for i in range(n - 1, 0, -1):
+        # Root'u (en büyük) sona taşı
+        arr[0], arr[i] = arr[i], arr[0]
+        print(f"Swap: 0 ↔ {i} → {arr}")
+        print(f"  Sıralanmış kısım: {arr[i:]} ✅")
+
+        # Kalan heap'i düzelt
+        heapify(arr, i, 0)
+        print(f"  Heapify sonrası: {arr[:i]} (heap) + {arr[i:]} (sıralı)")
+        print()
+
+    print(f"✅ Sıralama tamamlandı: {arr}")
+    return arr
+
+# Test
+arr = [12, 11, 13, 5, 6, 7]
+sorted_arr = heap_sort(arr.copy())
+
+# Doğrulama
+print("\n=== Doğrulama ===")
+print(f"Sıralı mı? {sorted_arr == sorted(sorted_arr)}")
+print(f"Sonuç: {sorted_arr}")</code></pre>
+                <textarea id="code1" class="code-editor"></textarea>
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚖️ Heap Sort vs Diğer Sıralama Algoritmaları</h2>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                        <th style="padding: 12px;">Algoritma</th>
+                        <th style="padding: 12px;">Best</th>
+                        <th style="padding: 12px;">Average</th>
+                        <th style="padding: 12px;">Worst</th>
+                        <th style="padding: 12px;">Space</th>
+                        <th style="padding: 12px;">Stable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #fff3e0;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>Heap Sort</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #4caf50;">O(n log n) ✅</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">❌</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Quick Sort</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #f44336;">O(n²) ❌</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">❌</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;">Merge Sort</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #f44336;">O(n) ❌</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">✅</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #856404;">🎯 Heap Sort Ne Zaman Kullanılır?</h4>
+                <ul style="margin: 10px 0;">
+                    <li>✅ <strong>Worst case garantisi</strong> önemliyse (embedded sistemler)</li>
+                    <li>✅ <strong>Bellek kısıtlı</strong> (O(1) extra space)</li>
+                    <li>❌ Stable sorting gerekiyorsa kullanma (Merge Sort kullan)</li>
+                    <li>❌ Küçük dizilerde (Insertion Sort daha hızlı)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Heap Sort:</strong> Build heap → Extract max tekrar tekrar</li>
+                    <li><strong>Zaman:</strong> O(n log n) - her durumda garantili!</li>
+                    <li><strong>Yer:</strong> O(1) - In-place sıralama</li>
+                    <li><strong>Avantaj:</strong> Worst case garantisi, az bellek</li>
+                    <li><strong>Dezavantaj:</strong> Stable değil, pratikte cache friendly değil</li>
+                    <li><strong>Animasyonlar:</strong> Hem bar chart hem de ağaç görselleştirmesi ile adım adım izlediniz</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="9b_heap_operations.html" class="btn">⬅️ Önceki: Heap Operasyonları</a>
+            <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+            <a href="9d_priority_queue.html" class="btn btn-next">Sonraki: Priority Queue ➡️</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        let pyodideReady = false;
+        let pyodide = null;
+        async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+        main();
+
+        async function runPython(id) {
+            if (!pyodideReady) { alert("Python yükleniyor..."); return; }
+            const code = document.getElementById('view-' + id).textContent;
+            const out = document.getElementById('output-' + id);
+            out.innerText = "Çalışıyor...";
+            try {
+                pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+                await pyodide.runPythonAsync(code);
+                out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+            } catch (e) { out.innerText = "Hata: " + e; }
+        }
+
+        // Heap Sort Bar Visualization
+        class HeapSortVisualization {
+            constructor() {
+                this.array = [12, 11, 13, 5, 6, 7, 8, 3];
+                this.heapSize = this.array.length;
+                this.sortedCount = 0;
+                this.isRunning = false;
+                this.speed = 800; // ms
+                this.speedMode = 'normal';
+                this.currentPhase = 'idle';
+                this.render();
+            }
+
+            render() {
+                const container = document.getElementById('barContainer');
+                const maxVal = Math.max(...this.array);
+
+                container.innerHTML = this.array.map((val, i) => {
+                    const height = (val / maxVal) * 200;
+                    let className = 'bar';
+
+                    if (i >= this.heapSize) {
+                        className += ' sorted';
+                    } else if (this.currentPhase === 'heapify') {
+                        className += ' heap';
+                    }
+
+                    return `
+                        <div class="${className}" style="height: ${height}px;">
+                            <div class="bar-value">${val}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateStatus(msg) {
+                document.getElementById('sortStatus').innerHTML = `<strong>Durum:</strong> ${msg}`;
+            }
+
+            updateStepDetails(msg) {
+                document.getElementById('stepDetails').innerHTML = msg;
+            }
+
+            async heapify(n, i) {
+                let largest = i;
+                const left = 2 * i + 1;
+                const right = 2 * i + 2;
+
+                if (left < n && this.array[left] > this.array[largest]) {
+                    largest = left;
+                }
+
+                if (right < n && this.array[right] > this.array[largest]) {
+                    largest = right;
+                }
+
+                if (largest !== i) {
+                    [this.array[i], this.array[largest]] = [this.array[largest], this.array[i]];
+                    this.render();
+                    await this.sleep(this.speed);
+                    await this.heapify(n, largest);
+                }
+            }
+
+            async start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+
+                // Phase 1: Build heap
+                this.currentPhase = 'heapify';
+                this.updateStatus('Faz 1: Max heap oluşturuluyor...');
+                this.updateStepDetails('Build heap aşaması: Diziyi max heap yapısına çeviriyoruz');
+
+                const n = this.array.length;
+                for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+                    await this.heapify(n, i);
+                }
+
+                this.updateStatus('Faz 1 tamamlandı! Faz 2 başlıyor: Sıralama...');
+                await this.sleep(this.speed * 1.5);
+
+                // Phase 2: Extract elements
+                this.currentPhase = 'sorting';
+                for (let i = n - 1; i > 0; i--) {
+                    // Swap root with last element
+                    [this.array[0], this.array[i]] = [this.array[i], this.array[0]];
+                    this.heapSize = i;
+                    this.updateStatus(`Faz 2: En büyük eleman (${this.array[i]}) sona taşındı`);
+                    this.updateStepDetails(`Swap: root(${this.array[i]}) ↔ son eleman<br>Heap boyutu: ${i}<br>Sıralı kısım: [${this.array.slice(i).join(', ')}]`);
+                    this.render();
+                    await this.sleep(this.speed);
+
+                    // Heapify root
+                    await this.heapify(i, 0);
+                }
+
+                this.currentPhase = 'done';
+                this.heapSize = 0;
+                this.updateStatus('✅ Sıralama tamamlandı!');
+                this.updateStepDetails(`Sonuç: [${this.array.join(', ')}]<br>Toplam ${n} eleman başarıyla sıralandı!`);
+                this.render();
+                this.isRunning = false;
+            }
+
+            async step() {
+                // Simplified single step - can be enhanced
+                if (!this.isRunning) {
+                    await this.start();
+                }
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            reset() {
+                this.array = [12, 11, 13, 5, 6, 7, 8, 3];
+                this.heapSize = this.array.length;
+                this.sortedCount = 0;
+                this.isRunning = false;
+                this.currentPhase = 'idle';
+                this.updateStatus('Başlamaya hazır. "Başlat" butonuna basın!');
+                this.updateStepDetails('Algoritma başlamadı...');
+                this.render();
+            }
+
+            randomize() {
+                this.array = Array.from({ length: 8 }, () => Math.floor(Math.random() * 20) + 1);
+                this.heapSize = this.array.length;
+                this.sortedCount = 0;
+                this.currentPhase = 'idle';
+                this.updateStatus('Rastgele dizi oluşturuldu!');
+                this.updateStepDetails(`Yeni dizi: [${this.array.join(', ')}]`);
+                this.render();
+            }
+
+            toggleSpeed() {
+                const modes = { 'slow': 1200, 'normal': 800, 'fast': 400 };
+                const labels = { 'slow': 'Yavaş', 'normal': 'Normal', 'fast': 'Hızlı' };
+                const next = { 'slow': 'normal', 'normal': 'fast', 'fast': 'slow' };
+
+                this.speedMode = next[this.speedMode];
+                this.speed = modes[this.speedMode];
+                document.getElementById('speedLabel').textContent = labels[this.speedMode];
+            }
+        }
+
+        // Heap Tree Visualization
+        class HeapTreeVisualization {
+            constructor() {
+                this.canvas = document.getElementById('heapTreeCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.steps = [
+                    { heap: [4, 10, 3, 5, 1], desc: "Başlangıç (rastgele dizi)", phase: 'start' },
+                    { heap: [4, 10, 3, 5, 1], desc: "Build heap: Heapify başlıyor...", phase: 'build' },
+                    { heap: [10, 5, 3, 4, 1], desc: "Max heap oluşturuldu! Root = 10", phase: 'built' },
+                    { heap: [5, 4, 3, 1, 10], desc: "10 sona taşındı (sıralandı)", phase: 'extract' },
+                    { heap: [4, 1, 3, 5, 10], desc: "5 sona taşındı (sıralandı)", phase: 'extract' },
+                    { heap: [3, 1, 4, 5, 10], desc: "4 sona taşındı (sıralandı)", phase: 'extract' },
+                    { heap: [1, 3, 4, 5, 10], desc: "3 sona taşındı (sıralandı)", phase: 'extract' },
+                    { heap: [1, 3, 4, 5, 10], desc: "✅ Sıralama tamamlandı!", phase: 'done' }
+                ];
+                this.currentStep = 0;
+                this.autoPlayInterval = null;
+                this.draw();
+            }
+
+            draw() {
+                const step = this.steps[this.currentStep];
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Determine sorted portion
+                let sortedStart = step.heap.length;
+                if (step.phase === 'extract' || step.phase === 'done') {
+                    // Find where sorted portion starts
+                    for (let i = step.heap.length - 1; i >= 0; i--) {
+                        if (i === 0 || step.heap[i] >= step.heap[i - 1]) {
+                            sortedStart = i;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                this.drawHeapTree(step.heap, sortedStart);
+
+                document.getElementById('treeStatus').innerHTML =
+                    `<strong>Adım ${this.currentStep + 1}/${this.steps.length}:</strong> ${step.desc}`;
+            }
+
+            drawHeapTree(heap, sortedStart) {
+                const positions = this.calculatePositions(heap.length);
+
+                // Draw edges
+                this.ctx.strokeStyle = '#999';
+                this.ctx.lineWidth = 2;
+                for (let i = 0; i < sortedStart; i++) {
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+
+                    if (left < sortedStart) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[left].x, positions[left].y);
+                        this.ctx.stroke();
+                    }
+
+                    if (right < sortedStart) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[right].x, positions[right].y);
+                        this.ctx.stroke();
+                    }
+                }
+
+                // Draw nodes
+                for (let i = 0; i < heap.length; i++) {
+                    const pos = positions[i];
+                    const isSorted = i >= sortedStart;
+
+                    const gradient = this.ctx.createLinearGradient(pos.x - 25, pos.y - 25, pos.x + 25, pos.y + 25);
+                    if (isSorted) {
+                        gradient.addColorStop(0, '#4caf50');
+                        gradient.addColorStop(1, '#388e3c');
+                    } else if (i === 0) {
+                        gradient.addColorStop(0, '#e74c3c');
+                        gradient.addColorStop(1, '#c0392b');
+                    } else {
+                        gradient.addColorStop(0, '#3498db');
+                        gradient.addColorStop(1, '#2980b9');
+                    }
+
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(pos.x, pos.y, 28, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Value
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = 'bold 18px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(heap[i], pos.x, pos.y);
+
+                    // Index
+                    this.ctx.fillStyle = '#666';
+                    this.ctx.font = '12px Arial';
+                    this.ctx.fillText(`[${i}]`, pos.x, pos.y + 45);
+
+                    // Label sorted
+                    if (isSorted) {
+                        this.ctx.fillStyle = '#4caf50';
+                        this.ctx.font = 'bold 11px Arial';
+                        this.ctx.fillText('✓', pos.x + 20, pos.y - 20);
+                    }
+                }
+
+                // Legend
+                this.ctx.fillStyle = '#333';
+                this.ctx.font = '14px Arial';
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText('🔴 Root', 20, this.canvas.height - 60);
+                this.ctx.fillText('🔵 Heap', 20, this.canvas.height - 40);
+                this.ctx.fillText('🟢 Sıralandı', 20, this.canvas.height - 20);
+            }
+
+            calculatePositions(count) {
+                const positions = [];
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+
+                // Calculate tree dimensions
+                const levels = Math.ceil(Math.log2(count + 1));
+                const verticalSpacing = Math.min(100, (canvasHeight - 100) / levels);
+
+                // Helper function to calculate position for a node
+                const calcNodePos = (index, level, posInLevel, nodesInLevel) => {
+                    // Calculate horizontal spacing based on level
+                    // Each level divides the canvas into 2^level sections
+                    const totalSections = Math.pow(2, level);
+                    const sectionWidth = canvasWidth / (totalSections * 2);
+
+                    // Position in the middle of each section
+                    const x = sectionWidth + (posInLevel * 2 * sectionWidth);
+                    const y = 80 + level * verticalSpacing;
+
+                    return { x, y };
+                };
+
+                // Build positions array by traversing level by level
+                let idx = 0;
+                for (let level = 0; level < levels && idx < count; level++) {
+                    const nodesInLevel = Math.min(Math.pow(2, level), count - idx);
+
+                    for (let posInLevel = 0; posInLevel < nodesInLevel && idx < count; posInLevel++) {
+                        positions.push(calcNodePos(idx, level, posInLevel, nodesInLevel));
+                        idx++;
+                    }
+                }
+
+                return positions;
+            }
+
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.draw();
+                }
+            }
+
+            reset() {
+                this.currentStep = 0;
+                if (this.autoPlayInterval) {
+                    clearInterval(this.autoPlayInterval);
+                    this.autoPlayInterval = null;
+                }
+                this.draw();
+            }
+
+            autoPlay() {
+                if (this.autoPlayInterval) return;
+                this.autoPlayInterval = setInterval(() => {
+                    if (this.currentStep < this.steps.length - 1) {
+                        this.nextStep();
+                    } else {
+                        clearInterval(this.autoPlayInterval);
+                        this.autoPlayInterval = null;
+                    }
+                }, 1500);
+            }
+        }
+
+        // Initialize visualizations
+        let heapSortViz, heapTreeViz;
+
+        window.addEventListener('load', () => {
+            heapSortViz = new HeapSortVisualization();
+            heapTreeViz = new HeapTreeVisualization();
+        });
+    </script>
+</body>
+</html>

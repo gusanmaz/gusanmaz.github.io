@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.3: Çakışma (Collision) Yönetimi</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .collision-demo {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .hash-table-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .table-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-index {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .table-bucket {
+            flex: 1;
+            min-height: 40px;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .table-bucket.empty {
+            color: #999;
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        .table-bucket.filled {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .table-bucket.collision {
+            background: #ffebee;
+            border-color: #f44336;
+            position: relative;
+        }
+
+        .table-bucket.collision::before {
+            content: '⚠️ Çakışma!';
+            position: absolute;
+            top: -20px;
+            right: 10px;
+            background: #f44336;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .kv-item {
+            background: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chain-visual {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chain-node {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid #2196f3;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .chain-arrow {
+            color: #2196f3;
+            font-weight: bold;
+        }
+
+        .method-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .method-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+
+        .method-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .method-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .method-icon.chaining {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+        }
+
+        .method-icon.probing {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+
+        .interactive-demo {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .demo-input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .demo-button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .demo-button.clear {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+
+        .probe-sequence {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .probe-step {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 3px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #2196f3;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .probe-step.found {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .probe-step.occupied {
+            background: #ff9800;
+            color: white;
+            border-color: #ff9800;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>⚠️ 8.3: Çakışma (Collision) Yönetimi</h1>
+            <p>İki Anahtar Aynı Yere Düşerse Ne Olur?</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Çakışma Nedir?</h2>
+            <p><strong>Çakışma (Collision)</strong>, farklı iki anahtarın hash fonksiyonu sonucunda <strong>aynı indekse</strong> düşmesi durumudur.</p>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; border-left: 4px solid #f44336; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #c62828;">⚠️ Problem</h4>
+                <p style="margin: 10px 0;">Hash tablosu boyutu: <strong>10</strong></p>
+                <ul style="margin: 10px 0;">
+                    <li><code>hash("elma") % 10 = 3</code> ✅</li>
+                    <li><code>hash("armut") % 10 = 7</code> ✅</li>
+                    <li><code>hash("muz") % 10 = <strong style="color: #f44336;">3</strong></code> ❌ <strong>ÇAKIŞMA!</strong></li>
+                </ul>
+                <p style="margin: 10px 0 0 0; font-weight: bold;">"elma" ve "muz" aynı indekse (3) düşüyor!</p>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #1565c0;">🌍 Günlük Hayattan Örnek</h4>
+                <p style="margin: 10px 0;">Okulda sınıflara öğrenci yerleştiriliyor:</p>
+                <ul style="margin: 10px 0;">
+                    <li>Soyadın <strong>"A"</strong> ile başlıyorsa → 1. Sınıf</li>
+                    <li>Soyadın <strong>"B"</strong> ile başlıyorsa → 2. Sınıf</li>
+                </ul>
+                <p style="margin: 10px 0;"><strong>Problem:</strong> "Ahmet" ve "Ali" ikisi de "A" ile başlıyor - ikisi de 1. Sınıfa gitmeli ama sınıfta tek kişilik yer var!</p>
+                <p style="margin: 10px 0 0 0; color: #666;">Çözüm: Ya ikisini yan yana oturtmalıyız (chaining) ya da Ali için başka boş sınıf bulmalıyız (probing)!</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔍 Çakışma Neden Oluşur?</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800;">
+                    <h4 style="margin-top: 0; color: #e65100;">1️⃣ Tablo Küçük</h4>
+                    <p style="margin: 0; font-size: 0.9em;">100 anahtar var, tablo boyutu sadece 10 → Kesin çakışma olur!</p>
+                </div>
+
+                <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0;">
+                    <h4 style="margin-top: 0; color: #6a1b9a;">2️⃣ Kötü Hash Fonksiyonu</h4>
+                    <p style="margin: 0; font-size: 0.9em;">Hash fonksiyonu anahtarları eşit dağıtmıyor - hep aynı yere düşüyor!</p>
+                </div>
+
+                <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50;">
+                    <h4 style="margin-top: 0; color: #2e7d32;">3️⃣ Şans</h4>
+                    <p style="margin: 0; font-size: 0.9em;">Rastgele bile olsa, yeterli anahtar eklenirse çakışma kaçınılmaz!</p>
+                </div>
+            </div>
+
+            <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #856404;">💡 Pigeon Hole Principle (Güvercin Deliği İlkesi)</h4>
+                <p style="margin: 0;">10 güvercin var ve 9 delik var → En az 2 güvercin aynı deliğe girmek zorunda!</p>
+                <p style="margin: 10px 0 0 0;"><strong>Hash Table:</strong> Anahtarlar > Tablo boyutu → Çakışma kaçınılmaz!</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🛠️ Çakışma Çözme Yöntemleri</h2>
+            <p>İki ana yöntem vardır:</p>
+
+            <div class="method-comparison">
+                <div class="method-box">
+                    <div class="method-header">
+                        <div class="method-icon chaining">🔗</div>
+                        <div>
+                            <h3 style="margin: 0;">Chaining (Zincirleme)</h3>
+                            <p style="margin: 0; font-size: 0.85em; color: #666;">Her indekste bir liste tut</p>
+                        </div>
+                    </div>
+                    <p>Çakışan anahtarlar <strong>aynı indekste</strong> bir liste olarak saklanır.</p>
+                    <div class="chain-visual" style="margin: 15px 0;">
+                        <div class="chain-node">elma</div>
+                        <div class="chain-arrow">→</div>
+                        <div class="chain-node">muz</div>
+                        <div class="chain-arrow">→</div>
+                        <div class="chain-node">NULL</div>
+                    </div>
+                    <div style="background: #e8f5e9; padding: 10px; border-radius: 6px; margin-top: 10px;">
+                        <strong>✅ Artıları:</strong>
+                        <ul style="margin: 5px 0; font-size: 0.9em;">
+                            <li>Basit ve anlaşılır</li>
+                            <li>Tablo dolu olmaz</li>
+                            <li>Silme kolay</li>
+                        </ul>
+                    </div>
+                    <div style="background: #ffebee; padding: 10px; border-radius: 6px; margin-top: 10px;">
+                        <strong>❌ Eksileri:</strong>
+                        <ul style="margin: 5px 0; font-size: 0.9em;">
+                            <li>Ekstra bellek (pointer'lar)</li>
+                            <li>Kötü dağılımda yavaş</li>
+                            <li>Cache friendly değil</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="method-box">
+                    <div class="method-header">
+                        <div class="method-icon probing">🔎</div>
+                        <div>
+                            <h3 style="margin: 0;">Open Addressing (Açık Adresleme)</h3>
+                            <p style="margin: 0; font-size: 0.85em; color: #666;">Başka boş yer bul</p>
+                        </div>
+                    </div>
+                    <p>Çakışma olursa, tabloda <strong>başka boş indeks</strong> aranır.</p>
+                    <div class="probe-sequence">
+                        <strong>Deneme sırası:</strong><br>
+                        <div class="probe-step">3 (dolu)</div>
+                        <div class="probe-step">4 (dolu)</div>
+                        <div class="probe-step found">5 (boş!)</div>
+                    </div>
+                    <div style="background: #e8f5e9; padding: 10px; border-radius: 6px; margin-top: 10px;">
+                        <strong>✅ Artıları:</strong>
+                        <ul style="margin: 5px 0; font-size: 0.9em;">
+                            <li>Ekstra bellek yok</li>
+                            <li>Cache friendly</li>
+                            <li>Tek dizi, basit</li>
+                        </ul>
+                    </div>
+                    <div style="background: #ffebee; padding: 10px; border-radius: 6px; margin-top: 10px;">
+                        <strong>❌ Eksileri:</strong>
+                        <ul style="margin: 5px 0; font-size: 0.9em;">
+                            <li>Tablo dolabilir</li>
+                            <li>Silme karmaşık</li>
+                            <li>Clustering (kümelenme)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔗 Yöntem 1: Chaining (Zincirleme)</h2>
+            <p>Her indekste bir <strong>linked list</strong> tutarız. Çakışan anahtarlar bu listeye eklenir.</p>
+
+            <div class="collision-demo">
+                <h3 style="text-align: center; margin-top: 0;">Chaining Örneği</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">Tablo boyutu: 5, Hash: key % 5</p>
+
+                <div class="hash-table-visual">
+                    <div class="table-row">
+                        <div class="table-index">0</div>
+                        <div class="table-bucket filled">
+                            <div class="chain-visual">
+                                <div class="kv-item">10</div>
+                                <div class="chain-arrow">→</div>
+                                <div class="kv-item">20</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-index">1</div>
+                        <div class="table-bucket filled">
+                            <div class="kv-item">6</div>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-index">2</div>
+                        <div class="table-bucket empty">boş</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-index">3</div>
+                        <div class="table-bucket collision">
+                            <div class="chain-visual">
+                                <div class="kv-item">3</div>
+                                <div class="chain-arrow">→</div>
+                                <div class="kv-item">8</div>
+                                <div class="chain-arrow">→</div>
+                                <div class="kv-item">13</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-index">4</div>
+                        <div class="table-bucket filled">
+                            <div class="kv-item">9</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <strong>📝 Açıklama:</strong>
+                    <ul style="margin: 10px 0;">
+                        <li><strong>İndeks 0:</strong> 10 % 5 = 0, 20 % 5 = 0 → İkisi de 0'da (chaining ile çözüldü)</li>
+                        <li><strong>İndeks 3:</strong> 3 % 5 = 3, 8 % 5 = 3, 13 % 5 = 3 → Üçü de 3'te (3 elemanlı liste)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Chaining - Python İmplementasyonu</span>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code1"><code class="language-python">class HashTableChaining:
+    """Chaining yöntemi ile Hash Table"""
+
+    def __init__(self, size=10):
+        self.size = size
+        # Her indekste boş liste
+        self.table = [[] for _ in range(size)]
+
+    def hash_function(self, key):
+        """Basit hash fonksiyonu"""
+        return key % self.size
+
+    def insert(self, key, value):
+        """Anahtar-değer ekle"""
+        index = self.hash_function(key)
+
+        # Bu indekste zaten var mı kontrol et
+        for i, (k, v) in enumerate(self.table[index]):
+            if k == key:
+                # Varsa güncelle
+                self.table[index][i] = (key, value)
+                print(f"Güncellendi: {key} → indeks {index}")
+                return
+
+        # Yoksa ekle
+        self.table[index].append((key, value))
+        print(f"Eklendi: {key} → indeks {index}")
+
+    def search(self, key):
+        """Anahtar ara"""
+        index = self.hash_function(key)
+
+        # Bu indeksteki listeyi dolaş
+        for k, v in self.table[index]:
+            if k == key:
+                return v
+
+        return None  # Bulunamadı
+
+    def display(self):
+        """Tabloyu göster"""
+        print("\n=== Hash Table (Chaining) ===")
+        for i in range(self.size):
+            print(f"[{i}]: ", end="")
+            if self.table[i]:
+                print(" → ".join([f"{k}" for k, v in self.table[i]]))
+            else:
+                print("boş")
+
+# Örnek kullanım
+ht = HashTableChaining(size=5)
+
+# Anahtar ekle
+keys = [10, 6, 3, 8, 20, 9, 13]
+print("=== Ekleme İşlemleri ===")
+for key in keys:
+    ht.insert(key, f"değer_{key}")
+
+# Tabloyu göster
+ht.display()
+
+# Çakışma analizi
+print("\n=== Çakışma Analizi ===")
+collisions = sum(1 for bucket in ht.table if len(bucket) > 1)
+print(f"Çakışma olan indeks sayısı: {collisions}")
+print(f"En uzun zincir: {max(len(bucket) for bucket in ht.table)} eleman")
+
+# Arama
+print("\n=== Arama ===")
+search_keys = [3, 8, 100]
+for key in search_keys:
+    result = ht.search(key)
+    if result:
+        print(f"Anahtar {key} bulundu: {result}")
+    else:
+        print(f"Anahtar {key} bulunamadı")</code></pre>
+                <textarea id="code1" class="code-editor"></textarea>
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔎 Yöntem 2: Open Addressing (Linear Probing)</h2>
+            <p>Çakışma olduğunda, tabloda <strong>sıradaki boş yeri</strong> ararız.</p>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #1565c0;">📐 Linear Probing Formülü</h4>
+                <p style="margin: 10px 0; font-family: 'Courier New', monospace; font-size: 16px;">
+                    new_index = (hash_value + i) % table_size
+                </p>
+                <p style="margin: 10px 0 0 0; color: #666;">
+                    <strong>i:</strong> 0, 1, 2, 3, ... (deneme sayısı)<br>
+                    Sırayla: indeks, indeks+1, indeks+2, ... boş yer bulunana kadar
+                </p>
+            </div>
+
+            <div class="collision-demo">
+                <h3 style="text-align: center; margin-top: 0;">Linear Probing Örneği</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">13 eklenirken ne olur? (hash(13) = 13 % 5 = 3)</p>
+
+                <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <strong>Adım adım:</strong>
+                    <ol style="margin: 10px 0; padding-left: 20px;">
+                        <li>İndeks 3'e bak → <span style="color: #f44336;">DOLU</span></li>
+                        <li>İndeks (3+1) % 5 = 4'e bak → <span style="color: #f44336;">DOLU</span></li>
+                        <li>İndeks (3+2) % 5 = 0'a bak → <span style="color: #f44336;">DOLU</span></li>
+                        <li>İndeks (3+3) % 5 = 1'e bak → <span style="color: #f44336;">DOLU</span></li>
+                        <li>İndeks (3+4) % 5 = 2'ye bak → <span style="color: #4caf50;">BOŞ! Buraya koy</span></li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Linear Probing - Python İmplementasyonu</span>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code2"><code class="language-python">class HashTableProbing:
+    """Linear Probing ile Hash Table"""
+
+    def __init__(self, size=10):
+        self.size = size
+        self.table = [None] * size  # Tek dizi
+        self.count = 0  # Eleman sayısı
+
+    def hash_function(self, key):
+        """Basit hash fonksiyonu"""
+        return key % self.size
+
+    def insert(self, key, value):
+        """Anahtar-değer ekle"""
+        if self.count >= self.size:
+            print("❌ Tablo dolu!")
+            return False
+
+        index = self.hash_function(key)
+        start_index = index
+        i = 0
+
+        print(f"\n{key} ekleniyor (hash: {index})...")
+
+        while True:
+            current_index = (index + i) % self.size
+
+            print(f"  Deneme {i+1}: İndeks {current_index}", end=" ")
+
+            if self.table[current_index] is None:
+                # Boş yer bulundu
+                self.table[current_index] = (key, value)
+                self.count += 1
+                print("→ BOŞ, eklendi! ✅")
+                return True
+
+            # Aynı anahtar mı?
+            if self.table[current_index][0] == key:
+                self.table[current_index] = (key, value)
+                print("→ Aynı anahtar, güncellendi! 🔄")
+                return True
+
+            print("→ DOLU, devam et...")
+            i += 1
+
+            # Tüm tablo dolaşıldı
+            if i >= self.size:
+                print("❌ Tablo dolu!")
+                return False
+
+    def search(self, key):
+        """Anahtar ara"""
+        index = self.hash_function(key)
+        i = 0
+
+        while i < self.size:
+            current_index = (index + i) % self.size
+
+            if self.table[current_index] is None:
+                return None  # Boş yer → bulunamadı
+
+            if self.table[current_index][0] == key:
+                return self.table[current_index][1]  # Bulundu!
+
+            i += 1
+
+        return None  # Bulunamadı
+
+    def display(self):
+        """Tabloyu göster"""
+        print("\n=== Hash Table (Linear Probing) ===")
+        for i in range(self.size):
+            if self.table[i] is None:
+                print(f"[{i}]: boş")
+            else:
+                key, val = self.table[i]
+                original_index = self.hash_function(key)
+                if original_index != i:
+                    print(f"[{i}]: {key} (orijinal: {original_index}, kayma: {i - original_index})")
+                else:
+                    print(f"[{i}]: {key}")
+
+# Örnek kullanım
+ht = HashTableProbing(size=7)
+
+# Anahtar ekle
+keys = [10, 3, 8, 17, 24]  # 10%7=3, 3%7=3, 8%7=1, 17%7=3, 24%7=3
+
+for key in keys:
+    ht.insert(key, f"değer_{key}")
+
+# Tabloyu göster
+ht.display()
+
+# Load factor
+print(f"\nLoad Factor: {ht.count}/{ht.size} = {ht.count/ht.size:.2f}")
+
+# Arama
+print("\n=== Arama ===")
+for key in [3, 17, 100]:
+    result = ht.search(key)
+    if result:
+        print(f"✅ {key} bulundu: {result}")
+    else:
+        print(f"❌ {key} bulunamadı")</code></pre>
+                <textarea id="code2" class="code-editor"></textarea>
+                <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚖️ Chaining vs Open Addressing</h2>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                        <th style="padding: 15px; text-align: left;">Özellik</th>
+                        <th style="padding: 15px;">Chaining</th>
+                        <th style="padding: 15px;">Open Addressing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Veri Yapısı</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Dizi + Linked List</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Sadece Dizi</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Bellek</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Ekstra (pointer'lar)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Verimli (tek dizi)</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Tablo Dolduğunda</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Sorun yok (liste uzar)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Eklenemez!</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Cache</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Kötü (pointer takibi)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">İyi (ardışık bellek)</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Silme</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Kolay</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Karmaşık ("deleted" işareti)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>En Kötü Durum</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Tüm elemanlar tek zincirde</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Tablo tamamen dolu</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Kullanım</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Python dict, Java HashMap</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Cache, Embedded sistemler</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>💡 Hangi Yöntemi Seçmeli?</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin: 20px 0;">
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                    <h4 style="margin-top: 0; color: #1565c0;">✅ Chaining Kullan</h4>
+                    <ul style="margin: 10px 0; font-size: 0.9em;">
+                        <li>Eleman sayısı belirsiz</li>
+                        <li>Silme sık yapılacak</li>
+                        <li>Basit implementasyon istiyorsan</li>
+                        <li>Python dict gibi</li>
+                    </ul>
+                </div>
+
+                <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800;">
+                    <h4 style="margin-top: 0; color: #e65100;">✅ Open Addressing Kullan</h4>
+                    <ul style="margin: 10px 0; font-size: 0.9em;">
+                        <li>Bellek kısıtlı (embedded)</li>
+                        <li>Tablo boyutu belli</li>
+                        <li>Cache performansı önemli</li>
+                        <li>Silme az</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Çakışma:</strong> İki farklı anahtar aynı indekse düşmesi</li>
+                    <li><strong>Chaining:</strong> Her indekste linked list - basit ama ekstra bellek</li>
+                    <li><strong>Open Addressing:</strong> Boş yer ara - tek dizi ama karmaşık</li>
+                    <li><strong>Linear Probing:</strong> Sırayla boş yer ara</li>
+                    <li><strong>Seçim:</strong> Kullanım senaryosuna göre yöntem seç</li>
+                </ul>
+
+                <h4 style="color: #1565c0; margin-top: 20px;">📚 Sonraki Konu</h4>
+                <p style="margin: 5px 0 0 0;">Hash table'ın performansını etkileyen en önemli faktör: <strong>Load Factor (Doluluk Oranı)</strong>. Ne kadar doluysa o kadar yavaş!</p>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="8b_hash_functions.html" class="btn">⬅️ Önceki: Hash Fonksiyonları</a>
+            <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+            <a href="8d_hash_performance.html" class="btn btn-next">Sonraki: Performance & Load Factor ➡️</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        let pyodideReady = false;
+        let pyodide = null;
+
+        async function main() {
+            pyodide = await loadPyodide();
+            pyodideReady = true;
+        }
+        main();
+
+        async function runPython(id) {
+            if (!pyodideReady) {
+                alert("Python yükleniyor, lütfen bekleyin...");
+                return;
+            }
+            const code = document.getElementById('view-' + id).textContent;
+            const out = document.getElementById('output-' + id);
+            out.innerText = "Çalışıyor...";
+            try {
+                pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+                await pyodide.runPythonAsync(code);
+                out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+            } catch (e) {
+                out.innerText = "Hata: " + e;
+            }
+        }
+    </script>
+</body>
+</html>

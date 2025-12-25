@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.4: Hash Table Performansı ve Load Factor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .meter-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .load-meter {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to right, #4caf50 0%, #ffc107 50%, #f44336 100%);
+            border-radius: 20px;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .load-indicator {
+            position: absolute;
+            top: -10px;
+            width: 4px;
+            height: 60px;
+            background: #2c3e50;
+            transition: left 0.3s ease;
+        }
+
+        .load-indicator::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -8px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #2c3e50;
+        }
+
+        .load-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .performance-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+
+        .perf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .perf-box {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .perf-box.good {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+        }
+
+        .perf-box.warning {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+        }
+
+        .perf-box.bad {
+            background: #ffebee;
+            border: 2px solid #f44336;
+        }
+
+        .perf-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .perf-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            margin: 20px 0;
+            padding: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .bar {
+            flex: 1;
+            margin: 0 5px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+            max-width: 80px;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+            transform: translateY(-5px);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 8.4: Hash Table Performansı</h1>
+            <p>Load Factor ve Hız İlişkisi</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Load Factor (Doluluk Oranı) Nedir?</h2>
+            <p><strong>Load Factor</strong>, hash table'ın ne kadar dolu olduğunu gösteren bir sayıdır.</p>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #1565c0;">📐 Formül</h4>
+                <div style="font-family: 'Courier New', monospace; font-size: 20px; text-align: center; padding: 15px; background: white; border-radius: 8px; margin: 10px 0;">
+                    Load Factor (α) = Eleman Sayısı / Tablo Boyutu
+                </div>
+                <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <strong>Örnekler:</strong>
+                    <ul style="margin: 10px 0;">
+                        <li>10 eleman, 10 boyut → α = 10/10 = <strong>1.0</strong> (tam dolu)</li>
+                        <li>5 eleman, 10 boyut → α = 5/10 = <strong>0.5</strong> (yarı dolu)</li>
+                        <li>15 eleman, 10 boyut → α = 15/10 = <strong>1.5</strong> (taştı! - chaining)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="meter-container">
+                <h3 style="text-align: center; margin-top: 0;">🎚️ İnteraktif Load Factor Göstergesi</h3>
+                <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0; flex-wrap: wrap;">
+                    <div>
+                        <label>Eleman Sayısı:</label>
+                        <input type="number" id="numElements" value="5" min="0" max="20"
+                               style="width: 80px; padding: 8px; border: 2px solid #667eea; border-radius: 6px; margin-left: 10px;">
+                    </div>
+                    <div>
+                        <label>Tablo Boyutu:</label>
+                        <input type="number" id="tableSize" value="10" min="1" max="20"
+                               style="width: 80px; padding: 8px; border: 2px solid #667eea; border-radius: 6px; margin-left: 10px;">
+                    </div>
+                    <button onclick="updateLoadFactor()"
+                            style="padding: 8px 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                        Hesapla
+                    </button>
+                </div>
+
+                <div class="load-meter">
+                    <div class="load-indicator" id="loadIndicator" style="left: 50%;"></div>
+                </div>
+                <div class="load-labels">
+                    <span>0.0<br>Boş</span>
+                    <span>0.5<br>İdeal</span>
+                    <span>0.75<br>Kritik</span>
+                    <span>1.0<br>Dolu</span>
+                </div>
+
+                <div id="loadResult" style="text-align: center; margin-top: 20px; font-size: 18px; font-weight: bold;">
+                    Load Factor: 0.50
+                </div>
+
+                <div id="loadAdvice" style="margin-top: 15px; padding: 15px; border-radius: 8px; text-align: center;">
+                    İdeal seviye! ✅
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚡ Load Factor ve Performans İlişkisi</h2>
+
+            <div class="perf-grid">
+                <div class="perf-box good">
+                    <div style="font-size: 2em;">🟢</div>
+                    <div class="perf-value" style="color: #4caf50;">α < 0.7</div>
+                    <div class="perf-label">Mükemmel Performans</div>
+                    <p style="font-size: 0.85em; margin: 10px 0 0 0;">Az çakışma, hızlı erişim</p>
+                </div>
+
+                <div class="perf-box warning">
+                    <div style="font-size: 2em;">🟡</div>
+                    <div class="perf-value" style="color: #ff9800;">0.7 ≤ α < 1.0</div>
+                    <div class="perf-label">Dikkat! Yavaşlama Başlıyor</div>
+                    <p style="font-size: 0.85em; margin: 10px 0 0 0;">Çakışmalar artıyor</p>
+                </div>
+
+                <div class="perf-box bad">
+                    <div style="font-size: 2em;">🔴</div>
+                    <div class="perf-value" style="color: #f44336;">α ≥ 1.0</div>
+                    <div class="perf-label">Kötü Performans</div>
+                    <p style="font-size: 0.85em; margin: 10px 0 0 0;">Çok çakışma (chaining) / Eklenemez (open addressing)</p>
+                </div>
+            </div>
+
+            <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #856404;">💡 Python'un Sırrı</h4>
+                <p style="margin: 10px 0;">Python dict'in load factor kritik seviyeye gelince (α ≥ 0.67) ne yapar?</p>
+                <p style="margin: 10px 0; font-weight: bold; color: #e65100;">→ Tabloyu 2 katına çıkarır ve tüm elemanları yeniden yerleştirir (rehashing)!</p>
+                <p style="margin: 10px 0 0 0;">Bu sayede performans her zaman O(1) kalır.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Performans Karşılaştırması</h2>
+
+            <div class="chart-container">
+                <h3 style="margin-top: 0;">Ortalama Arama Süresi vs Load Factor</h3>
+                <div class="bar-chart">
+                    <div class="bar" style="height: 20px;">
+                        <div class="bar-value">1.0</div>
+                        <div class="bar-label">α=0.25</div>
+                    </div>
+                    <div class="bar" style="height: 35px;">
+                        <div class="bar-value">1.1</div>
+                        <div class="bar-label">α=0.50</div>
+                    </div>
+                    <div class="bar" style="height: 60px;">
+                        <div class="bar-value">1.5</div>
+                        <div class="bar-label">α=0.75</div>
+                    </div>
+                    <div class="bar" style="height: 100px;">
+                        <div class="bar-value">2.5</div>
+                        <div class="bar-label">α=0.90</div>
+                    </div>
+                    <div class="bar" style="height: 180px;">
+                        <div class="bar-value">10+</div>
+                        <div class="bar-label">α=0.99</div>
+                    </div>
+                </div>
+                <p style="color: #666; font-size: 0.9em;">Load factor arttıkça arama süresi katlanarak uzuyor!</p>
+            </div>
+
+            <div class="performance-card">
+                <h3>🔢 Matematiksel Beklenen Değerler</h3>
+                <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                            <th style="padding: 12px;">Load Factor</th>
+                            <th style="padding: 12px;">Chaining<br>(başarılı arama)</th>
+                            <th style="padding: 12px;">Chaining<br>(başarısız arama)</th>
+                            <th style="padding: 12px;">Open Addressing<br>(başarılı arama)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #e8f5e9;">
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><strong>α = 0.5</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">1.25</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">1.5</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">1.5</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><strong>α = 0.75</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">1.37</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">2.5</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">2.5</td>
+                        </tr>
+                        <tr style="background: #ffebee;">
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><strong>α = 0.9</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">1.45</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">5.5</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">5.5</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 0.85em; color: #666; margin: 0;">Değerler: Ortalama deneme sayısı (probe count)</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Rehashing (Yeniden Hash'leme)</h2>
+            <p>Load factor kritik seviyeye gelince tablo boyutu artırılır ve tüm elemanlar yeniden yerleştirilir.</p>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">🔄 Rehashing Süreci</h4>
+                <ol style="margin: 10px 0; padding-left: 25px;">
+                    <li>Mevcut tablo boyutunu 2 katına çıkar (örn: 10 → 20)</li>
+                    <li>Yeni boş tablo oluştur</li>
+                    <li>Eski tablodaki <strong>her elemanı</strong> yeni hash değeri ile yeni tabloya ekle</li>
+                    <li>Eski tabloyu sil</li>
+                </ol>
+                <p style="margin: 10px 0 0 0; font-weight: bold;">⚠️ Maliyetli işlem: O(n) ama <strong>nadir</strong> olur!</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Rehashing Örneği - Python</span>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code1"><code class="language-python">class HashTableWithRehash:
+    """Otomatik rehashing yapan hash table"""
+
+    def __init__(self, initial_size=4):
+        self.size = initial_size
+        self.table = [[] for _ in range(self.size)]
+        self.count = 0
+        self.max_load_factor = 0.75  # Kritik seviye
+        self.rehash_count = 0
+
+    def hash_function(self, key):
+        return key % self.size
+
+    def get_load_factor(self):
+        return self.count / self.size
+
+    def rehash(self):
+        """Tabloyu büyüt ve yeniden yerleştir"""
+        self.rehash_count += 1
+        old_table = self.table
+        old_size = self.size
+
+        # Yeni tablo (2 katı)
+        self.size = old_size * 2
+        self.table = [[] for _ in range(self.size)]
+        self.count = 0
+
+        print(f"\n🔄 REHASHING: {old_size} → {self.size}")
+        print("=" * 40)
+
+        # Tüm elemanları yeniden ekle
+        for bucket in old_table:
+            for key, value in bucket:
+                # Yeni hash değeri!
+                self.insert(key, value, silent=True)
+
+        print(f"✅ Rehashing tamamlandı!")
+        print(f"   Yeni load factor: {self.get_load_factor():.2f}")
+
+    def insert(self, key, value, silent=False):
+        """Eleman ekle (gerekirse rehash yap)"""
+        # Load factor kontrolü
+        if self.get_load_factor() >= self.max_load_factor:
+            if not silent:
+                print(f"\n⚠️ Load factor kritik: {self.get_load_factor():.2f}")
+            self.rehash()
+
+        index = self.hash_function(key)
+
+        # Güncelleme mi?
+        for i, (k, v) in enumerate(self.table[index]):
+            if k == key:
+                self.table[index][i] = (key, value)
+                if not silent:
+                    print(f"Güncellendi: {key} → indeks {index}")
+                return
+
+        # Yeni ekleme
+        self.table[index].append((key, value))
+        self.count += 1
+
+        if not silent:
+            print(f"Eklendi: {key} → indeks {index} (LF: {self.get_load_factor():.2f})")
+
+    def display_stats(self):
+        print(f"\n📊 İstatistikler:")
+        print(f"   Tablo boyutu: {self.size}")
+        print(f"   Eleman sayısı: {self.count}")
+        print(f"   Load factor: {self.get_load_factor():.2f}")
+        print(f"   Rehash sayısı: {self.rehash_count}")
+        print(f"   En uzun zincir: {max(len(b) for b in self.table)}")
+
+# Test
+ht = HashTableWithRehash(initial_size=4)
+
+print("=== Hash Table ile Ekleme (Rehashing İzle) ===")
+print(f"Başlangıç boyutu: 4, Max load factor: 0.75")
+print()
+
+# 10 eleman ekle - rehashing'leri gözlemle
+for i in range(1, 11):
+    print(f"\n--- {i}. eleman ekleniyor ---")
+    ht.insert(i * 3, f"değer_{i}")
+
+ht.display_stats()
+
+# Son durum
+print("\n=== Son Tablo Durumu ===")
+for i in range(min(ht.size, 16)):  # İlk 16 indeks
+    if ht.table[i]:
+        keys = [k for k, v in ht.table[i]]
+        print(f"[{i:2d}]: {keys}")
+    else:
+        print(f"[{i:2d}]: boş")</code></pre>
+                <textarea id="code1" class="code-editor"></textarea>
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💰 Amortized Analysis (Ortalama Maliyet)</h2>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #1565c0;">🤔 Soru</h4>
+                <p style="margin: 10px 0;">Rehashing O(n) zaman alıyor. Peki hash table insert işlemi O(1) mi, O(n) mi?</p>
+
+                <h4 style="color: #2e7d32; margin-top: 15px;">✅ Cevap: Amortized O(1)</h4>
+                <p style="margin: 10px 0;">Çoğu insert O(1), sadece <strong>seyrek olarak</strong> rehashing oluyor:</p>
+                <ul style="margin: 10px 0;">
+                    <li>1000 insert → Belki 10 rehashing</li>
+                    <li>Her rehashing O(n) ama toplam yine O(n)</li>
+                    <li>Ortalama: O(n) / n = <strong>O(1)</strong></li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #e65100;">🎯 Pratik Tavsiyeler</h4>
+                <ul style="margin: 10px 0;">
+                    <li>Load factor'ı <strong>0.7 altında</strong> tut</li>
+                    <li>Eleman sayısı belliyse, tabloyu <strong>yeterince büyük</strong> başlat</li>
+                    <li>Python dict gibi <strong>otomatik rehashing</strong> kullan</li>
+                    <li>Gerçek zamanlı sistemlerde rehashing <strong>süre kısıtlaması</strong> yapabilir</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Load Factor (α):</strong> Eleman sayısı / Tablo boyutu</li>
+                    <li><strong>İdeal α:</strong> 0.5 - 0.7 arası (hızlı erişim)</li>
+                    <li><strong>Kritik α:</strong> 0.75+ (yavaşlama başlar)</li>
+                    <li><strong>Rehashing:</strong> Tablo 2x büyüt, yeniden yerleştir (nadir ama O(n))</li>
+                    <li><strong>Amortized O(1):</strong> Ortalamada insert hala çok hızlı</li>
+                </ul>
+
+                <h4 style="color: #1565c0; margin-top: 20px;">📚 Sonraki Konu</h4>
+                <p style="margin: 5px 0 0 0;">Python'da hash table nasıl kullanılır? dict'in sırlarını keşfedeceğiz!</p>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="8c_collision_handling.html" class="btn">⬅️ Önceki: Çakışma Yönetimi</a>
+            <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+            <a href="8e_hash_python.html" class="btn btn-next">Sonraki: Python dict ➡️</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        let pyodideReady = false;
+        let pyodide = null;
+
+        async function main() {
+            pyodide = await loadPyodide();
+            pyodideReady = true;
+        }
+        main();
+
+        async function runPython(id) {
+            if (!pyodideReady) {
+                alert("Python yükleniyor, lütfen bekleyin...");
+                return;
+            }
+            const code = document.getElementById('view-' + id).textContent;
+            const out = document.getElementById('output-' + id);
+            out.innerText = "Çalışıyor...";
+            try {
+                pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+                await pyodide.runPythonAsync(code);
+                out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+            } catch (e) {
+                out.innerText = "Hata: " + e;
+            }
+        }
+
+        function updateLoadFactor() {
+            const numElements = parseInt(document.getElementById('numElements').value) || 0;
+            const tableSize = parseInt(document.getElementById('tableSize').value) || 1;
+            const loadFactor = numElements / tableSize;
+
+            // Göstergeyi güncelle
+            const percentage = Math.min(loadFactor * 100, 100);
+            document.getElementById('loadIndicator').style.left = percentage + '%';
+
+            // Sonuç
+            document.getElementById('loadResult').textContent = `Load Factor: ${loadFactor.toFixed(2)}`;
+
+            // Tavsiye
+            const adviceDiv = document.getElementById('loadAdvice');
+            if (loadFactor < 0.5) {
+                adviceDiv.style.background = '#e8f5e9';
+                adviceDiv.style.border = '2px solid #4caf50';
+                adviceDiv.innerHTML = '🟢 Mükemmel! Çok hızlı erişim.';
+            } else if (loadFactor < 0.7) {
+                adviceDiv.style.background = '#e3f2fd';
+                adviceDiv.style.border = '2px solid #2196f3';
+                adviceDiv.innerHTML = '✅ İdeal seviye! Performans iyi.';
+            } else if (loadFactor < 0.9) {
+                adviceDiv.style.background = '#fff3e0';
+                adviceDiv.style.border = '2px solid #ff9800';
+                adviceDiv.innerHTML = '⚠️ Dikkat! Rehashing yakın.';
+            } else {
+                adviceDiv.style.background = '#ffebee';
+                adviceDiv.style.border = '2px solid #f44336';
+                adviceDiv.innerHTML = '🔴 Kritik! Rehashing gerekli veya tablo dolu!';
+            }
+        }
+
+        // Sayfa yüklendiğinde hesapla
+        window.addEventListener('load', updateLoadFactor);
+    </script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.5: Python'da Hash Table - dict Kullanımı</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🐍 8.5: Python'da Hash Table</h1>
+            <p>dict - En Çok Kullanılan Veri Yapısı!</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Python dict Nedir?</h2>
+            <p>Python'un yerleşik <strong>dictionary (dict)</strong> veri yapısı, <strong>hash table</strong> implementasyonudur!</p>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✨ Neden Bu Kadar Önemli?</h4>
+                <ul style="margin: 10px 0;">
+                    <li>Python'un <strong>en hızlı</strong> veri yapısı (O(1) erişim)</li>
+                    <li>JSON, API, veritabanı - her yerde kullanılır</li>
+                    <li>Modül import sistemi bile dict kullanır</li>
+                    <li>Class'ların attribute'ları dict olarak saklanır</li>
+                </ul>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>dict Temel Kullanım</span>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code1"><code class="language-python"># dict oluşturma yöntemleri
+print("=== dict Oluşturma ===")
+
+# 1. Süslü parantez
+ogrenci = {
+    "ad": "Ahmet",
+    "soyad": "Yılmaz",
+    "yas": 20,
+    "not": 85
+}
+print(f"1. Yöntem: {ogrenci}")
+
+# 2. dict() fonksiyonu
+ogrenci2 = dict(ad="Mehmet", soyad="Kaya", yas=22)
+print(f"2. Yöntem: {ogrenci2}")
+
+# 3. Listeden
+veriler = [("ad", "Ayşe"), ("yas", 19)]
+ogrenci3 = dict(veriler)
+print(f"3. Yöntem: {ogrenci3}")
+
+print("\n=== Erişim ===")
+# Erişim - O(1)
+print(f"Öğrencinin adı: {ogrenci['ad']}")
+print(f"Öğrencinin notu: {ogrenci['not']}")
+
+# Güvenli erişim (yoksa None döner)
+print(f"Şube: {ogrenci.get('sube', 'Belirtilmemiş')}")
+
+print("\n=== Ekleme/Güncelleme ===")
+# Ekleme/Güncelleme - O(1)
+ogrenci["sube"] = "A"
+print(f"Şube eklendi: {ogrenci}")
+
+ogrenci["not"] = 90  # Güncelleme
+print(f"Not güncellendi: {ogrenci}")
+
+print("\n=== Silme ===")
+# Silme - O(1)
+del ogrenci["sube"]
+print(f"Şube silindi: {ogrenci}")
+
+# pop ile silme (değer döndürür)
+yas = ogrenci.pop("yas")
+print(f"Yaş silindi (değer: {yas}): {ogrenci}")
+
+print("\n=== Kontroller ===")
+# Anahtar var mı? - O(1)
+print(f"'ad' var mı? {'ad' in ogrenci}")
+print(f"'yas' var mı? {'yas' in ogrenci}")
+
+# Boyut
+print(f"Eleman sayısı: {len(ogrenci)}")</code></pre>
+                <textarea id="code1" class="code-editor"></textarea>
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 dict Döngüleri</h2>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>dict Üzerinde Döngü</span>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code2"><code class="language-python">notlar = {
+    "Ali": 85,
+    "Veli": 92,
+    "Ayşe": 78,
+    "Fatma": 95
+}
+
+print("=== Sadece Anahtarlar ===")
+for isim in notlar:
+    print(isim)
+
+print("\n=== Sadece Değerler ===")
+for not_degeri in notlar.values():
+    print(not_degeri)
+
+print("\n=== Anahtar-Değer Çiftleri ===")
+for isim, not_degeri in notlar.items():
+    print(f"{isim}: {not_degeri}")
+
+print("\n=== Şartlı Filtre (comprehension) ===")
+# 90'dan yüksek notlar
+yuksek_notlar = {isim: not_degeri 
+                 for isim, not_degeri in notlar.items() 
+                 if not_degeri >= 90}
+print(f"90+ notlar: {yuksek_notlar}")
+
+# Not ortalaması
+ortalama = sum(notlar.values()) / len(notlar)
+print(f"\nOrtalama: {ortalama:.1f}")</code></pre>
+                <textarea id="code2" class="code-editor"></textarea>
+                <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚡ dict Performansı</h2>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h3 style="margin-top: 0;">⏱️ Zaman Karmaşıklığı</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="background: #667eea; color: white;">
+                        <th style="padding: 12px; text-align: left;">İşlem</th>
+                        <th style="padding: 12px;">Ortalama</th>
+                        <th style="padding: 12px;">En Kötü</th>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>d[key]</code> (erişim)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>d[key] = val</code> (ekleme)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>del d[key]</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>key in d</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>len(d)</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                    </tr>
+                </table>
+                <p style="margin: 10px 0 0 0; font-size: 0.85em; color: #666;">*En kötü durum: Çok kötü hash fonksiyonu veya tüm çakışmalar</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>dict vs list Hız Karşılaştırması</span>
+                    <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code3"><code class="language-python">import time
+
+# 10,000 elemanlı veri
+n = 10000
+liste = list(range(n))
+sozluk = {i: i for i in range(n)}
+
+print(f"=== {n} Elemanda Arama Hızı ===\n")
+
+# Liste'de arama (O(n))
+aranan = 9999
+start = time.time()
+for _ in range(1000):
+    result = aranan in liste
+end = time.time()
+list_time = (end - start) * 1000
+print(f"Liste (O(n)): {list_time:.2f} ms")
+
+# dict'te arama (O(1))
+start = time.time()
+for _ in range(1000):
+    result = aranan in sozluk
+end = time.time()
+dict_time = (end - start) * 1000
+print(f"dict (O(1)): {dict_time:.2f} ms")
+
+speedup = list_time / dict_time
+print(f"\n⚡ dict {speedup:.0f}x daha hızlı!")
+
+# Bellek kullanımı
+import sys
+print(f"\n=== Bellek Kullanımı ===")
+print(f"Liste: {sys.getsizeof(liste):,} byte")
+print(f"dict: {sys.getsizeof(sozluk):,} byte")
+print(f"dict ~{sys.getsizeof(sozluk) / sys.getsizeof(liste):.1f}x daha fazla bellek")</code></pre>
+                <textarea id="code3" class="code-editor"></textarea>
+                <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💡 dict İpuçları ve Yaygın Hatalar</h2>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; border-left: 4px solid #f44336; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #c62828;">❌ Yaygın Hatalar</h4>
+                <ol style="margin: 10px 0; padding-left: 25px;">
+                    <li><strong>Liste anahtarı kullanmak:</strong> Liste hash'lenemez!
+                        <pre style="background: #fff; padding: 10px; border-radius: 6px; margin: 5px 0;"><code class="language-python"># ❌ YANLIŞ
+d = {[1, 2]: "değer"}  # TypeError!
+
+# ✅ DOĞRU (tuple kullan)
+d = {(1, 2): "değer"}</code></pre>
+                    </li>
+                    <li><strong>Döngü sırasında değiştirmek:</strong>
+                        <pre style="background: #fff; padding: 10px; border-radius: 6px; margin: 5px 0;"><code class="language-python"># ❌ YANLIŞ
+for key in d:
+    del d[key]  # RuntimeError!
+
+# ✅ DOĞRU
+for key in list(d.keys()):
+    del d[key]</code></pre>
+                    </li>
+                </ol>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ İyi Pratikler</h4>
+                <ul style="margin: 10px 0;">
+                    <li>Yoksa default değer: <code>d.get(key, default)</code></li>
+                    <li>Yoksa ekle: <code>d.setdefault(key, [])</code></li>
+                    <li>Birleştir: <code>d1.update(d2)</code> veya <code>{**d1, **d2}</code></li>
+                    <li>Tersine çevir: <code>{v: k for k, v in d.items()}</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>dict:</strong> Python'un hash table implementasyonu</li>
+                    <li><strong>O(1):</strong> Erişim, ekleme, silme çok hızlı</li>
+                    <li><strong>Anahtar:</strong> Sadece hashable tipler (int, str, tuple)</li>
+                    <li><strong>Döngü:</strong> keys(), values(), items()</li>
+                    <li><strong>Performans:</strong> Liste'den çok daha hızlı arama</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="8d_hash_performance.html" class="btn">⬅️ Önceki: Performans & Load Factor</a>
+            <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+            <a href="8f_hash_ornekler.html" class="btn btn-next">Sonraki: Gerçek Örnekler ➡️</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        let pyodideReady = false;
+        let pyodide = null;
+        async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+        main();
+
+        async function runPython(id) {
+            if (!pyodideReady) { alert("Python yükleniyor..."); return; }
+            const code = document.getElementById('view-' + id).textContent;
+            const out = document.getElementById('output-' + id);
+            out.innerText = "Çalışıyor...";
+            try {
+                pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+                await pyodide.runPythonAsync(code);
+                out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+            } catch (e) { out.innerText = "Hata: " + e; }
+        }
+    </script>
+</body>
+</html>

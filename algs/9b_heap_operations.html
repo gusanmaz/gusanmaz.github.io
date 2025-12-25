@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.2: Heap Operasyonları - Insert, Delete, Heapify</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .heap-visual {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 30px 0;
+        }
+
+        .step-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .step-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .step-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .step-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .step-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .step-btn.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .step-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+            min-height: 50px;
+        }
+
+        .array-display {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .array-cell.highlight {
+            background: #fff3e0;
+            border-color: #ff9800;
+            transform: scale(1.1);
+        }
+
+        .array-cell.active {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            transform: scale(1.15);
+        }
+
+        .cell-index {
+            font-size: 10px;
+            color: #999;
+            position: absolute;
+            top: 2px;
+        }
+
+        .cell-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>9.2: Heap Operasyonları</h1>
+            <p>Insert, Delete, Heapify - Adım Adım</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Heap'te 3 Temel İşlem</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                    <h4 style="margin-top: 0;">➕ Insert (Ekleme)</h4>
+                    <p style="font-size: 0.9em;">Yeni eleman ekle ve heap kuralını koru</p>
+                    <p style="font-size: 0.85em; color: #666;">Zaman: O(log n)</p>
+                </div>
+                <div style="background: #ffebee; padding: 20px; border-radius: 10px; border-left: 4px solid #f44336;">
+                    <h4 style="margin-top: 0;">➖ Delete (Silme)</h4>
+                    <p style="font-size: 0.9em;">En büyük/küçük elemanı çıkar</p>
+                    <p style="font-size: 0.85em; color: #666;">Zaman: O(log n)</p>
+                </div>
+                <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0;">
+                    <h4 style="margin-top: 0;">🔄 Heapify</h4>
+                    <p style="font-size: 0.9em;">Diziyi heap'e dönüştür</p>
+                    <p style="font-size: 0.85em; color: #666;">Zaman: O(n)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>➕ Insert (Ekleme) İşlemi - İnteraktif Görselleştirme</h2>
+            <p>Yeni eleman en sona eklenir, sonra <strong>yukarı doğru</strong> yüzdürülür (bubble up).</p>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">📝 Insert Algoritması (Max Heap)</h4>
+                <ol style="margin: 10px 0; padding-left: 25px;">
+                    <li>Yeni elemanı dizinin sonuna ekle</li>
+                    <li>Parent ile karşılaştır</li>
+                    <li>Eğer yeni eleman > parent → Yer değiştir (swap)</li>
+                    <li>Kök'e ulaşana veya parent ≥ yeni eleman olana kadar tekrarla</li>
+                </ol>
+            </div>
+
+            <div class="heap-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Insert Animasyonu</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">40 değerini heap'e ekleme adımlarını izleyin</p>
+
+                <canvas id="insertCanvas" width="700" height="400"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="insertInfo" class="step-info">
+                    <strong>Adım 1:</strong> 40 değerini dizinin sonuna ekle
+                </div>
+
+                <div class="step-controls">
+                    <button class="step-btn secondary" onclick="insertDemo.reset()">🔄 Sıfırla</button>
+                    <button class="step-btn primary" onclick="insertDemo.nextStep()">▶ Sonraki Adım</button>
+                    <button class="step-btn primary" onclick="insertDemo.autoPlay()">⏩ Otomatik Oynat</button>
+                </div>
+
+                <div id="insertArray" class="array-display"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>➖ Delete (Silme) İşlemi - İnteraktif Görselleştirme</h2>
+            <p>Heap'te genelde <strong>sadece root silinir</strong> (max/min eleman). Silme sonrası heap kuralı korunmalı.</p>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; border-left: 4px solid #f44336; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #c62828;">📝 Delete Algoritması (Max Heap)</h4>
+                <ol style="margin: 10px 0; padding-left: 25px;">
+                    <li>Root'u (indeks 0) kaydet (bu dönecek)</li>
+                    <li>Son elemanı root'a taşı</li>
+                    <li>Son elemanı sil</li>
+                    <li>Root'tan başla, <strong>aşağı doğru</strong> batır (bubble down)</li>
+                    <li>Her adımda: Sol ve sağ child'dan büyük olanla yer değiştir</li>
+                    <li>Yaprak'a ulaşana veya child'lar ≤ parent olana kadar devam</li>
+                </ol>
+            </div>
+
+            <div class="heap-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Delete Animasyonu</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">Root (en büyük) elemanı silme adımlarını izleyin</p>
+
+                <canvas id="deleteCanvas" width="700" height="400"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="deleteInfo" class="step-info">
+                    <strong>Adım 1:</strong> Root'u (50) kaydet ve son elemanı (15) root'a taşı
+                </div>
+
+                <div class="step-controls">
+                    <button class="step-btn secondary" onclick="deleteDemo.reset()">🔄 Sıfırla</button>
+                    <button class="step-btn primary" onclick="deleteDemo.nextStep()">▶ Sonraki Adım</button>
+                    <button class="step-btn primary" onclick="deleteDemo.autoPlay()">⏩ Otomatik Oynat</button>
+                </div>
+
+                <div id="deleteArray" class="array-display"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Heapify - Diziyi Heap'e Çevir</h2>
+            <p>Rastgele bir diziyi heap'e dönüştürmek için <strong>tüm parent'ları</strong> aşağı batırırız.</p>
+
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #6a1b9a;">🎯 Heapify Neden O(n)?</h4>
+                <p>Sezgisel düşünce: n eleman × log n = O(n log n) gibi görünür.</p>
+                <p><strong>Ama:</strong> Alt seviyelerde çok eleman var ama az batırılıyor, üst seviyelerde az eleman var ama çok batırılıyor. Toplam: <strong>O(n)</strong></p>
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 0.9em;">Bu şaşırtıcı sonuç, heap sort'u çok verimli yapar!</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Heapify - Dizi → Heap</span>
+                    <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code3"><code class="language-python">def heapify_down(arr, n, i):
+    """i indeksindeki elemanı aşağı batır"""
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    # Sol child büyük mü?
+    if left < n and arr[left] > arr[largest]:
+        largest = left
+
+    # Sağ child daha büyük mü?
+    if right < n and arr[right] > arr[largest]:
+        largest = right
+
+    # Swap gerekli mi?
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        print(f"   Swap: {i} ↔ {largest} → {arr}")
+        # Recursive olarak devam et
+        heapify_down(arr, n, largest)
+
+def build_max_heap(arr):
+    """Rastgele diziyi max heap'e çevir"""
+    n = len(arr)
+
+    print(f"Başlangıç dizisi: {arr}")
+    print("\n🔄 Heapify başlıyor...\n")
+
+    # Son parent'tan başla, geriye doğru git
+    # Son parent: (n//2 - 1)
+    start = n // 2 - 1
+
+    for i in range(start, -1, -1):
+        print(f"Parent {i} ({arr[i]}) batırılıyor:")
+        heapify_down(arr, n, i)
+        print()
+
+    print(f"✅ Heap oluşturuldu: {arr}")
+    return arr
+
+# Test
+print("=== Heapify Demosu ===\n")
+
+# Rastgele dizi
+arr = [4, 10, 3, 5, 1, 8, 7]
+print(f"Rastgele dizi (heap değil): {arr}")
+
+# Heap'e çevir
+heap = build_max_heap(arr.copy())
+
+# Doğrulama
+print("\n=== Doğrulama ===")
+print(f"Root (en büyük): {heap[0]}")
+print(f"Parent ≥ Children kuralı:")
+
+for i in range(len(heap) // 2):
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    checks = f"  {i} ({heap[i]})"
+
+    if left < len(heap):
+        status = "✅" if heap[i] >= heap[left] else "❌"
+        checks += f" ≥ L:{left} ({heap[left]}) {status}"
+
+    if right < len(heap):
+        status = "✅" if heap[i] >= heap[right] else "❌"
+        checks += f" ≥ R:{right} ({heap[right]}) {status}"
+
+    print(checks)</code></pre>
+                <textarea id="code3" class="code-editor"></textarea>
+                <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧮 İnteraktif Heap Builder</h2>
+            <p>Kendi heap'inizi oluşturun ve insert/delete operasyonlarını deneyin!</p>
+
+            <div class="heap-visual">
+                <h3 style="text-align: center; margin-top: 0;">🎮 Heap Oyun Alanı</h3>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <input type="number" id="heapInput" placeholder="Sayı girin"
+                        style="padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; width: 150px;">
+                    <button class="step-btn primary" onclick="interactiveHeap.insert()">➕ Ekle</button>
+                    <button class="step-btn secondary" onclick="interactiveHeap.deleteMax()" style="background: #f44336; color: white;">➖ Max Sil</button>
+                    <button class="step-btn secondary" onclick="interactiveHeap.clear()">🗑️ Temizle</button>
+                </div>
+
+                <canvas id="interactiveCanvas" width="700" height="350"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="interactiveInfo" class="step-info">
+                    Heap boş. Yukarıdan sayı ekleyin!
+                </div>
+
+                <div id="interactiveArray" class="array-display"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Karmaşıklık Özeti</h2>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                        <th style="padding: 15px; text-align: left;">İşlem</th>
+                        <th style="padding: 15px;">Zaman</th>
+                        <th style="padding: 15px;">Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Insert</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(log n)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Ağacın yüksekliği kadar yukarı çık</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Delete (root)</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(log n)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Ağacın yüksekliği kadar aşağı in</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Peek (root)</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Sadece indeks 0'a bak</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Heapify (build)</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Diziyi heap'e çevir</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Search</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Heap arama için optimize değil!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Insert (Ekleme):</strong> Sona ekle, yukarı yüzdür (bubble up) - O(log n)</li>
+                    <li><strong>Delete (Silme):</strong> Root (kök) sil, son elemanı root'a taşı, aşağı batır (bubble down) - O(log n)</li>
+                    <li><strong>Heapify (Heap Oluşturma):</strong> Diziyi heap'e çevir - O(n) (şaşırtıcı derecede hızlı!)</li>
+                    <li><strong>Parent formülü (Ebeveyn):</strong> (i-1)//2, <strong>Child (Çocuk):</strong> 2i+1, 2i+2</li>
+                    <li><strong>İnteraktif görselleştirmeler</strong> ile heap operasyonlarını adım adım izlediniz</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="9a_heap_intro.html" class="btn">⬅️ Önceki: Heap Giriş</a>
+            <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+            <a href="9c_heap_sort.html" class="btn btn-next">Sonraki: Heap Sort ➡️</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        let pyodideReady = false;
+        let pyodide = null;
+        async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+        main();
+
+        async function runPython(id) {
+            if (!pyodideReady) { alert("Python yükleniyor..."); return; }
+            const code = document.getElementById('view-' + id).textContent;
+            const out = document.getElementById('output-' + id);
+            out.innerText = "Çalışıyor...";
+            try {
+                pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+                await pyodide.runPythonAsync(code);
+                out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+            } catch (e) { out.innerText = "Hata: " + e; }
+        }
+
+        // Insert Demo Animation
+        class InsertDemo {
+            constructor() {
+                this.canvas = document.getElementById('insertCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.steps = [
+                    { heap: [30, 20, 10, 15, 5], desc: "Başlangıç heap: [30, 20, 10, 15, 5]", highlight: [] },
+                    { heap: [30, 20, 10, 15, 5, 40], desc: "40'ı dizinin sonuna ekle (indeks 5)", highlight: [5] },
+                    { heap: [30, 20, 10, 15, 5, 40], desc: "40 > parent(20)? Evet! Swap yap", highlight: [5, 1] },
+                    { heap: [30, 40, 10, 15, 5, 20], desc: "Swap yapıldı. 40 şimdi indeks 1'de", highlight: [1] },
+                    { heap: [30, 40, 10, 15, 5, 20], desc: "40 > parent(30)? Evet! Tekrar swap", highlight: [1, 0] },
+                    { heap: [40, 30, 10, 15, 5, 20], desc: "✅ Insert tamamlandı! 40 artık root", highlight: [0] }
+                ];
+                this.currentStep = 0;
+                this.autoPlayInterval = null;
+                this.draw();
+            }
+
+            draw() {
+                const step = this.steps[this.currentStep];
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw tree
+                this.drawHeapTree(step.heap, step.highlight);
+
+                // Update info
+                document.getElementById('insertInfo').innerHTML =
+                    `<strong>Adım ${this.currentStep + 1}/${this.steps.length}:</strong> ${step.desc}`;
+
+                // Update array display
+                this.updateArrayDisplay('insertArray', step.heap, step.highlight);
+            }
+
+            drawHeapTree(heap, highlight) {
+                if (heap.length === 0) return;
+
+                const positions = this.calculatePositions(heap.length);
+
+                // Draw edges first
+                this.ctx.strokeStyle = '#999';
+                this.ctx.lineWidth = 2;
+                for (let i = 0; i < heap.length; i++) {
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+
+                    if (left < heap.length) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[left].x, positions[left].y);
+                        this.ctx.stroke();
+                    }
+
+                    if (right < heap.length) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[right].x, positions[right].y);
+                        this.ctx.stroke();
+                    }
+                }
+
+                // Draw nodes
+                for (let i = 0; i < heap.length; i++) {
+                    const pos = positions[i];
+                    const isHighlight = highlight.includes(i);
+
+                    // Node circle
+                    const gradient = this.ctx.createLinearGradient(pos.x - 25, pos.y - 25, pos.x + 25, pos.y + 25);
+                    if (isHighlight) {
+                        gradient.addColorStop(0, '#ff9800');
+                        gradient.addColorStop(1, '#f57c00');
+                    } else if (i === 0) {
+                        gradient.addColorStop(0, '#e74c3c');
+                        gradient.addColorStop(1, '#c0392b');
+                    } else {
+                        gradient.addColorStop(0, '#3498db');
+                        gradient.addColorStop(1, '#2980b9');
+                    }
+
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(pos.x, pos.y, isHighlight ? 28 : 25, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    if (isHighlight) {
+                        this.ctx.strokeStyle = '#ffd700';
+                        this.ctx.lineWidth = 3;
+                        this.ctx.stroke();
+                    }
+
+                    // Value text
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = 'bold 16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(heap[i], pos.x, pos.y);
+
+                    // Index label
+                    this.ctx.fillStyle = '#666';
+                    this.ctx.font = '11px Arial';
+                    this.ctx.fillText(`[${i}]`, pos.x, pos.y + 45);
+                }
+            }
+
+            calculatePositions(count) {
+                const positions = [];
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+
+                // Calculate tree dimensions
+                const levels = Math.ceil(Math.log2(count + 1));
+                const verticalSpacing = Math.min(100, (canvasHeight - 100) / levels);
+
+                // Helper function to calculate position for a node
+                const calcNodePos = (index, level, posInLevel, nodesInLevel) => {
+                    // Calculate horizontal spacing based on level
+                    // Each level divides the canvas into 2^level sections
+                    const totalSections = Math.pow(2, level);
+                    const sectionWidth = canvasWidth / (totalSections * 2);
+
+                    // Position in the middle of each section
+                    const x = sectionWidth + (posInLevel * 2 * sectionWidth);
+                    const y = 60 + level * verticalSpacing;
+
+                    return { x, y };
+                };
+
+                // Build positions array by traversing level by level
+                let idx = 0;
+                for (let level = 0; level < levels && idx < count; level++) {
+                    const nodesInLevel = Math.min(Math.pow(2, level), count - idx);
+
+                    for (let posInLevel = 0; posInLevel < nodesInLevel && idx < count; posInLevel++) {
+                        positions.push(calcNodePos(idx, level, posInLevel, nodesInLevel));
+                        idx++;
+                    }
+                }
+
+                return positions;
+            }
+
+            updateArrayDisplay(containerId, heap, highlight) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = heap.map((val, i) => {
+                    const classes = ['array-cell'];
+                    if (highlight.includes(i)) classes.push('highlight');
+                    return `
+                        <div class="${classes.join(' ')}">
+                            <div class="cell-index">${i}</div>
+                            <div class="cell-value">${val}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.draw();
+                }
+            }
+
+            reset() {
+                this.currentStep = 0;
+                if (this.autoPlayInterval) {
+                    clearInterval(this.autoPlayInterval);
+                    this.autoPlayInterval = null;
+                }
+                this.draw();
+            }
+
+            autoPlay() {
+                if (this.autoPlayInterval) return;
+                this.autoPlayInterval = setInterval(() => {
+                    if (this.currentStep < this.steps.length - 1) {
+                        this.nextStep();
+                    } else {
+                        clearInterval(this.autoPlayInterval);
+                        this.autoPlayInterval = null;
+                    }
+                }, 1500);
+            }
+        }
+
+        // Delete Demo Animation
+        class DeleteDemo {
+            constructor() {
+                this.canvas = document.getElementById('deleteCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.steps = [
+                    { heap: [50, 30, 20, 15, 10], desc: "Başlangıç heap: [50, 30, 20, 15, 10]", highlight: [] },
+                    { heap: [10, 30, 20, 15], desc: "Root(50) kaydet, son eleman(10) root'a", highlight: [0] },
+                    { heap: [10, 30, 20, 15], desc: "10 < child(30)? Evet! Swap gerekli", highlight: [0, 1] },
+                    { heap: [30, 10, 20, 15], desc: "Swap yapıldı. 10 şimdi indeks 1'de", highlight: [1] },
+                    { heap: [30, 10, 20, 15], desc: "10 < child(15)? Evet! Tekrar swap", highlight: [1, 3] },
+                    { heap: [30, 15, 20, 10], desc: "✅ Delete tamamlandı! Heap kuralı sağlandı", highlight: [] }
+                ];
+                this.currentStep = 0;
+                this.autoPlayInterval = null;
+                this.draw();
+            }
+
+            draw() {
+                const step = this.steps[this.currentStep];
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.drawHeapTree(step.heap, step.highlight);
+
+                document.getElementById('deleteInfo').innerHTML =
+                    `<strong>Adım ${this.currentStep + 1}/${this.steps.length}:</strong> ${step.desc}`;
+
+                this.updateArrayDisplay('deleteArray', step.heap, step.highlight);
+            }
+
+            drawHeapTree(heap, highlight) {
+                const positions = this.calculatePositions(heap.length);
+
+                this.ctx.strokeStyle = '#999';
+                this.ctx.lineWidth = 2;
+                for (let i = 0; i < heap.length; i++) {
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+
+                    if (left < heap.length) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[left].x, positions[left].y);
+                        this.ctx.stroke();
+                    }
+
+                    if (right < heap.length) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[right].x, positions[right].y);
+                        this.ctx.stroke();
+                    }
+                }
+
+                for (let i = 0; i < heap.length; i++) {
+                    const pos = positions[i];
+                    const isHighlight = highlight.includes(i);
+
+                    const gradient = this.ctx.createLinearGradient(pos.x - 25, pos.y - 25, pos.x + 25, pos.y + 25);
+                    if (isHighlight) {
+                        gradient.addColorStop(0, '#f44336');
+                        gradient.addColorStop(1, '#c62828');
+                    } else if (i === 0) {
+                        gradient.addColorStop(0, '#e74c3c');
+                        gradient.addColorStop(1, '#c0392b');
+                    } else {
+                        gradient.addColorStop(0, '#3498db');
+                        gradient.addColorStop(1, '#2980b9');
+                    }
+
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(pos.x, pos.y, isHighlight ? 28 : 25, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    if (isHighlight) {
+                        this.ctx.strokeStyle = '#ffd700';
+                        this.ctx.lineWidth = 3;
+                        this.ctx.stroke();
+                    }
+
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = 'bold 16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(heap[i], pos.x, pos.y);
+
+                    this.ctx.fillStyle = '#666';
+                    this.ctx.font = '11px Arial';
+                    this.ctx.fillText(`[${i}]`, pos.x, pos.y + 45);
+                }
+            }
+
+            calculatePositions(count) {
+                const positions = [];
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+
+                // Calculate tree dimensions
+                const levels = Math.ceil(Math.log2(count + 1));
+                const verticalSpacing = Math.min(100, (canvasHeight - 100) / levels);
+
+                // Helper function to calculate position for a node
+                const calcNodePos = (index, level, posInLevel, nodesInLevel) => {
+                    // Calculate horizontal spacing based on level
+                    // Each level divides the canvas into 2^level sections
+                    const totalSections = Math.pow(2, level);
+                    const sectionWidth = canvasWidth / (totalSections * 2);
+
+                    // Position in the middle of each section
+                    const x = sectionWidth + (posInLevel * 2 * sectionWidth);
+                    const y = 60 + level * verticalSpacing;
+
+                    return { x, y };
+                };
+
+                // Build positions array by traversing level by level
+                let idx = 0;
+                for (let level = 0; level < levels && idx < count; level++) {
+                    const nodesInLevel = Math.min(Math.pow(2, level), count - idx);
+
+                    for (let posInLevel = 0; posInLevel < nodesInLevel && idx < count; posInLevel++) {
+                        positions.push(calcNodePos(idx, level, posInLevel, nodesInLevel));
+                        idx++;
+                    }
+                }
+
+                return positions;
+            }
+
+            updateArrayDisplay(containerId, heap, highlight) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = heap.map((val, i) => {
+                    const classes = ['array-cell'];
+                    if (highlight.includes(i)) classes.push('highlight');
+                    return `
+                        <div class="${classes.join(' ')}">
+                            <div class="cell-index">${i}</div>
+                            <div class="cell-value">${val}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.draw();
+                }
+            }
+
+            reset() {
+                this.currentStep = 0;
+                if (this.autoPlayInterval) {
+                    clearInterval(this.autoPlayInterval);
+                    this.autoPlayInterval = null;
+                }
+                this.draw();
+            }
+
+            autoPlay() {
+                if (this.autoPlayInterval) return;
+                this.autoPlayInterval = setInterval(() => {
+                    if (this.currentStep < this.steps.length - 1) {
+                        this.nextStep();
+                    } else {
+                        clearInterval(this.autoPlayInterval);
+                        this.autoPlayInterval = null;
+                    }
+                }, 1500);
+            }
+        }
+
+        // Interactive Heap Builder
+        class InteractiveHeap {
+            constructor() {
+                this.heap = [];
+                this.canvas = document.getElementById('interactiveCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.draw();
+            }
+
+            insert() {
+                const input = document.getElementById('heapInput');
+                const val = parseInt(input.value);
+
+                if (isNaN(val)) {
+                    alert('Lütfen geçerli bir sayı girin!');
+                    return;
+                }
+
+                this.heap.push(val);
+                this.bubbleUp(this.heap.length - 1);
+                input.value = '';
+                this.draw();
+                this.updateInfo(`${val} eklendi. Heap boyutu: ${this.heap.length}`);
+            }
+
+            bubbleUp(i) {
+                while (i > 0) {
+                    const parent = Math.floor((i - 1) / 2);
+                    if (this.heap[i] > this.heap[parent]) {
+                        [this.heap[i], this.heap[parent]] = [this.heap[parent], this.heap[i]];
+                        i = parent;
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            deleteMax() {
+                if (this.heap.length === 0) {
+                    alert('Heap boş!');
+                    return;
+                }
+
+                const max = this.heap[0];
+                this.heap[0] = this.heap.pop();
+
+                if (this.heap.length > 0) {
+                    this.bubbleDown(0);
+                }
+
+                this.draw();
+                this.updateInfo(`${max} silindi. Heap boyutu: ${this.heap.length}`);
+            }
+
+            bubbleDown(i) {
+                while (true) {
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+                    let largest = i;
+
+                    if (left < this.heap.length && this.heap[left] > this.heap[largest]) {
+                        largest = left;
+                    }
+
+                    if (right < this.heap.length && this.heap[right] > this.heap[largest]) {
+                        largest = right;
+                    }
+
+                    if (largest !== i) {
+                        [this.heap[i], this.heap[largest]] = [this.heap[largest], this.heap[i]];
+                        i = largest;
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            clear() {
+                this.heap = [];
+                this.draw();
+                this.updateInfo('Heap temizlendi!');
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (this.heap.length === 0) {
+                    this.ctx.fillStyle = '#999';
+                    this.ctx.font = '20px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('Heap boş - Yukarıdan sayı ekleyin!', this.canvas.width / 2, this.canvas.height / 2);
+                    return;
+                }
+
+                const positions = this.calculatePositions(this.heap.length);
+
+                // Draw edges
+                this.ctx.strokeStyle = '#999';
+                this.ctx.lineWidth = 2;
+                for (let i = 0; i < this.heap.length; i++) {
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+
+                    if (left < this.heap.length) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[left].x, positions[left].y);
+                        this.ctx.stroke();
+                    }
+
+                    if (right < this.heap.length) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[right].x, positions[right].y);
+                        this.ctx.stroke();
+                    }
+                }
+
+                // Draw nodes
+                for (let i = 0; i < this.heap.length; i++) {
+                    const pos = positions[i];
+
+                    const gradient = this.ctx.createLinearGradient(pos.x - 25, pos.y - 25, pos.x + 25, pos.y + 25);
+                    if (i === 0) {
+                        gradient.addColorStop(0, '#4caf50');
+                        gradient.addColorStop(1, '#388e3c');
+                    } else {
+                        gradient.addColorStop(0, '#3498db');
+                        gradient.addColorStop(1, '#2980b9');
+                    }
+
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(pos.x, pos.y, 25, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = 'bold 16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(this.heap[i], pos.x, pos.y);
+
+                    this.ctx.fillStyle = '#666';
+                    this.ctx.font = '11px Arial';
+                    this.ctx.fillText(`[${i}]`, pos.x, pos.y + 40);
+                }
+
+                // Update array display
+                const container = document.getElementById('interactiveArray');
+                container.innerHTML = this.heap.map((val, i) => `
+                    <div class="array-cell ${i === 0 ? 'active' : ''}">
+                        <div class="cell-index">${i}</div>
+                        <div class="cell-value">${val}</div>
+                    </div>
+                `).join('');
+            }
+
+            calculatePositions(count) {
+                const positions = [];
+                const levels = Math.ceil(Math.log2(count + 1));
+                let idx = 0;
+
+                for (let level = 0; level < levels && idx < count; level++) {
+                    const nodesInLevel = Math.min(Math.pow(2, level), count - idx);
+                    const y = 50 + level * 90;
+                    const spacing = this.canvas.width / (nodesInLevel + 1);
+
+                    for (let j = 0; j < nodesInLevel && idx < count; j++) {
+                        positions.push({
+                            x: spacing * (j + 1),
+                            y: y
+                        });
+                        idx++;
+                    }
+                }
+
+                return positions;
+            }
+
+            updateInfo(msg) {
+                document.getElementById('interactiveInfo').innerHTML = `<strong>${msg}</strong>`;
+            }
+        }
+
+        // Initialize demos
+        let insertDemo, deleteDemo, interactiveHeap;
+
+        window.addEventListener('load', () => {
+            insertDemo = new InsertDemo();
+            deleteDemo = new DeleteDemo();
+            interactiveHeap = new InteractiveHeap();
+        });
+    </script>
+</body>
+</html>

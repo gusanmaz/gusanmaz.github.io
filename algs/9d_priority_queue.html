@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>9.4: Priority Queue (Öncelik Kuyruğu)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .pq-visual {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 30px 0;
+        }
+
+        .queue-display {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            transition: all 0.3s;
+        }
+
+        .queue-item.processing {
+            background: linear-gradient(135deg, #fff3e0, #ffebee);
+            border-left-color: #ff9800;
+            transform: translateX(10px);
+        }
+
+        .queue-item.done {
+            opacity: 0.5;
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+
+        .priority-badge {
+            min-width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .priority-badge.high {
+            background: linear-gradient(135deg, #f44336, #c62828);
+        }
+
+        .priority-badge.medium {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+
+        .priority-badge.low {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .item-desc {
+            color: #666;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .control-btn.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>⭐ 9.4: Priority Queue</h1>
+            <p>Heap'in En Önemli Kullanımı!</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Priority Queue Nedir?</h2>
+            <p><strong>Priority Queue</strong>, her elemanın bir <strong>önceliği</strong> olan kuyruktur. En yüksek öncelikli eleman her zaman ilk çıkar.</p>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4 style="margin-top: 0;">🆚 Normal Queue vs Priority Queue</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0;">
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h5>Normal Queue (FIFO)</h5>
+                        <p style="font-size: 0.9em;">İlk giren ilk çıkar</p>
+                        <code>[5, 2, 9, 1] → 5 çıkar</code>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h5>Priority Queue</h5>
+                        <p style="font-size: 0.9em;">En yüksek öncelikli çıkar</p>
+                        <code>[5, 2, 9, 1] → 9 çıkar ⭐</code>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">🌍 Gerçek Hayattan Örnekler</h4>
+                <ul style="margin: 10px 0;">
+                    <li><strong>Hastane Acil:</strong> Ağır hastalar önce (öncelik: hastalık ciddiyeti)</li>
+                    <li><strong>İşletim Sistemi:</strong> Kritik işler önce çalışır (öncelik: CPU priority)</li>
+                    <li><strong>Dijkstra Algoritması:</strong> En kısa yol bulma</li>
+                    <li><strong>Huffman Encoding:</strong> Veri sıkıştırma</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏥 İnteraktif Simülasyon: Hastane Acil Servisi</h2>
+            <p>Gerçek bir hastane acil servisini simüle edelim! Hastalar önceliklerine göre sıralanır.</p>
+
+            <div class="pq-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Acil Servis Priority Queue</h3>
+
+                <div class="control-panel">
+                    <h4 style="margin-top: 0;">Yeni Hasta Ekle</h4>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                        <input type="text" id="patientName" placeholder="Hasta adı" style="padding: 10px; border: 2px solid #ddd; border-radius: 8px; flex: 1; min-width: 150px;">
+                        <select id="patientPriority" style="padding: 10px; border: 2px solid #ddd; border-radius: 8px;">
+                            <option value="1">🔴 Kritik (1)</option>
+                            <option value="2">🟠 Acil (2)</option>
+                            <option value="3">🟡 Orta (3)</option>
+                            <option value="4">🟢 Normal (4)</option>
+                            <option value="5">⚪ Hafif (5)</option>
+                        </select>
+                        <button class="control-btn primary" onclick="hospitalSim.addPatient()">➕ Ekle</button>
+                        <button class="control-btn secondary" onclick="hospitalSim.processNext()">🏥 Muayene Et</button>
+                        <button class="control-btn secondary" onclick="hospitalSim.autoProcess()">⏩ Otomatik</button>
+                        <button class="control-btn secondary" onclick="hospitalSim.reset()">🔄 Sıfırla</button>
+                    </div>
+                </div>
+
+                <div id="queueStatus" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2196f3;">
+                    <strong>Durum:</strong> Kuyrukta 0 hasta var
+                </div>
+
+                <canvas id="heapCanvas" width="700" height="350"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="queueDisplay" class="queue-display"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💻 Priority Queue İmplementasyonu</h2>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Priority Queue with Heap</span>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code1"><code class="language-python">class PriorityQueue:
+    """Min Heap ile Priority Queue (en küçük öncelikli önce çıkar)"""
+
+    def __init__(self):
+        self.heap = []
+
+    def parent(self, i):
+        return (i - 1) // 2
+
+    def left(self, i):
+        return 2 * i + 1
+
+    def right(self, i):
+        return 2 * i + 2
+
+    def swap(self, i, j):
+        self.heap[i], self.heap[j] = self.heap[j], self.heap[i]
+
+    def push(self, priority, data):
+        """Eleman ekle - O(log n)"""
+        item = (priority, data)
+        self.heap.append(item)
+        self._bubble_up(len(self.heap) - 1)
+        print(f"➕ Push: Priority={priority}, Data={data}")
+
+    def _bubble_up(self, i):
+        """Yukarı yüzdür"""
+        while i > 0:
+            parent_idx = self.parent(i)
+            if self.heap[i][0] < self.heap[parent_idx][0]:
+                self.swap(i, parent_idx)
+                i = parent_idx
+            else:
+                break
+
+    def pop(self):
+        """En yüksek öncelikli elemanı çıkar - O(log n)"""
+        if not self.heap:
+            return None
+
+        if len(self.heap) == 1:
+            item = self.heap.pop()
+            print(f"➖ Pop: Priority={item[0]}, Data={item[1]}")
+            return item[1]
+
+        # Root'u kaydet
+        min_item = self.heap[0]
+
+        # Son elemanı root'a taşı
+        self.heap[0] = self.heap.pop()
+        self._bubble_down(0)
+
+        print(f"➖ Pop: Priority={min_item[0]}, Data={min_item[1]}")
+        return min_item[1]
+
+    def _bubble_down(self, i):
+        """Aşağı batır"""
+        while True:
+            left = self.left(i)
+            right = self.right(i)
+            smallest = i
+
+            if left < len(self.heap) and self.heap[left][0] < self.heap[smallest][0]:
+                smallest = left
+
+            if right < len(self.heap) and self.heap[right][0] < self.heap[smallest][0]:
+                smallest = right
+
+            if smallest != i:
+                self.swap(i, smallest)
+                i = smallest
+            else:
+                break
+
+    def peek(self):
+        """En yüksek öncelikli elemana bak - O(1)"""
+        if self.heap:
+            return self.heap[0][1]
+        return None
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    def size(self):
+        return len(self.heap)
+
+# Test: Hastane Acil Servisi
+print("=== 🏥 Hastane Acil Servisi Simülasyonu ===\n")
+
+pq = PriorityQueue()
+
+# Hastalar geldi (öncelik: 1=kritik, 5=hafif)
+print("Hastalar acile geldi:")
+pq.push(3, "Ali (kırık kol)")
+pq.push(1, "Ayşe (kalp krizi)") # En kritik!
+pq.push(5, "Mehmet (nezle)")
+pq.push(2, "Fatma (yanık)")
+pq.push(4, "Can (baş ağrısı)")
+
+print(f"\nKuyrukta {pq.size()} hasta var")
+print(f"Sıradaki: {pq.peek()}")
+
+# Hastaları sırayla muayene et
+print("\n=== Muayene Sırası ===")
+while not pq.is_empty():
+    hasta = pq.pop()
+    print(f"  → {hasta} muayene ediliyor")
+
+print("\n✅ Tüm hastalar muayene edildi!")</code></pre>
+                <textarea id="code1" class="code-editor"></textarea>
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🐍 Python'da Priority Queue</h2>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python heapq Modülü</span>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code2"><code class="language-python">import heapq
+
+# Python heapq kullanımı
+print("=== Python heapq (Min Heap) ===\n")
+
+# Priority Queue oluştur
+pq = []
+
+# Eleman ekle: (öncelik, veri)
+heapq.heappush(pq, (3, "Görev C"))
+heapq.heappush(pq, (1, "Görev A - ÖNEMLİ!"))
+heapq.heappush(pq, (2, "Görev B"))
+heapq.heappush(pq, (1, "Görev A2 - ÖNEMLİ!"))
+
+print(f"Priority Queue: {pq}")
+
+# Elemanları çıkar (öncelik sırasında)
+print("\n=== Görevler Sırayla ===")
+while pq:
+    priority, task = heapq.heappop(pq)
+    print(f"Öncelik {priority}: {task}")
+
+# Max Heap için trick: Negatif kullan!
+print("\n=== Max Heap (Negatif Trick) ===")
+max_heap = []
+
+# Negatif öncelik ekle
+heapq.heappush(max_heap, (-10, "A"))
+heapq.heappush(max_heap, (-30, "C"))
+heapq.heappush(max_heap, (-20, "B"))
+
+print("Max Heap (negatif):", max_heap)
+
+while max_heap:
+    neg_priority, data = heapq.heappop(max_heap)
+    priority = -neg_priority  # Geri çevir
+    print(f"Öncelik {priority}: {data}")
+
+# Önemli: heapq SADECE min heap!
+# Max heap için negatif kullan veya kendi sınıf yaz</code></pre>
+                <textarea id="code2" class="code-editor"></textarea>
+                <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Priority Queue Karmaşıklık</h2>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                        <th style="padding: 12px; text-align: left;">İşlem</th>
+                        <th style="padding: 12px;">Heap</th>
+                        <th style="padding: 12px;">Sıralı Dizi</th>
+                        <th style="padding: 12px;">Sırasız Dizi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>Push</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #4caf50;">O(log n) ✅</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>Pop (min/max)</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #4caf50;">O(log n) ✅</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>Peek</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #4caf50;">O(1) ✅</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="font-size: 0.9em; color: #666;">Heap her iki işlemde de dengeli performans → En iyi seçim!</p>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Priority Queue:</strong> En yüksek/düşük öncelikli eleman önce çıkar</li>
+                    <li><strong>Heap ideal:</strong> Push O(log n), Pop O(log n), Peek O(1)</li>
+                    <li><strong>Python heapq:</strong> Min heap (max için negatif kullan)</li>
+                    <li><strong>Kullanım:</strong> Task scheduling, Dijkstra, Huffman, OS...</li>
+                    <li><strong>İnteraktif simülasyon:</strong> Hastane acil servisi örneği ile priority queue mantığını gördünüz</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="9c_heap_sort.html" class="btn">⬅️ Önceki: Heap Sort</a>
+            <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+            <a href="9e_heap_python.html" class="btn btn-next">Sonraki: Python heapq ➡️</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        let pyodideReady = false;
+        let pyodide = null;
+        async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+        main();
+        async function runPython(id) {
+            if (!pyodideReady) { alert("Python yükleniyor..."); return; }
+            const code = document.getElementById('view-' + id).textContent;
+            const out = document.getElementById('output-' + id);
+            out.innerText = "Çalışıyor...";
+            try {
+                pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+                await pyodide.runPythonAsync(code);
+                out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+            } catch (e) { out.innerText = "Hata: " + e; }
+        }
+
+        // Hospital Priority Queue Simulation
+        class HospitalSimulation {
+            constructor() {
+                this.heap = [];
+                this.processed = [];
+                this.canvas = document.getElementById('heapCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.autoInterval = null;
+                this.patientId = 1;
+                this.render();
+            }
+
+            addPatient() {
+                const name = document.getElementById('patientName').value || `Hasta${this.patientId}`;
+                const priority = parseInt(document.getElementById('patientPriority').value);
+
+                this.heap.push({ id: this.patientId++, name, priority });
+                this.bubbleUp(this.heap.length - 1);
+
+                document.getElementById('patientName').value = '';
+                this.render();
+                this.updateStatus();
+            }
+
+            bubbleUp(i) {
+                while (i > 0) {
+                    const parent = Math.floor((i - 1) / 2);
+                    if (this.heap[i].priority < this.heap[parent].priority) {
+                        [this.heap[i], this.heap[parent]] = [this.heap[parent], this.heap[i]];
+                        i = parent;
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            processNext() {
+                if (this.heap.length === 0) {
+                    alert('Kuyruk boş!');
+                    return;
+                }
+
+                const patient = this.heap[0];
+                this.heap[0] = this.heap[this.heap.length - 1];
+                this.heap.pop();
+
+                if (this.heap.length > 0) {
+                    this.bubbleDown(0);
+                }
+
+                this.processed.push(patient);
+                this.render();
+                this.updateStatus();
+            }
+
+            bubbleDown(i) {
+                while (true) {
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+                    let smallest = i;
+
+                    if (left < this.heap.length && this.heap[left].priority < this.heap[smallest].priority) {
+                        smallest = left;
+                    }
+
+                    if (right < this.heap.length && this.heap[right].priority < this.heap[smallest].priority) {
+                        smallest = right;
+                    }
+
+                    if (smallest !== i) {
+                        [this.heap[i], this.heap[smallest]] = [this.heap[smallest], this.heap[i]];
+                        i = smallest;
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            autoProcess() {
+                if (this.autoInterval) {
+                    clearInterval(this.autoInterval);
+                    this.autoInterval = null;
+                    return;
+                }
+
+                this.autoInterval = setInterval(() => {
+                    if (this.heap.length > 0) {
+                        this.processNext();
+                    } else {
+                        clearInterval(this.autoInterval);
+                        this.autoInterval = null;
+                    }
+                }, 1500);
+            }
+
+            reset() {
+                this.heap = [];
+                this.processed = [];
+                this.patientId = 1;
+                if (this.autoInterval) {
+                    clearInterval(this.autoInterval);
+                    this.autoInterval = null;
+                }
+                this.render();
+                this.updateStatus();
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.renderHeap();
+                this.renderQueue();
+            }
+
+            renderHeap() {
+                if (this.heap.length === 0) {
+                    this.ctx.fillStyle = '#999';
+                    this.ctx.font = '18px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('Priority Queue boş - Hasta ekleyin!', this.canvas.width / 2, this.canvas.height / 2);
+                    return;
+                }
+
+                const positions = this.calculatePositions(this.heap.length);
+
+                // Draw edges
+                this.ctx.strokeStyle = '#999';
+                this.ctx.lineWidth = 2;
+                for (let i = 0; i < this.heap.length; i++) {
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+
+                    if (left < this.heap.length) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[left].x, positions[left].y);
+                        this.ctx.stroke();
+                    }
+
+                    if (right < this.heap.length) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(positions[i].x, positions[i].y);
+                        this.ctx.lineTo(positions[right].x, positions[right].y);
+                        this.ctx.stroke();
+                    }
+                }
+
+                // Draw nodes
+                for (let i = 0; i < this.heap.length; i++) {
+                    const pos = positions[i];
+                    const patient = this.heap[i];
+
+                    const gradient = this.ctx.createLinearGradient(pos.x - 30, pos.y - 30, pos.x + 30, pos.y + 30);
+                    if (patient.priority === 1) {
+                        gradient.addColorStop(0, '#f44336');
+                        gradient.addColorStop(1, '#c62828');
+                    } else if (patient.priority === 2) {
+                        gradient.addColorStop(0, '#ff9800');
+                        gradient.addColorStop(1, '#f57c00');
+                    } else if (patient.priority === 3) {
+                        gradient.addColorStop(0, '#ffc107');
+                        gradient.addColorStop(1, '#ffa000');
+                    } else {
+                        gradient.addColorStop(0, '#4caf50');
+                        gradient.addColorStop(1, '#388e3c');
+                    }
+
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Priority number
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = 'bold 20px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(patient.priority, pos.x, pos.y);
+
+                    // Patient name
+                    this.ctx.fillStyle = '#333';
+                    this.ctx.font = '12px Arial';
+                    this.ctx.fillText(patient.name, pos.x, pos.y + 45);
+                }
+            }
+
+            renderQueue() {
+                const container = document.getElementById('queueDisplay');
+
+                let html = '<h4 style="margin-top: 0;">📋 Kuyruk (Öncelik Sırasında)</h4>';
+
+                if (this.heap.length === 0 && this.processed.length === 0) {
+                    html += '<p style="text-align: center; color: #999;">Henüz hasta yok</p>';
+                } else {
+                    // Show waiting patients
+                    const sorted = [...this.heap].sort((a, b) => a.priority - b.priority);
+                    sorted.forEach((patient, i) => {
+                        const badgeClass = patient.priority <= 2 ? 'high' : patient.priority === 3 ? 'medium' : 'low';
+                        html += `
+                            <div class="queue-item">
+                                <div class="priority-badge ${badgeClass}">${patient.priority}</div>
+                                <div class="item-content">
+                                    <div class="item-title">${patient.name}</div>
+                                    <div class="item-desc">Sıra: ${i + 1}, Durum: Bekliyor...</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    // Show processed patients
+                    if (this.processed.length > 0) {
+                        html += '<h4 style="margin-top: 20px;">✅ Muayene Edildi</h4>';
+                        this.processed.slice(-3).reverse().forEach(patient => {
+                            html += `
+                                <div class="queue-item done">
+                                    <div class="priority-badge">${patient.priority}</div>
+                                    <div class="item-content">
+                                        <div class="item-title">${patient.name}</div>
+                                        <div class="item-desc">Muayene tamamlandı</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+
+                container.innerHTML = html;
+            }
+
+            calculatePositions(count) {
+                const positions = [];
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+
+                // Calculate tree dimensions
+                const levels = Math.ceil(Math.log2(count + 1));
+                const verticalSpacing = Math.min(100, (canvasHeight - 100) / levels);
+
+                // Helper function to calculate position for a node
+                const calcNodePos = (index, level, posInLevel, nodesInLevel) => {
+                    // Calculate horizontal spacing based on level
+                    // Each level divides the canvas into 2^level sections
+                    const totalSections = Math.pow(2, level);
+                    const sectionWidth = canvasWidth / (totalSections * 2);
+
+                    // Position in the middle of each section
+                    const x = sectionWidth + (posInLevel * 2 * sectionWidth);
+                    const y = 50 + level * verticalSpacing;
+
+                    return { x, y };
+                };
+
+                // Build positions array by traversing level by level
+                let idx = 0;
+                for (let level = 0; level < levels && idx < count; level++) {
+                    const nodesInLevel = Math.min(Math.pow(2, level), count - idx);
+
+                    for (let posInLevel = 0; posInLevel < nodesInLevel && idx < count; posInLevel++) {
+                        positions.push(calcNodePos(idx, level, posInLevel, nodesInLevel));
+                        idx++;
+                    }
+                }
+
+                return positions;
+            }
+
+            updateStatus() {
+                const status = document.getElementById('queueStatus');
+                if (this.heap.length === 0) {
+                    status.innerHTML = '<strong>Durum:</strong> Kuyruk boş - Yeni hasta eklenebilir';
+                } else {
+                    const next = this.heap[0];
+                    status.innerHTML = `<strong>Durum:</strong> Kuyrukta ${this.heap.length} hasta var | Sıradaki: ${next.name} (Öncelik: ${next.priority})`;
+                }
+            }
+        }
+
+        // Initialize
+        let hospitalSim;
+        window.addEventListener('load', () => {
+            hospitalSim = new HospitalSimulation();
+        });
+    </script>
+</body>
+</html>

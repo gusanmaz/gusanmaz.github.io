@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.2: Hash Fonksiyonları - Basit Anlatım</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <style>
+        .demo-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .hash-demo {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .input-section {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .hash-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .hash-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .hash-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-box {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            color: #2c3e50;
+            word-break: break-all;
+        }
+
+        .method-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+
+        .method-title {
+            font-size: 1.3em;
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .pros, .cons {
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .pros {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+
+        .cons {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+
+        .pros h4, .cons h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+
+        .pros ul, .cons ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 13px;
+        }
+
+        .visual-demo {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .array-visual {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .array-slot {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+        }
+
+        .array-slot.highlight {
+            background: #fff3e0;
+            border-color: #ff9800;
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .slot-index {
+            font-size: 10px;
+            color: #999;
+            position: absolute;
+            top: 2px;
+        }
+
+        .slot-value {
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #667eea;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .example-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 8.2: Hash Fonksiyonları</h1>
+            <p>Anahtarı İndekse Dönüştürmek - Basit ve Anlaşılır</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Hash Fonksiyonu Nedir?</h2>
+            <p><strong>Hash fonksiyonu</strong>, herhangi bir veriyi (anahtar) alıp, onu bir sayıya (indeks) dönüştüren matematiksel bir fonksiyondur.</p>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">🌍 Günlük Hayattan Örnek</h4>
+                <p style="margin: 10px 0;">Kütüphanede kitaplar <strong>konularına göre raflara</strong> yerleştirilir:</p>
+                <ul style="margin: 10px 0;">
+                    <li><strong>"Matematik"</strong> → Raf 3</li>
+                    <li><strong>"Tarih"</strong> → Raf 7</li>
+                    <li><strong>"Edebiyat"</strong> → Raf 2</li>
+                </ul>
+                <p style="margin: 10px 0 0 0; color: #666;">Hash fonksiyonu, kitap konusunu (anahtar) alıp raf numarasını (indeks) veriyor!</p>
+            </div>
+
+            <div class="demo-container">
+                <h3 style="text-align: center; margin-top: 0;">🧪 İnteraktif Hash Fonksiyonu Deneyi</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">Bir kelime girin ve farklı hash fonksiyonlarının nasıl çalıştığını görün</p>
+
+                <div class="hash-demo">
+                    <div class="input-section">
+                        <input type="text" id="hashInput" class="hash-input" placeholder="Bir kelime girin (örn: elma, armut, muz)">
+                        <button class="hash-button" onclick="calculateHashes()">🔢 Hash Hesapla</button>
+                    </div>
+
+                    <div id="hashResults" class="result-box" style="display: none;">
+                        <div class="result-item">
+                            <div class="result-label">📝 Girdiğiniz Kelime:</div>
+                            <div class="result-value" id="inputText"></div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">🔢 ASCII Toplamı:</div>
+                            <div class="result-value" id="asciiSum"></div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">📐 Division Method (tablo boyutu: 10):</div>
+                            <div class="result-value" id="divisionResult"></div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">✨ Multiplication Method:</div>
+                            <div class="result-value" id="multiplicationResult"></div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">🎲 Python hash():</div>
+                            <div class="result-value" id="pythonHash"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📚 Hash Fonksiyonu Özellikleri</h2>
+
+            <p>İyi bir hash fonksiyonu şu özelliklere sahip olmalıdır:</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                    <h4 style="margin-top: 0; color: #1565c0;">⚡ Hızlı</h4>
+                    <p style="margin: 0; font-size: 0.9em;">Hash hesaplama çok hızlı olmalı (O(1) zaman)</p>
+                </div>
+                <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0;">
+                    <h4 style="margin-top: 0; color: #6a1b9a;">📊 Düzgün Dağılım</h4>
+                    <p style="margin: 0; font-size: 0.9em;">Anahtarları tabloya eşit şekilde dağıtmalı</p>
+                </div>
+                <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800;">
+                    <h4 style="margin-top: 0; color: #e65100;">🎯 Deterministik</h4>
+                    <p style="margin: 0; font-size: 0.9em;">Aynı anahtar her zaman aynı indeksi vermeli</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔢 1. Division Method (Bölme Yöntemi)</h2>
+            <p>En basit ve en yaygın kullanılan yöntem!</p>
+
+            <div class="formula-box">
+                <h4 style="text-align: center; margin-top: 0;">Formül</h4>
+                <div class="formula">
+                    hash(key) = key % table_size
+                </div>
+                <p style="text-align: center; color: #666; font-size: 0.9em; margin: 10px 0 0 0;">
+                    (key'i table_size'a böl, <strong>kalanı al</strong>)
+                </p>
+            </div>
+
+            <div class="example-box">
+                <h4 style="margin-top: 0;">💡 Örnek</h4>
+                <p style="margin: 5px 0;">Tablo boyutu: <strong>10</strong></p>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li><code>hash(25) = 25 % 10 = <strong>5</strong></code></li>
+                    <li><code>hash(38) = 38 % 10 = <strong>8</strong></code></li>
+                    <li><code>hash(123) = 123 % 10 = <strong>3</strong></code></li>
+                </ul>
+            </div>
+
+            <div class="method-card">
+                <div class="method-title">
+                    <span>📝</span>
+                    <span>Ne Zaman Kullanılır?</span>
+                </div>
+                <p>✅ Sayısal anahtarlar için (ID, telefon numarası, etc.)</p>
+                <p>✅ Basit ve hızlı</p>
+                <p>✅ Anlaşılması kolay</p>
+
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✅ Artıları</h4>
+                        <ul>
+                            <li>Çok basit ve hızlı</li>
+                            <li>Hesaplaması kolay</li>
+                            <li>Bellek tasarrufu</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h4>❌ Eksileri</h4>
+                        <ul>
+                            <li>Tablo boyutu önemli</li>
+                            <li>Ardışık sayılar sorun çıkarabilir</li>
+                            <li>Kötü boyut seçimi → çakışma</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ffc107;">
+                    <strong>⚠️ Önemli İpucu:</strong>
+                    <p style="margin: 5px 0 0 0;">Tablo boyutunu <strong>asal sayı</strong> seçin! (7, 11, 13, 17, 19...)<br>
+                    Bu, daha iyi dağılım sağlar ve çakışmaları azaltır.</p>
+                </div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Division Method - Python</span>
+                    <button class="btn btn-run" onclick="runPython('code1')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code1"><code class="language-python">def hash_division(key, table_size):
+    """Bölme yöntemi ile hash hesapla"""
+    return key % table_size
+
+# Örnek kullanım
+table_size = 11  # Asal sayı - önemli!
+
+# Farklı anahtarlar için hash değerleri
+keys = [25, 38, 123, 456, 789]
+
+print(f"Tablo boyutu: {table_size}")
+print(f"{'Anahtar':<10} {'Hash Değeri':<15}")
+print("-" * 25)
+
+for key in keys:
+    hash_value = hash_division(key, table_size)
+    print(f"{key:<10} {hash_value:<15}")
+
+# String anahtarlar için
+def hash_string_division(text, table_size):
+    """String'i önce sayıya çevir, sonra hash hesapla"""
+    # Karakterlerin ASCII değerlerini topla
+    total = sum(ord(char) for char in text)
+    return total % table_size
+
+print("\n=== String Anahtarlar ===")
+words = ["elma", "armut", "muz", "çilek"]
+print(f"{'Kelime':<10} {'ASCII Toplamı':<15} {'Hash':<10}")
+print("-" * 35)
+
+for word in words:
+    ascii_sum = sum(ord(c) for c in word)
+    hash_val = hash_string_division(word, table_size)
+    print(f"{word:<10} {ascii_sum:<15} {hash_val:<10}")</code></pre>
+                <textarea id="code1" class="code-editor"></textarea>
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✨ 2. Multiplication Method (Çarpma Yöntemi)</h2>
+            <p>Daha gelişmiş bir yöntem - tablo boyutundan bağımsız çalışır!</p>
+
+            <div class="formula-box">
+                <h4 style="text-align: center; margin-top: 0;">Formül</h4>
+                <div class="formula">
+                    hash(key) = ⌊ m × (key × A mod 1) ⌋
+                </div>
+                <p style="text-align: center; color: #666; font-size: 0.9em; margin: 10px 0 0 0;">
+                    <strong>A:</strong> 0 ile 1 arasında bir sabit (genelde: 0.6180339887... - altın oran)<br>
+                    <strong>m:</strong> Tablo boyutu<br>
+                    <strong>mod 1:</strong> Sadece ondalık kısmı al
+                </p>
+            </div>
+
+            <div class="example-box">
+                <h4 style="margin-top: 0;">💡 Adım Adım Örnek</h4>
+                <p style="margin: 5px 0;">key = 123, A = 0.618, m = 10</p>
+                <ol style="margin: 10px 0; padding-left: 20px;">
+                    <li>123 × 0.618 = 76.014</li>
+                    <li>76.014 mod 1 = 0.014 (sadece ondalık kısım)</li>
+                    <li>10 × 0.014 = 0.14</li>
+                    <li>⌊0.14⌋ = <strong>0</strong> (tam kısım)</li>
+                </ol>
+            </div>
+
+            <div class="method-card">
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✅ Artıları</h4>
+                        <ul>
+                            <li>Tablo boyutu asal olmak zorunda değil</li>
+                            <li>Genelde 2'nin kuvveti kullanılır (8, 16, 32...)</li>
+                            <li>Daha iyi dağılım</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h4>❌ Eksileri</h4>
+                        <ul>
+                            <li>Biraz daha yavaş</li>
+                            <li>Çarpma işlemi gerekir</li>
+                            <li>A sabiti önemli</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Multiplication Method - Python</span>
+                    <button class="btn btn-run" onclick="runPython('code2')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code2"><code class="language-python">import math
+
+def hash_multiplication(key, table_size):
+    """Çarpma yöntemi ile hash hesapla"""
+    # Altın oran (golden ratio)
+    A = 0.6180339887
+
+    # key × A'nın ondalık kısmını al
+    fractional = (key * A) % 1
+
+    # Tablo boyutu ile çarp ve tam kısmı al
+    return int(table_size * fractional)
+
+# Örnek kullanım
+table_size = 16  # 2'nin kuvveti - multiplication için iyi
+
+keys = [25, 38, 123, 456, 789, 1000]
+
+print(f"Tablo boyutu: {table_size}")
+print(f"A sabiti: 0.6180339887 (Altın Oran)")
+print()
+print(f"{'Anahtar':<10} {'key × A':<15} {'Ondalık':<12} {'Hash':<10}")
+print("-" * 47)
+
+for key in keys:
+    product = key * 0.6180339887
+    fractional = product % 1
+    hash_val = hash_multiplication(key, table_size)
+    print(f"{key:<10} {product:<15.4f} {fractional:<12.4f} {hash_val:<10}")
+
+# Karşılaştırma: Division vs Multiplication
+print("\n=== Division vs Multiplication Karşılaştırma ===")
+print(f"{'Anahtar':<10} {'Division':<15} {'Multiplication':<15}")
+print("-" * 40)
+
+for key in keys:
+    div_hash = key % table_size
+    mult_hash = hash_multiplication(key, table_size)
+    print(f"{key:<10} {div_hash:<15} {mult_hash:<15}")</code></pre>
+                <textarea id="code2" class="code-editor"></textarea>
+                <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎲 3. Python'un hash() Fonksiyonu</h2>
+            <p>Python'da yerleşik gelen hash fonksiyonu - çok gelişmiş ve optimize edilmiş!</p>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✨ Python hash() Özellikleri</h4>
+                <ul style="margin: 10px 0;">
+                    <li>Her veri tipi için özel optimize edilmiş</li>
+                    <li>String, int, tuple, frozenset için çalışır</li>
+                    <li>List, dict, set için çalışmaz (değiştirilebilir oldukları için)</li>
+                    <li>Her Python oturumunda farklı olabilir (güvenlik için)</li>
+                </ul>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python hash() - Örnekler</span>
+                    <button class="btn btn-run" onclick="runPython('code3')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code3"><code class="language-python"># Python'un yerleşik hash fonksiyonu
+
+# Sayılar için
+print("=== Sayılar ===")
+numbers = [1, 42, 123, 1000, -50]
+for num in numbers:
+    print(f"hash({num:>5}) = {hash(num)}")
+
+# String'ler için
+print("\n=== String'ler ===")
+words = ["elma", "armut", "muz", "python", "algoritma"]
+for word in words:
+    print(f"hash('{word:<10}') = {hash(word)}")
+
+# Tuple için (değiştirilemez)
+print("\n=== Tuple (çalışır) ===")
+my_tuple = (1, 2, 3)
+print(f"hash({my_tuple}) = {hash(my_tuple)}")
+
+# Hash table için kullanım
+print("\n=== Hash Table Kullanımı ===")
+table_size = 10
+
+# String anahtarları hash'le ve tabloya yerleştir
+keys = ["elma", "armut", "muz"]
+for key in keys:
+    hash_value = hash(key)
+    index = hash_value % table_size  # Tabloya sığdır
+    print(f"'{key}' -> hash: {hash_value:>10} -> indeks: {index}")
+
+# ❌ List için çalışmaz
+print("\n=== ❌ List (çalışmaz) ===")
+try:
+    my_list = [1, 2, 3]
+    print(hash(my_list))
+except TypeError as e:
+    print(f"HATA: {e}")
+    print("List değiştirilebilir olduğu için hash'lenemez!")</code></pre>
+                <textarea id="code3" class="code-editor"></textarea>
+                <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚖️ Hangi Yöntemi Kullanmalı?</h2>
+
+            <table class="comparison-table" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                        <th style="padding: 15px; text-align: left;">Durum</th>
+                        <th style="padding: 15px;">Önerilen Yöntem</th>
+                        <th style="padding: 15px;">Neden?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Sayısal anahtarlar</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">Division</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Basit, hızlı, yeterli</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>String anahtarlar</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">Python hash()</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Optimize edilmiş, güvenilir</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Kötü dağılım</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">Multiplication</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Daha iyi dağılım sağlar</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Eğitim/Öğrenme</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">Division</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Anlaşılması en kolay</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Gerçek projeler</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">Python dict</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Yerleşik, güvenli, hızlı</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>💡 Önemli Hatırlatmalar</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin: 20px 0;">
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px;">
+                    <h4 style="margin-top: 0; color: #1565c0;">🎯 Deterministik Olmalı</h4>
+                    <p style="margin: 0; font-size: 0.9em;">Aynı anahtar <strong>her zaman</strong> aynı hash değerini vermelidir!</p>
+                </div>
+
+                <div style="background: #f3e5f5; padding: 20px; border-radius: 10px;">
+                    <h4 style="margin-top: 0; color: #6a1b9a;">⚡ Hızlı Olmalı</h4>
+                    <p style="margin: 0; font-size: 0.9em;">Hash hesaplama O(1) zamanda olmalı - karmaşık işlemlerden kaçının!</p>
+                </div>
+
+                <div style="background: #fff3e0; padding: 20px; border-radius: 10px;">
+                    <h4 style="margin-top: 0; color: #e65100;">📊 Düzgün Dağıtmalı</h4>
+                    <p style="margin: 0; font-size: 0.9em;">Tüm indeksler eşit şansla kullanılmalı - tek bir yerde toplanmamalı!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Hash fonksiyonu:</strong> Anahtarı indekse dönüştürür</li>
+                    <li><strong>Division Method:</strong> key % table_size (en basit)</li>
+                    <li><strong>Multiplication Method:</strong> Altın oran kullanır (daha gelişmiş)</li>
+                    <li><strong>Python hash():</strong> Yerleşik, optimize edilmiş fonksiyon</li>
+                    <li><strong>İyi hash:</strong> Hızlı, deterministik, düzgün dağıtan</li>
+                </ul>
+
+                <h4 style="color: #1565c0; margin-top: 20px;">📚 Sonraki Konu</h4>
+                <p style="margin: 5px 0 0 0;">Hash fonksiyonları bazen aynı indeksi verir - buna <strong>çakışma (collision)</strong> denir. Bir sonraki bölümde çakışmaları nasıl çözeceğimizi öğreneceğiz!</p>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="8a_hash_intro.html" class="btn">⬅️ Önceki: Hash Table Giriş</a>
+            <a href="index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+            <a href="8c_collision_handling.html" class="btn btn-next">Sonraki: Çakışma Yönetimi ➡️</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        let pyodideReady = false;
+        let pyodide = null;
+
+        async function main() {
+            pyodide = await loadPyodide();
+            pyodideReady = true;
+        }
+        main();
+
+        async function runPython(id) {
+            if (!pyodideReady) {
+                alert("Python yükleniyor, lütfen bekleyin...");
+                return;
+            }
+            const code = document.getElementById('view-' + id).textContent;
+            const out = document.getElementById('output-' + id);
+            out.innerText = "Çalışıyor...";
+            try {
+                pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+                await pyodide.runPythonAsync(code);
+                out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+            } catch (e) {
+                out.innerText = "Hata: " + e;
+            }
+        }
+
+        function calculateHashes() {
+            const input = document.getElementById('hashInput').value.trim();
+            if (!input) {
+                alert("Lütfen bir kelime girin!");
+                return;
+            }
+
+            // ASCII toplamı hesapla
+            let asciiSum = 0;
+            for (let i = 0; i < input.length; i++) {
+                asciiSum += input.charCodeAt(i);
+            }
+
+            // Division method
+            const tableSize = 10;
+            const divisionHash = asciiSum % tableSize;
+
+            // Multiplication method
+            const A = 0.6180339887;
+            const fractional = (asciiSum * A) % 1;
+            const multiplicationHash = Math.floor(tableSize * fractional);
+
+            // Python-like hash (basitleştirilmiş)
+            let pythonHash = asciiSum;
+            for (let i = 0; i < input.length; i++) {
+                pythonHash = ((pythonHash << 5) - pythonHash) + input.charCodeAt(i);
+                pythonHash = pythonHash & pythonHash; // 32-bit integer'a dönüştür
+            }
+
+            // Sonuçları göster
+            document.getElementById('inputText').textContent = input;
+            document.getElementById('asciiSum').textContent = asciiSum;
+            document.getElementById('divisionResult').textContent = `${asciiSum} % ${tableSize} = ${divisionHash}`;
+            document.getElementById('multiplicationResult').textContent = `⌊${tableSize} × ${fractional.toFixed(4)}⌋ = ${multiplicationHash}`;
+            document.getElementById('pythonHash').textContent = `${pythonHash} % ${tableSize} = ${Math.abs(pythonHash) % tableSize}`;
+
+            document.getElementById('hashResults').style.display = 'block';
+        }
+
+        // Enter tuşu ile de çalışsın
+        document.getElementById('hashInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateHashes();
+            }
+        });
+    </script>
+</body>
+</html>
