@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.1: Bellek Modeli - C vs Python</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- CodeMirror 6 -->
+    <script type="module">
+        import {EditorView, basicSetup} from "https://cdn.jsdelivr.net/npm/codemirror@6/dist/index.js"
+        import {python} from "https://cdn.jsdelivr.net/npm/@codemirror/lang-python@6/dist/index.js"
+        import {oneDark} from "https://cdn.jsdelivr.net/npm/@codemirror/theme-one-dark@6/dist/index.js"
+
+        window.CodeMirror = {
+            EditorView,
+            basicSetup,
+            python: () => python(),
+            oneDark
+        };
+    </script>
+
+    <!-- Pyodide for Python execution -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <style>
+        .ram-container {
+            overflow-x: auto; padding: 30px 10px; text-align: center; background: var(--bg-secondary); border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .byte-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 20px; min-height: 80px; align-items: center; }
+        .byte-cell {
+            width: 50px; height: 70px; background: var(--bg-tertiary); border: 2px solid var(--border-color);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; font-family: monospace; transition: all 0.3s;
+        }
+        .byte-addr {
+            position: absolute; top: -25px; font-size: 12px; font-weight: bold; color: var(--text-secondary);
+            background: var(--bg-tertiary); padding: 2px 5px; border-radius: 4px;
+        }
+        .byte-val { font-weight: bold; font-size: 14px; color: var(--text-primary); }
+
+        /* C Styles */
+        .alloc-int { background: #e74c3c; color: white; border-color: #c0392b; }
+        .alloc-char { background: #3498db; color: white; border-color: #2980b9; }
+        .alloc-float { background: #f1c40f; color: black; border-color: #f39c12; }
+
+        /* Python Ref Visuals */
+        .heap-space {
+            border: 2px dashed #9b59b6; padding: 20px; border-radius: 10px; background: #f3e5f5;
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 100px;
+        }
+        [data-theme="dark"] .heap-space {
+            background: rgba(155, 89, 182, 0.1);
+        }
+        .heap-obj {
+            background: #8e44ad; color: white; padding: 10px; border-radius: 50%; width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; animation: popIn 0.5s;
+        }
+        .heap-addr-label {
+            position: absolute; bottom: -20px; color: var(--text-secondary); font-size: 10px; width: 100%; text-align: center;
+        }
+        .ptr-arrow { font-size: 20px; color: #9b59b6; }
+
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🧠 1.1: Bellek Modeli - C vs Python</h1>
+            <p>Bilgisayar verileri arka planda nasıl saklar?</p>
+        </header>
+
+        <!-- 1. C Modeli -->
+        <div class="section">
+            <h2>💾 1. C / Java Modeli: Değer Tipleri (Value Types)</h2>
+            <p>C dilinde değişkenler doğrudan değeri tutar. Bellek bitişiktir ve değerler kutuların içine yazılır.</p>
+
+            <div class="ram-container">
+                <p><strong>Stack Belleği (Bitişik):</strong></p>
+                <div class="byte-row" id="c-ram"></div>
+                <div style="margin-top: 20px;">
+                    <button class="btn" style="background:#e74c3c" onclick="allocC('int')">int (4 Byte)</button>
+                    <button class="btn" style="background:#3498db" onclick="allocC('char')">char (1 Byte)</button>
+                    <button class="btn" style="background:#f1c40f; color:black;" onclick="allocC('double')">double (8 Byte)</button>
+                    <button class="btn btn-reset" onclick="initCRam()">Temizle</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Python Modeli -->
+        <div class="section">
+            <h2>🐍 2. Python Modeli: Referans Tipleri (References)</h2>
+            <p>Python listeleri değerleri değil, değerlerin bulunduğu <strong>adresleri (Pointer)</strong> tutar. Gerçek objeler <strong>Heap</strong> denilen dağınık bir bellek alanında yaşar.</p>
+
+            <div class="ram-container">
+                <div style="display: flex; justify-content: space-around; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                    <!-- Liste -->
+                    <div style="flex: 1; min-width: 300px;">
+                        <h4>Python Listesi (Adres Defteri)</h4>
+                        <div class="byte-row" id="py-list" style="flex-wrap: wrap;"></div>
+                    </div>
+
+                    <!-- Heap -->
+                    <div style="flex: 1; min-width: 300px;">
+                        <h4>Heap Belleği (Gerçek Objeler)</h4>
+                        <div class="heap-space" id="py-heap"></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="btn" style="background:#9b59b6" onclick="allocPy()">Eleman Ekle (Append)</button>
+                    <button class="btn btn-reset" onclick="initPyRam()">Temizle</button>
+                </div>
+            </div>
+
+            <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #3498db;">
+                <strong>💡 Analiz:</strong> Python listesine erişmek iki aşamalıdır (Indirection):
+                1. Listeden adresi al → 2. Adrese git ve değeri oku.
+                Bu yüzden C dizilerinden daha yavaştır.
+            </div>
+        </div>
+
+        <!-- Geri Getirilen Bölüm -->
+        <div class="section">
+            <h2>Statik vs Dinamik Tahsis</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: #fdf2f2; padding: 15px; border-radius: 8px; border: 1px solid #e74c3c;">
+                    <h3 style="color:#c0392b; margin-top:0;">🧱 Statik (Stack Memory)</h3>
+                    <p>Boyutu önceden bellidir. Derleme zamanında ayrılır.</p>
+                    <pre><code class="language-c">int dizi[5]; // Boyut SABİT!</code></pre>
+                    <ul>
+                        <li>Çok hızlıdır.</li>
+                        <li>Boyutu değiştirilemez.</li>
+                        <li>C dizileri buradadır.</li>
+                    </ul>
+                </div>
+                <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border: 1px solid #3498db;">
+                    <h3 style="color:#2980b9; margin-top:0;">🎈 Dinamik (Heap Memory)</h3>
+                    <p>Boyutu çalışma anında belirlenir.</p>
+                    <pre><code class="language-c">int* dizi = malloc(n * 4);</code></pre>
+                    <ul>
+                        <li>Daha yavaştır (yer bulmak gerekir).</li>
+                        <li>İstenildiği zaman büyütülüp küçültülebilir.</li>
+                        <li>Python listeleri buradadır.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+
+    <!-- Page-specific visualization -->
+    <script>
+        // --- C RAM LOGIC ---
+        const cRam = document.getElementById('c-ram');
+        let cIdx = 0;
+        const C_SIZE = 16;
+
+        function initCRam() {
+            cRam.innerHTML = '';
+            cIdx = 0;
+            for(let i=0; i<C_SIZE; i++) {
+                let addr = '0x' + i.toString(16).toUpperCase().padStart(2,'0');
+                cRam.innerHTML += `
+                    <div class="byte-cell" id="c-byte-${i}">
+                        <span class="byte-addr">${addr}</span>
+                        <span class="byte-val">00</span>
+                    </div>`;
+            }
+        }
+
+        function allocC(type) {
+            let size = 0;
+            let cls = '';
+            let val = '';
+
+            if(type === 'int') { size = 4; cls = 'alloc-int'; val = '10'; }
+            else if(type === 'char') { size = 1; cls = 'alloc-char'; val = "'A'"; }
+            else if(type === 'double') { size = 8; cls = 'alloc-float'; val = '3.14'; }
+
+            if(cIdx + size > C_SIZE) { alert("RAM Doldu!"); return; }
+
+            for(let i=0; i<size; i++) {
+                const el = document.getElementById(`c-byte-${cIdx + i}`);
+                el.className = `byte-cell ${cls}`;
+                if(i === size - 1) el.querySelector('.byte-val').innerText = val;
+                else el.querySelector('.byte-val').innerText = '.';
+            }
+            cIdx += size;
+        }
+
+        // --- PYTHON RAM LOGIC ---
+        const pyList = document.getElementById('py-list');
+        const pyHeap = document.getElementById('py-heap');
+        const PY_SIZE = 5;
+        let pyCount = 0;
+
+        function initPyRam() {
+            pyList.innerHTML = '';
+            pyHeap.innerHTML = '';
+            pyCount = 0;
+            // Liste slotlarını oluştur
+            for(let i=0; i<PY_SIZE; i++) {
+                pyList.innerHTML += `
+                    <div class="byte-cell" style="width:70px; margin:2px;" id="py-slot-${i}">
+                        <span class="byte-addr">idx[${i}]</span>
+                        <span class="byte-val" style="font-size:10px;">(Boş)</span>
+                    </div>`;
+            }
+        }
+
+        function allocPy() {
+            if(pyCount >= PY_SIZE) { alert("Liste Doldu!"); return; }
+
+            // 1. Heap'te Obje Oluştur
+            const val = Math.floor(Math.random() * 100);
+            const addr = '0x' + Math.floor(Math.random()*900 + 100).toString(16).toUpperCase();
+
+            const obj = document.createElement('div');
+            obj.className = 'heap-obj';
+            obj.innerHTML = `${val}<div class="heap-addr-label">${addr}</div>`;
+            pyHeap.appendChild(obj);
+
+            // 2. Listeye Adresi Yaz
+            const slot = document.getElementById(`py-slot-${pyCount}`);
+            slot.querySelector('.byte-val').innerText = addr;
+            slot.style.background = '#e1bee7';
+            slot.style.borderColor = '#8e44ad';
+
+            pyCount++;
+        }
+
+        initCRam();
+        initPyRam();
+    </script>
+</body>
+</html>

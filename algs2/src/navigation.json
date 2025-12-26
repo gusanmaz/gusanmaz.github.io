@@ -1,0 +1,349 @@
+{
+  "modules": [
+    {
+      "id": 0,
+      "title": "Python Temelleri",
+      "color": "#667eea",
+      "menuFile": null,
+      "pages": [
+        {
+          "file": "0a_fonksiyonlar.html",
+          "shortTitle": "Fonksiyonlar",
+          "title": "Fonksiyonlar"
+        },
+        {
+          "file": "0b_siniflar.html",
+          "shortTitle": "Sınıflar",
+          "title": "Sınıflar ve Objeler"
+        },
+        {
+          "file": "0c_python_bellek.html",
+          "shortTitle": "Bellek",
+          "title": "Bellek ve Referanslar"
+        },
+        {
+          "file": "0d_python_onfazla.html",
+          "shortTitle": "Ön Bilgiler",
+          "title": "Python Ön Bilgiler"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "title": "Algoritma Analizi",
+      "color": "#3498db",
+      "menuFile": null,
+      "pages": [
+        {
+          "file": "1_algoritma_analizi.html",
+          "shortTitle": "Analiz Teorisi",
+          "title": "Algoritma Analizi Teorisi"
+        },
+        {
+          "file": "1a_analiz_giris.html",
+          "shortTitle": "Bellek Modeli",
+          "title": "Bellek Modeli"
+        },
+        {
+          "file": "1b_c_dizileri.html",
+          "shortTitle": "C Dizileri",
+          "title": "C Dizileri"
+        },
+        {
+          "file": "1c_numpy_detay.html",
+          "shortTitle": "Numpy",
+          "title": "Numpy Detay"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Stack",
+      "color": "#8e44ad",
+      "menuFile": "stack.html",
+      "pages": [
+        {
+          "file": "2a_stack_giris.html",
+          "shortTitle": "Stack Giriş",
+          "title": "Stack Nedir?"
+        },
+        {
+          "file": "2b_stack_numpy.html",
+          "shortTitle": "Numpy Stack",
+          "title": "Numpy ile Stack"
+        },
+        {
+          "file": "2c_stack_analiz.html",
+          "shortTitle": "Analiz",
+          "title": "Big O Analizi"
+        },
+        {
+          "file": "2d_stack_python.html",
+          "shortTitle": "Python Stack",
+          "title": "Python List Stack"
+        },
+        {
+          "file": "2e_stack_ornekler.html",
+          "shortTitle": "Örnekler",
+          "title": "Stack Örnekleri"
+        },
+        {
+          "file": "2f_stack_aritmetik.html",
+          "shortTitle": "Aritmetik",
+          "title": "Aritmetik İfadeler"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Queue",
+      "color": "#11998e",
+      "menuFile": "queue.html",
+      "pages": [
+        {
+          "file": "3a_queue_giris.html",
+          "shortTitle": "Queue Giriş",
+          "title": "Queue Nedir?"
+        },
+        {
+          "file": "3b_queue_circular.html",
+          "shortTitle": "Circular",
+          "title": "Circular Queue"
+        },
+        {
+          "file": "3c_queue_python.html",
+          "shortTitle": "Python Deque",
+          "title": "Python Deque"
+        },
+        {
+          "file": "3d_queue_ornekler.html",
+          "shortTitle": "Örnekler",
+          "title": "Queue Örnekleri"
+        },
+        {
+          "file": "3e_queue_analiz.html",
+          "shortTitle": "Analiz",
+          "title": "Big O Analizi"
+        },
+        {
+          "file": "3f_queue_bfs.html",
+          "shortTitle": "BFS",
+          "title": "BFS ve Graf"
+        },
+        {
+          "file": "3g_queue_priority.html",
+          "shortTitle": "Priority Queue",
+          "title": "Priority Queue"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Linked List",
+      "color": "#e94560",
+      "menuFile": "linked_list.html",
+      "pages": [
+        {
+          "file": "4a_linked_list_giris.html",
+          "shortTitle": "LL Giriş",
+          "title": "Linked List Nedir?"
+        },
+        {
+          "file": "4b_linked_list_tek.html",
+          "shortTitle": "Singly LL",
+          "title": "Singly Linked List"
+        },
+        {
+          "file": "4c_linked_list_cift.html",
+          "shortTitle": "Doubly LL",
+          "title": "Doubly Linked List"
+        },
+        {
+          "file": "4d_linked_list_circular.html",
+          "shortTitle": "Circular LL",
+          "title": "Circular Linked List"
+        },
+        {
+          "file": "4e_linked_list_python.html",
+          "shortTitle": "Python",
+          "title": "Python ile Pratik"
+        },
+        {
+          "file": "4f_linked_list_algoritmalar.html",
+          "shortTitle": "Algoritmalar",
+          "title": "LL Algoritmaları"
+        },
+        {
+          "file": "4g_linked_list_analiz.html",
+          "shortTitle": "Analiz",
+          "title": "Big O Analizi"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Ağaç & BST",
+      "color": "#11998e",
+      "menuFile": "bst.html",
+      "pages": [
+        {
+          "file": "5_tree_intro.html",
+          "shortTitle": "Ağaç Temelleri",
+          "title": "Ağaç (Tree) Temelleri"
+        },
+        {
+          "file": "5a_bst_giris.html",
+          "shortTitle": "BST Giriş",
+          "title": "BST Nedir?"
+        },
+        {
+          "file": "5b_bst_islemler.html",
+          "shortTitle": "İşlemler",
+          "title": "Temel İşlemler"
+        },
+        {
+          "file": "5c_bst_traversal.html",
+          "shortTitle": "Traversal",
+          "title": "Tree Traversal"
+        },
+        {
+          "file": "5d_bst_ornekler.html",
+          "shortTitle": "Örnekler",
+          "title": "Örnek Sorular"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Arama",
+      "color": "#3498db",
+      "menuFile": null,
+      "pages": [
+        {
+          "file": "6a_linear_search.html",
+          "shortTitle": "Linear Search",
+          "title": "Linear Search"
+        },
+        {
+          "file": "6b_binary_search.html",
+          "shortTitle": "Binary Search",
+          "title": "Binary Search"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Sıralama",
+      "color": "#8e44ad",
+      "menuFile": null,
+      "pages": [
+        {
+          "file": "7a_sorting_intro.html",
+          "shortTitle": "Sıralama Giriş",
+          "title": "Sıralama Giriş"
+        },
+        {
+          "file": "7b_bubble_sort.html",
+          "shortTitle": "Bubble Sort",
+          "title": "Bubble Sort"
+        },
+        {
+          "file": "7c_selection_sort.html",
+          "shortTitle": "Selection Sort",
+          "title": "Selection Sort"
+        },
+        {
+          "file": "7d_insertion_sort.html",
+          "shortTitle": "Insertion Sort",
+          "title": "Insertion Sort"
+        },
+        {
+          "file": "7e_merge_sort.html",
+          "shortTitle": "Merge Sort",
+          "title": "Merge Sort"
+        },
+        {
+          "file": "7f_quick_sort.html",
+          "shortTitle": "Quick Sort",
+          "title": "Quick Sort"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Hash Table",
+      "color": "#11998e",
+      "menuFile": null,
+      "pages": [
+        {
+          "file": "8a_hash_intro.html",
+          "shortTitle": "Hash Giriş",
+          "title": "Hash Table Nedir?"
+        },
+        {
+          "file": "8b_hash_functions.html",
+          "shortTitle": "Hash Functions",
+          "title": "Hash Fonksiyonları"
+        },
+        {
+          "file": "8c_collision_handling.html",
+          "shortTitle": "Çarpışma",
+          "title": "Çarpışma Yönetimi"
+        },
+        {
+          "file": "8d_hash_performance.html",
+          "shortTitle": "Performans",
+          "title": "Performans ve Load Factor"
+        },
+        {
+          "file": "8e_hash_python.html",
+          "shortTitle": "Python Dict",
+          "title": "Python dict Kullanımı"
+        },
+        {
+          "file": "8f_hash_ornekler.html",
+          "shortTitle": "Örnekler",
+          "title": "Gerçek Dünya Örnekleri"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Heap",
+      "color": "#e94560",
+      "menuFile": null,
+      "pages": [
+        {
+          "file": "9a_heap_intro.html",
+          "shortTitle": "Heap Giriş",
+          "title": "Heap Nedir?"
+        },
+        {
+          "file": "9b_heap_operations.html",
+          "shortTitle": "Operasyonlar",
+          "title": "Heap Operasyonları"
+        },
+        {
+          "file": "9c_heap_sort.html",
+          "shortTitle": "Heap Sort",
+          "title": "Heap Sort"
+        },
+        {
+          "file": "9d_priority_queue.html",
+          "shortTitle": "Priority Queue",
+          "title": "Priority Queue"
+        },
+        {
+          "file": "9e_heap_python.html",
+          "shortTitle": "Python heapq",
+          "title": "Python heapq Modülü"
+        },
+        {
+          "file": "9f_heap_ornekler.html",
+          "shortTitle": "Örnekler",
+          "title": "Gerçek Dünya Örnekleri"
+        }
+      ]
+    }
+  ]
+}

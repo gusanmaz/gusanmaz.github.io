@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BST (İkili Arama Ağacı) - Alt Menü</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <style>
+        /* BST Menu Specific Styles */
+        .bst-menu-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .bst-menu-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .bst-menu-header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .menu-item {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            text-decoration: none;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .menu-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .menu-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .menu-content h3 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .menu-content p {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+        }
+
+        .tree-visual {
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: var(--code-bg);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tree-visual pre {
+            color: var(--text-color);
+            font-family: monospace;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 25px;
+            background: var(--code-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: var(--card-hover-bg);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+<div class="bst-menu-header">
+            <h1>🌳 İkili Arama Ağacı (BST)</h1>
+            <p>Binary Search Tree Konuları</p>
+        </div>
+
+        <div class="tree-visual">
+            <pre>
+        50
+       /  \
+     30    70
+    / \   /  \
+   20 40 60  80
+            </pre>
+        </div>
+
+        <div class="menu-items">
+            <a href="5a_bst_giris.html" class="menu-item">
+                <div class="menu-icon">🌱</div>
+                <div class="menu-content">
+                    <h3>5.1: BST Giriş</h3>
+                    <p>BST nedir? Node yapısı, temel kavramlar</p>
+                </div>
+            </a>
+
+            <a href="5b_bst_islemler.html" class="menu-item">
+                <div class="menu-icon">🔧</div>
+                <div class="menu-content">
+                    <h3>5.2: Temel İşlemler</h3>
+                    <p>Ekleme, arama, silme operasyonları</p>
+                </div>
+            </a>
+
+            <a href="5c_bst_traversal.html" class="menu-item">
+                <div class="menu-icon">🚶</div>
+                <div class="menu-content">
+                    <h3>5.3: Traversal (Dolaşma)</h3>
+                    <p>Inorder, Preorder, Postorder, Level Order</p>
+                </div>
+            </a>
+
+            <a href="5d_bst_ornekler.html" class="menu-item">
+                <div class="menu-icon">🧩</div>
+                <div class="menu-content">
+                    <h3>5.4: Örnek Sorular</h3>
+                    <p>Pratik problemler ve çözümleri</p>
+                </div>
+            </a>
+        </div>
+
+        <a href="index.html" class="back-link">⬅️ Ana Menüye Dön</a>
+    
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Pyodide CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+</body>
+</html>

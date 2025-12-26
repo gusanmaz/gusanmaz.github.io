@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.2: BST Temel İşlemler</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <style>
+
+        .operation-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .operation-card h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .o-logn { background: #d4edda; color: #155724; }
+        .o-n { background: #f8d7da; color: #721c24; }
+
+        .step-visual {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mini-tree {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: monospace;
+        }
+
+        .tree-row {
+            display: flex;
+            gap: 10px;
+            margin: 5px 0;
+        }
+
+        .tree-node-mini {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .tree-node-mini.highlight { background: #e74c3c; }
+        .tree-node-mini.new { background: #27ae60; }
+        .tree-node-mini.search { background: #f39c12; }
+
+        .arrow-down {
+            font-size: 24px;
+            color: #7f8c8d;
+        }
+
+        .case-box {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+
+        .case-box.case-easy { border-color: #27ae60; }
+        .case-box.case-medium { border-color: #f39c12; }
+        .case-box.case-hard { border-color: #e74c3c; }
+        </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+<header>
+        <h1>🔧 5.2: BST Temel İşlemler</h1>
+        <p>Ekleme, Arama ve Silme</p>
+    </header>
+
+    <!-- EKLEME -->
+    <div class="operation-card" style="border-left-color:#27ae60;">
+        <h3>
+            <span>1️⃣ Ekleme (Insert)</span>
+            <span class="complexity-badge o-logn">O(log n)</span>
+        </h3>
+
+        <p>Yeni değer, BST kuralına uygun yere yerleştirilir:</p>
+        <ol>
+            <li>Kökten başla</li>
+            <li>Değer küçükse sola, büyükse sağa git</li>
+            <li>Boş pozisyon bulana kadar devam et</li>
+            <li>Yeni node'u o pozisyona yerleştir</li>
+        </ol>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code1\')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code1')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code1"><code class="language-python line-numbers">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+class BST:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, data):
+        """BST'ye yeni değer ekle - O(log n)"""
+        if not self.root:
+            self.root = Node(data)
+            print(f"🌱 {data} kök olarak eklendi")
+            return
+
+        current = self.root
+        while True:
+            if data < current.data:
+                # Sola git
+                if current.left is None:
+                    current.left = Node(data)
+                    print(f"⬅️ {data}, {current.data}'in soluna eklendi")
+                    return
+                current = current.left
+            elif data > current.data:
+                # Sağa git
+                if current.right is None:
+                    current.right = Node(data)
+                    print(f"➡️ {data}, {current.data}'in sağına eklendi")
+                    return
+                current = current.right
+            else:
+                print(f"⚠️ {data} zaten var!")
+                return
+
+    def display(self, node=None, level=0, prefix="Kök"):
+        """Ağacı görselleştir"""
+        if node is None:
+            node = self.root
+        if node is not None:
+            print(" " * (level * 4) + prefix + ": " + str(node.data))
+            if node.left or node.right:
+                if node.left:
+                    self.display(node.left, level + 1, "Sol")
+                else:
+                    print(" " * ((level + 1) * 4) + "Sol: -")
+                if node.right:
+                    self.display(node.right, level + 1, "Sağ")
+                else:
+                    print(" " * ((level + 1) * 4) + "Sağ: -")
+
+# Test
+print("=" * 50)
+print("📌 BST EKLEME DEMO")
+print("=" * 50)
+
+bst = BST()
+values = [50, 30, 70, 20, 40, 60, 80, 35]
+
+for v in values:
+    bst.insert(v)
+
+print("\n🌳 Ağaç Yapısı:")
+bst.display()</code></pre>
+
+            
+
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- ARAMA -->
+    <div class="operation-card" style="border-left-color:#f39c12;">
+        <h3>
+            <span>2️⃣ Arama (Search)</span>
+            <span class="complexity-badge o-logn">O(log n)</span>
+        </h3>
+
+        <p>İkili arama mantığı: Her adımda arama alanı yarıya iner!</p>
+
+        <div class="step-visual">
+            <span style="font-weight:bold;">65 aranıyor:</span>
+            <div class="tree-node-mini search">50</div>
+            <span>65>50 →</span>
+            <div class="tree-node-mini search">70</div>
+            <span>65<70 →</span>
+            <div class="tree-node-mini search">60</div>
+            <span>65>60 →</span>
+            <div class="tree-node-mini highlight">65</div>
+            <span>✅ Bulundu!</span>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code2\')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code2')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code2"><code class="language-python line-numbers">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+class BST:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, data):
+        if not self.root:
+            self.root = Node(data)
+            return
+        current = self.root
+        while True:
+            if data < current.data:
+                if not current.left:
+                    current.left = Node(data)
+                    return
+                current = current.left
+            else:
+                if not current.right:
+                    current.right = Node(data)
+                    return
+                current = current.right
+
+    def search(self, target):
+        """
+        BST'de arama - O(log n)
+        İteratif (döngü ile) versiyon
+        """
+        current = self.root
+        steps = []
+
+        while current:
+            steps.append(current.data)
+            if target == current.data:
+                return True, steps
+            elif target < current.data:
+                current = current.left
+            else:
+                current = current.right
+
+        return False, steps
+
+    def search_recursive(self, target, node=None, steps=None):
+        """
+        BST'de arama - O(log n)
+        Recursive (özyinelemeli) versiyon
+        """
+        if node is None:
+            node = self.root
+        if steps is None:
+            steps = []
+
+        if node is None:
+            return False, steps
+
+        steps.append(node.data)
+
+        if target == node.data:
+            return True, steps
+        elif target < node.data:
+            return self.search_recursive(target, node.left, steps)
+        else:
+            return self.search_recursive(target, node.right, steps)
+
+# Test
+bst = BST()
+for v in [50, 30, 70, 20, 40, 60, 80, 65, 75]:
+    bst.insert(v)
+
+print("🌳 Ağaç: 50 → (30, 70) → ...")
+print("\n" + "=" * 50)
+print("🔍 ARAMA TESTLERİ")
+print("=" * 50)
+
+for target in [65, 40, 100, 50]:
+    found, path = bst.search(target)
+    status = "✅ Bulundu" if found else "❌ Yok"
+    print(f"\n{target} aranıyor:")
+    print(f"  Yol: {' → '.join(map(str, path))}")
+    print(f"  Sonuç: {status} ({len(path)} adım)")</code></pre>
+
+            
+
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <!-- SİLME -->
+    <div class="operation-card" style="border-left-color:#e74c3c;">
+        <h3>
+            <span>3️⃣ Silme (Delete)</span>
+            <span class="complexity-badge o-logn">O(log n)</span>
+        </h3>
+
+        <p>Silme işlemi 3 farklı duruma göre değişir:</p>
+
+        <div class="case-box case-easy">
+            <h4 style="margin-top:0; color:#27ae60;">📗 Durum 1: Yaprak Node (Çocuğu Yok)</h4>
+            <p>En kolay durum: Node'u direkt sil</p>
+            <div class="step-visual">
+                <span>20'yi sil:</span>
+                <code>20</code> → <code>null</code>
+            </div>
+        </div>
+
+        <div class="case-box case-medium">
+            <h4 style="margin-top:0; color:#f39c12;">📙 Durum 2: Tek Çocuklu Node</h4>
+            <p>Node'u sil, çocuğunu yerine koy</p>
+            <div class="step-visual">
+                <span>30'u sil (sadece sol çocuk var):</span>
+                <code>30</code> → <code>25 (çocuk yerine geçer)</code>
+            </div>
+        </div>
+
+        <div class="case-box case-hard">
+            <h4 style="margin-top:0; color:#e74c3c;">📕 Durum 3: İki Çocuklu Node</h4>
+            <p>En zor durum:</p>
+            <ol>
+                <li>Sağ alt ağacın <strong>en küçük</strong> değerini bul (inorder successor)</li>
+                <li>Bu değeri silinecek node'un yerine koy</li>
+                <li>Successor'ı eski yerinden sil (Durum 1 veya 2)</li>
+            </ol>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code3\')">▶ Çalıştır</button>
+                    <button class="btn" onclick="toggleEdit('code3')">✏️ Düzenle</button>
+                </div>
+            </div>
+
+            <pre id="view-code3"><code class="language-python line-numbers">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+class BST:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, data):
+        if not self.root:
+            self.root = Node(data)
+            return
+        c = self.root
+        while True:
+            if data < c.data:
+                if not c.left: c.left = Node(data); return
+                c = c.left
+            else:
+                if not c.right: c.right = Node(data); return
+                c = c.right
+
+    def find_min(self, node):
+        """En küçük değeri bul (en sol node)"""
+        while node.left:
+            node = node.left
+        return node
+
+    def delete(self, target, node=None, is_root_call=True):
+        """BST'den değer sil - O(log n) - Recursive"""
+        if is_root_call:
+            node = self.root
+
+        if node is None:
+            print(f"❌ {target} bulunamadı!")
+            return node
+
+        # Hedefi bul
+        if target < node.data:
+            node.left = self.delete(target, node.left, False)
+        elif target > node.data:
+            node.right = self.delete(target, node.right, False)
+        else:
+            # BULUNDU! Şimdi sil
+
+            # Durum 1 & 2: 0 veya 1 çocuk
+            if node.left is None:
+                print(f"🗑️ {target} silindi (sağ çocuk/None ile değiştirildi)")
+                return node.right
+            elif node.right is None:
+                print(f"🗑️ {target} silindi (sol çocuk ile değiştirildi)")
+                return node.left
+
+            # Durum 3: 2 çocuk
+            # Inorder successor'ı bul (sağ alt ağacın minimumu)
+            successor = self.find_min(node.right)
+            print(f"🔄 {target} → {successor.data} ile değiştiriliyor (inorder successor)")
+            node.data = successor.data
+            # Successor'ı sil
+            node.right = self.delete(successor.data, node.right, False)
+
+        if is_root_call:
+            self.root = node
+        return node
+
+    def inorder(self, node=None, result=None):
+        """Sıralı çıktı (inorder traversal)"""
+        if result is None:
+            result = []
+        if node is None:
+            node = self.root
+        if node:
+            self.inorder(node.left, result)
+            result.append(node.data)
+            self.inorder(node.right, result)
+        return result
+
+# Test
+bst = BST()
+for v in [50, 30, 70, 20, 40, 60, 80]:
+    bst.insert(v)
+
+print("🌳 Başlangıç (inorder):", bst.inorder())
+
+print("\n--- Silme İşlemleri ---\n")
+
+# Durum 1: Yaprak
+bst.delete(20)
+print(f"   Sonuç: {bst.inorder()}\n")
+
+# Durum 3: İki çocuklu
+bst.delete(50)
+print(f"   Sonuç: {bst.inorder()}\n")
+
+# Olmayan değer
+bst.delete(100)</code></pre>
+
+            
+
+            <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Zaman Karmaşıklığı Özeti</h2>
+
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white;">
+                    <th style="padding: 15px;">İşlem</th>
+                    <th style="padding: 15px;">Ortalama</th>
+                    <th style="padding: 15px;">En Kötü (Dengesiz)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Arama</strong></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o-logn">O(log n)</span></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o-n">O(n)</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Ekleme</strong></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o-logn">O(log n)</span></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o-n">O(n)</span></td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px;"><strong>Silme</strong></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o-logn">O(log n)</span></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o-n">O(n)</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p style="margin-top:15px; color:#666;">
+            <strong>Not:</strong> En kötü durum, ağacın tek tarafa uzaması durumunda (linked list gibi) oluşur.
+        </p>
+    </div>
+
+    <!-- Auto-generated navigation -->
+        <div class="nav-footer">
+        <a href="5a_bst_giris.html" class="btn">⬅️ Önceki: BST Giriş</a>
+        <a href="bst.html" class="btn" style="background:#11998e">📋 BST Menü</a>
+        <a href="5c_bst_traversal.html" class="btn btn-next">Sonraki: Traversal ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    
+
+    
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Pyodide CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+
+    
+
+    
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+
+    </script>
+</body>
+</html>

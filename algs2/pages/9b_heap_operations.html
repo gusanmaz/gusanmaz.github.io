@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.2: Heap Operasyonları - Insert, Delete, Heapify</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="../src/main.css" rel="stylesheet" />
+    <script type="module">
+        import { CodeBlocks } from '../src/code-blocks.js';
+        window.CodeBlocks = CodeBlocks;
+        document.addEventListener('DOMContentLoaded', () => {
+            CodeBlocks.init();
+        });
+    </script>
+    <style>
+        .heap-visual {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 30px 0;
+        }
+
+        .step-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .step-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .step-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .step-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .step-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .step-btn.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .step-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+            min-height: 50px;
+        }
+
+        .array-display {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .array-cell.highlight {
+            background: #fff3e0;
+            border-color: #ff9800;
+            transform: scale(1.1);
+        }
+
+        .array-cell.active {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            transform: scale(1.15);
+        }
+
+        .cell-index {
+            font-size: 10px;
+            color: #999;
+            position: absolute;
+            top: 2px;
+        }
+
+        .cell-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 3a1 1 0 011 1v1a1 1 0 11-2 0V4a1 1 0 011-1zm0 10a3 3 0 100-6 3 3 0 000 6zm0 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM4 10a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm10 0a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1zM5.05 5.05a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zm9.9 9.9a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zm-9.9 0a1 1 0 011.414 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707zm9.9-9.9a1 1 0 011.414 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707z"/>
+        </svg>
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+        </svg>
+    </button>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>9.2: Heap Operasyonları</h1>
+            <p>Insert, Delete, Heapify - Adım Adım</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Heap'te 3 Temel İşlem</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                <div style="background: var(--info-bg); padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                    <h4 style="margin-top: 0;">➕ Insert (Ekleme)</h4>
+                    <p style="font-size: 0.9em;">Yeni eleman ekle ve heap kuralını koru</p>
+                    <p style="font-size: 0.85em; color: #666;">Zaman: O(log n)</p>
+                </div>
+                <div style="background: var(--error-bg); padding: 20px; border-radius: 10px; border-left: 4px solid #f44336;">
+                    <h4 style="margin-top: 0;">➖ Delete (Silme)</h4>
+                    <p style="font-size: 0.9em;">En büyük/küçük elemanı çıkar</p>
+                    <p style="font-size: 0.85em; color: #666;">Zaman: O(log n)</p>
+                </div>
+                <div style="background: var(--purple-bg); padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0;">
+                    <h4 style="margin-top: 0;">🔄 Heapify</h4>
+                    <p style="font-size: 0.9em;">Diziyi heap'e dönüştür</p>
+                    <p style="font-size: 0.85em; color: #666;">Zaman: O(n)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>➕ Insert (Ekleme) İşlemi - İnteraktif Görselleştirme</h2>
+            <p>Yeni eleman en sona eklenir, sonra <strong>yukarı doğru</strong> yüzdürülür (bubble up).</p>
+
+            <div style="background: var(--success-bg); padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">📝 Insert Algoritması (Max Heap)</h4>
+                <ol style="margin: 10px 0; padding-left: 25px;">
+                    <li>Yeni elemanı dizinin sonuna ekle</li>
+                    <li>Parent ile karşılaştır</li>
+                    <li>Eğer yeni eleman > parent → Yer değiştir (swap)</li>
+                    <li>Kök'e ulaşana veya parent ≥ yeni eleman olana kadar tekrarla</li>
+                </ol>
+            </div>
+
+            <div class="heap-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Insert Animasyonu</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">40 değerini heap'e ekleme adımlarını izleyin</p>
+
+                <canvas id="insertCanvas" width="700" height="400"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="insertInfo" class="step-info">
+                    <strong>Adım 1:</strong> 40 değerini dizinin sonuna ekle
+                </div>
+
+                <div class="step-controls">
+                    <button class="step-btn secondary" onclick="insertDemo.reset()">🔄 Sıfırla</button>
+                    <button class="step-btn primary" onclick="insertDemo.nextStep()">▶ Sonraki Adım</button>
+                    <button class="step-btn primary" onclick="insertDemo.autoPlay()">⏩ Otomatik Oynat</button>
+                </div>
+
+                <div id="insertArray" class="array-display"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>➖ Delete (Silme) İşlemi - İnteraktif Görselleştirme</h2>
+            <p>Heap'te genelde <strong>sadece root silinir</strong> (max/min eleman). Silme sonrası heap kuralı korunmalı.</p>
+
+            <div style="background: var(--error-bg); padding: 20px; border-radius: 10px; border-left: 4px solid #f44336; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #c62828;">📝 Delete Algoritması (Max Heap)</h4>
+                <ol style="margin: 10px 0; padding-left: 25px;">
+                    <li>Root'u (indeks 0) kaydet (bu dönecek)</li>
+                    <li>Son elemanı root'a taşı</li>
+                    <li>Son elemanı sil</li>
+                    <li>Root'tan başla, <strong>aşağı doğru</strong> batır (bubble down)</li>
+                    <li>Her adımda: Sol ve sağ child'dan büyük olanla yer değiştir</li>
+                    <li>Yaprak'a ulaşana veya child'lar ≤ parent olana kadar devam</li>
+                </ol>
+            </div>
+
+            <div class="heap-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Delete Animasyonu</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">Root (en büyük) elemanı silme adımlarını izleyin</p>
+
+                <canvas id="deleteCanvas" width="700" height="400"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="deleteInfo" class="step-info">
+                    <strong>Adım 1:</strong> Root'u (50) kaydet ve son elemanı (15) root'a taşı
+                </div>
+
+                <div class="step-controls">
+                    <button class="step-btn secondary" onclick="deleteDemo.reset()">🔄 Sıfırla</button>
+                    <button class="step-btn primary" onclick="deleteDemo.nextStep()">▶ Sonraki Adım</button>
+                    <button class="step-btn primary" onclick="deleteDemo.autoPlay()">⏩ Otomatik Oynat</button>
+                </div>
+
+                <div id="deleteArray" class="array-display"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Heapify - Diziyi Heap'e Çevir</h2>
+            <p>Rastgele bir diziyi heap'e dönüştürmek için <strong>tüm parent'ları</strong> aşağı batırırız.</p>
+
+            <div style="background: var(--purple-bg); padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #6a1b9a;">🎯 Heapify Neden O(n)?</h4>
+                <p>Sezgisel düşünce: n eleman × log n = O(n log n) gibi görünür.</p>
+                <p><strong>Ama:</strong> Alt seviyelerde çok eleman var ama az batırılıyor, üst seviyelerde az eleman var ama çok batırılıyor. Toplam: <strong>O(n)</strong></p>
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 0.9em;">Bu şaşırtıcı sonuç, heap sort'u çok verimli yapar!</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Heapify - Dizi → Heap</span>
+                    <button class="btn btn-run" onclick="CodeBlocks.run('code3')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code3"><code class="language-python line-numbers">def heapify_down(arr, n, i):
+    """i indeksindeki elemanı aşağı batır"""
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    # Sol child büyük mü?
+    if left < n and arr[left] > arr[largest]:
+        largest = left
+
+    # Sağ child daha büyük mü?
+    if right < n and arr[right] > arr[largest]:
+        largest = right
+
+    # Swap gerekli mi?
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        print(f"   Swap: {i} ↔ {largest} → {arr}")
+        # Recursive olarak devam et
+        heapify_down(arr, n, largest)
+
+def build_max_heap(arr):
+    """Rastgele diziyi max heap'e çevir"""
+    n = len(arr)
+
+    print(f"Başlangıç dizisi: {arr}")
+    print("\n🔄 Heapify başlıyor...\n")
+
+    # Son parent'tan başla, geriye doğru git
+    # Son parent: (n//2 - 1)
+    start = n // 2 - 1
+
+    for i in range(start, -1, -1):
+        print(f"Parent {i} ({arr[i]}) batırılıyor:")
+        heapify_down(arr, n, i)
+        print()
+
+    print(f"✅ Heap oluşturuldu: {arr}")
+    return arr
+
+# Test
+print("=== Heapify Demosu ===\n")
+
+# Rastgele dizi
+arr = [4, 10, 3, 5, 1, 8, 7]
+print(f"Rastgele dizi (heap değil): {arr}")
+
+# Heap'e çevir
+heap = build_max_heap(arr.copy())
+
+# Doğrulama
+print("\n=== Doğrulama ===")
+print(f"Root (en büyük): {heap[0]}")
+print(f"Parent ≥ Children kuralı:")
+
+for i in range(len(heap) // 2):
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    checks = f"  {i} ({heap[i]})"
+
+    if left < len(heap):
+        status = "✅" if heap[i] >= heap[left] else "❌"
+        checks += f" ≥ L:{left} ({heap[left]}) {status}"
+
+    if right < len(heap):
+        status = "✅" if heap[i] >= heap[right] else "❌"
+        checks += f" ≥ R:{right} ({heap[right]}) {status}"
+
+    print(checks)</code></pre>
+                <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧮 İnteraktif Heap Builder</h2>
+            <p>Kendi heap'inizi oluşturun ve insert/delete operasyonlarını deneyin!</p>
+
+            <div class="heap-visual">
+                <h3 style="text-align: center; margin-top: 0;">🎮 Heap Oyun Alanı</h3>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <input type="number" id="heapInput" placeholder="Sayı girin"
+                        style="padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; width: 150px;">
+                    <button class="step-btn primary" onclick="interactiveHeap.insert()">➕ Ekle</button>
+                    <button class="step-btn secondary" onclick="interactiveHeap.deleteMax()" style="background: #f44336; color: white;">➖ Max Sil</button>
+                    <button class="step-btn secondary" onclick="interactiveHeap.clear()">🗑️ Temizle</button>
+                </div>
+
+                <canvas id="interactiveCanvas" width="700" height="350"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="interactiveInfo" class="step-info">
+                    Heap boş. Yukarıdan sayı ekleyin!
+                </div>
+
+                <div id="interactiveArray" class="array-display"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Karmaşıklık Özeti</h2>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                        <th style="padding: 15px; text-align: left;">İşlem</th>
+                        <th style="padding: 15px;">Zaman</th>
+                        <th style="padding: 15px;">Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: var(--secondary-bg);">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Insert</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(log n)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Ağacın yüksekliği kadar yukarı çık</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Delete (root)</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(log n)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Ağacın yüksekliği kadar aşağı in</td>
+                    </tr>
+                    <tr style="background: var(--secondary-bg);">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Peek (root)</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Sadece indeks 0'a bak</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Heapify (build)</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Diziyi heap'e çevir</td>
+                    </tr>
+                    <tr style="background: var(--secondary-bg);">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Search</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">O(n)</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Heap arama için optimize değil!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: var(--success-bg); padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Insert (Ekleme):</strong> Sona ekle, yukarı yüzdür (bubble up) - O(log n)</li>
+                    <li><strong>Delete (Silme):</strong> Root (kök) sil, son elemanı root'a taşı, aşağı batır (bubble down) - O(log n)</li>
+                    <li><strong>Heapify (Heap Oluşturma):</strong> Diziyi heap'e çevir - O(n) (şaşırtıcı derecede hızlı!)</li>
+                    <li><strong>Parent formülü (Ebeveyn):</strong> (i-1)//2, <strong>Child (Çocuk):</strong> 2i+1, 2i+2</li>
+                    <li><strong>İnteraktif görselleştirmeler</strong> ile heap operasyonlarını adım adım izlediniz</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-footer" data-auto-nav></div>
+    </div>
+    
+</body>
+</html>
+
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>

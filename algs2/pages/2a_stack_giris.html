@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.1: Stack (Yığın) Kavramı</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>📚 2.1: Stack (Yığın) Nedir?</h1>
+            <p>Last In, First Out (LIFO) Prensibi</p>
+        </header>
+
+        <div class="section">
+            <h2>Stack Nedir?</h2>
+            <p>
+                Stack (Yığın), <strong>LIFO (Last In, First Out)</strong> prensibine göre çalışan bir veri yapısıdır.
+                En son eklenen eleman, ilk çıkarılan elemandır.
+            </p>
+            <p>
+                Tıpkı tabak yığını gibi: En üste koyduğunuz tabağı ilk alırsınız, alta inmek için üstteki
+                tüm tabakları kaldırmanız gerekir.
+            </p>
+        </div>
+
+        <div class="visual-container">
+            <h3>İnteraktif Stack Gösterimi</h3>
+            <div id="stack-demo"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-run" onclick="demoPush()">Push (Ekle)</button>
+                <button class="btn btn-reset" onclick="demoPop()">Pop (Çıkar)</button>
+                <button class="btn" style="background: #f39c12;" onclick="demoPeek()">Peek (Bak)</button>
+                <button class="btn btn-danger" onclick="demoClear()">Clear (Temizle)</button>
+            </div>
+            <p id="stack-msg" style="font-weight: bold; margin-top: 15px; color: #555; min-height: 24px;">Stack boş</p>
+        </div>
+
+        <div class="section">
+            <h2>Temel İşlemler</h2>
+            <ul>
+                <li><strong>push(x)</strong>: Stack'e x elemanını ekle (en üste)</li>
+                <li><strong>pop()</strong>: Stack'ten en üstteki elemanı çıkar ve döndür</li>
+                <li><strong>peek() / top()</strong>: En üstteki elemanı döndür (çıkarmadan)</li>
+                <li><strong>isEmpty()</strong>: Stack boş mu kontrol et</li>
+                <li><strong>size()</strong>: Stack'teki eleman sayısını döndür</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Gerçek Hayattan Örnekler</h2>
+            <ul>
+                <li>🍽️ <strong>Tabak Yığını:</strong> En son koyduğunuz tabağı ilk alırsınız. Alttan tabak alamazsınız!</li>
+                <li>🔙 <strong>Tarayıcı Geçmişi:</strong> Geri tuşu en son girdiğiniz sayfayı açar.</li>
+                <li>📝 <strong>Ctrl+Z (Undo):</strong> Son yapılan işlem geri alınır, sonra ondan önceki...</li>
+                <li>📖 <strong>Kitap Yığını:</strong> Masada üst üste kitaplar - en üsttekini alırsınız.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>💻 Bilgisayar Bilimlerinde Stack</h2>
+            <ul>
+                <li>
+                    📞 <strong>Fonksiyon Çağrı Stack'i (Call Stack):</strong> Bir fonksiyon başka bir fonksiyonu
+                    çağırınca, dönüş adresi stack'e yazılır. Fonksiyon bitince stack'ten adres alınarak geri dönülür.
+                </li>
+                <li>
+                    🔣 <strong>Matematiksel İfade Değerlendirme:</strong> Hesap makineleri parantezli ifadeleri
+                    çözmek için stack kullanır. Örn: <code>((3 + 5) * 2)</code>
+                </li>
+                <li>
+                    🔍 <strong>Derinlik Öncelikli Arama (DFS):</strong> Labirent çözme, puzzle oyunları stack ile çalışır.
+                </li>
+                <li>
+                    ↩️ <strong>Geri Alma Sistemi:</strong> Photoshop, Word gibi programlardaki undo/redo işlemleri.
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Stack'in Avantajları</h2>
+            <ul>
+                <li>✅ Basit ve anlaşılır mantık (LIFO)</li>
+                <li>✅ Push ve Pop işlemleri çok hızlıdır: O(1)</li>
+                <li>✅ Bellek yönetimi kolaydır</li>
+                <li>✅ Recursion implementasyonlarında doğal olarak kullanılır</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Stack'in Dezavantajları</h2>
+            <ul>
+                <li>⚠️ Sabit boyutlu stack'lerde overflow riski vardır</li>
+                <li>⚠️ Ortadaki elemanlara doğrudan erişim yoktur</li>
+                <li>⚠️ Arama işlemi verimsizdir (tüm stack'i pop etmek gerekir)</li>
+            </ul>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+        let stackViz = null;
+        const sampleData = ["Kitap", "Defter", "Kalem", "Silgi", "Cetvel"];
+        let dataIndex = 0;
+
+        // Initialize stack visualization
+        document.addEventListener('DOMContentLoaded', () => {
+            stackViz = Viz.Stack.create('stack-demo', { maxSize: 5 });
+            updateMessage("Stack boş. Push ile eleman ekleyin!");
+        });
+
+        function demoPush() {
+            if (!stackViz) return;
+
+            try {
+                const value = sampleData[dataIndex % sampleData.length];
+                stackViz.push(value);
+                dataIndex++;
+                updateMessage(`✅ Push("${value}") - Stack'e eklendi. Boyut: ${stackViz.size()}`, 'green');
+            } catch (error) {
+                updateMessage(`⚠️ ${error.message}`, 'red');
+            }
+        }
+
+        function demoPop() {
+            if (!stackViz) return;
+
+            try {
+                const value = stackViz.pop();
+                updateMessage(`🔻 Pop() → "${value}" çıkarıldı. Boyut: ${stackViz.size()}`, '#c0392b');
+            } catch (error) {
+                updateMessage(`⚠️ ${error.message}`, 'red');
+            }
+        }
+
+        function demoPeek() {
+            if (!stackViz) return;
+
+            const value = stackViz.peek();
+            if (value !== null) {
+                updateMessage(`👀 Peek() → "${value}" (silmeden baktık). Boyut: ${stackViz.size()}`, '#f39c12');
+            } else {
+                updateMessage(`⚠️ Stack boş! Peek yapılamaz`, 'red');
+            }
+        }
+
+        function demoClear() {
+            if (!stackViz) return;
+
+            stackViz.clear();
+            dataIndex = 0;
+            updateMessage(`🗑️ Clear() → Stack temizlendi`, '#666');
+        }
+
+        function updateMessage(text, color = '#555') {
+            const msg = document.getElementById('stack-msg');
+            if (msg) {
+                msg.textContent = text;
+                msg.style.color = color;
+            }
+        }
+    </script>
+</body>
+</html>

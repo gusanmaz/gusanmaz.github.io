@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.5: Merge Sort (Birleştirmeli Sıralama)</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <style>
+
+        .divide-conquer {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .tree-level {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .tree-node {
+            background: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+            font-family: monospace;
+            min-width: 80px;
+            text-align: center;
+        }
+        .tree-node.merged {
+            background: #d4edda;
+            border-color: #27ae60;
+        }
+        .arrow-down {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+        .merge-visual {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .merge-arrays {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .array-box {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+        .array-box h4 {
+            margin: 0 0 10px 0;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-box .cells {
+            display: flex;
+            gap: 5px;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-weight: bold;
+            background: var(--card-bg);
+        }
+        .cell.left { background: #e3f2fd; border-color: #2196f3; }
+        .cell.right { background: #fce4ec; border-color: #e91e63; }
+        .cell.merged { background: #e8f5e9; border-color: #4caf50; }
+        .cell.comparing { background: #fff3e0; border-color: #ff9800; transform: scale(1.1); }
+        </style>
+</head>
+
+<body>
+
+
+<div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+    <header>
+        <h1>🔀 7.5: Merge Sort (Birleştirmeli Sıralama)</h1>
+        <p>Böl ve Fethet ile Garantili O(n log n)</p>
+    </header>
+
+    <div class="section">
+        <h2>📌 Merge Sort Nedir?</h2>
+        <p><strong>Merge Sort</strong>, "Böl ve Fethet" (Divide and Conquer) stratejisini kullanan verimli bir sıralama algoritmasıdır. Diziyi sürekli ikiye böler, sonra sıralı şekilde birleştirir.</p>
+
+        <div class="divide-conquer">
+            <h4 style="margin-top: 0; color: #667eea; text-align: center;">🎯 Böl ve Fethet Stratejisi</h4>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
+                <div>
+                    <div style="font-size: 2em;">✂️</div>
+                    <strong>1. BÖL (Divide)</strong>
+                    <p>Diziyi ikiye böl</p>
+                </div>
+                <div>
+                    <div style="font-size: 2em;">⚔️</div>
+                    <strong>2. FETHET (Conquer)</strong>
+                    <p>Alt dizileri recursive sırala</p>
+                </div>
+                <div>
+                    <div style="font-size: 2em;">🔗</div>
+                    <strong>3. BİRLEŞTİR (Combine)</strong>
+                    <p>Sıralı alt dizileri birleştir</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌳 Merge Sort Ağaç Görünümü</h2>
+        <p>Örnek: [38, 27, 43, 3, 9, 82, 10]</p>
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; overflow-x: auto;">
+            <div class="tree-level">
+                <div class="tree-node">[38, 27, 43, 3, 9, 82, 10]</div>
+            </div>
+            <div class="arrow-down">↙️ BÖL ↘️</div>
+            <div class="tree-level">
+                <div class="tree-node">[38, 27, 43]</div>
+                <div class="tree-node">[3, 9, 82, 10]</div>
+            </div>
+            <div class="arrow-down">↙️ BÖL ↘️</div>
+            <div class="tree-level">
+                <div class="tree-node">[38]</div>
+                <div class="tree-node">[27, 43]</div>
+                <div class="tree-node">[3, 9]</div>
+                <div class="tree-node">[82, 10]</div>
+            </div>
+            <div class="arrow-down">↙️ BÖL ↘️</div>
+            <div class="tree-level">
+                <div class="tree-node">[38]</div>
+                <div class="tree-node">[27]</div>
+                <div class="tree-node">[43]</div>
+                <div class="tree-node">[3]</div>
+                <div class="tree-node">[9]</div>
+                <div class="tree-node">[82]</div>
+                <div class="tree-node">[10]</div>
+            </div>
+            <div class="arrow-down">↗️ BİRLEŞTİR ↖️</div>
+            <div class="tree-level">
+                <div class="tree-node merged">[38]</div>
+                <div class="tree-node merged">[27, 43]</div>
+                <div class="tree-node merged">[3, 9]</div>
+                <div class="tree-node merged">[10, 82]</div>
+            </div>
+            <div class="arrow-down">↗️ BİRLEŞTİR ↖️</div>
+            <div class="tree-level">
+                <div class="tree-node merged">[27, 38, 43]</div>
+                <div class="tree-node merged">[3, 9, 10, 82]</div>
+            </div>
+            <div class="arrow-down">↗️ BİRLEŞTİR ↖️</div>
+            <div class="tree-level">
+                <div class="tree-node merged" style="background: #c8e6c9; font-weight: bold;">[3, 9, 10, 27, 38, 43, 82]</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔗 Merge (Birleştirme) İşlemi</h2>
+        <p>İki sıralı diziyi tek sıralı dizide birleştirme:</p>
+
+        <div class="merge-visual">
+            <div class="merge-arrays">
+                <div class="array-box">
+                    <h4>Sol Dizi</h4>
+                    <div class="cells">
+                        <div class="cell left">3</div>
+                        <div class="cell left">27</div>
+                        <div class="cell left">38</div>
+                    </div>
+                </div>
+                <div style="font-size: 2em;">+</div>
+                <div class="array-box">
+                    <h4>Sağ Dizi</h4>
+                    <div class="cells">
+                        <div class="cell right">9</div>
+                        <div class="cell right">10</div>
+                        <div class="cell right">82</div>
+                    </div>
+                </div>
+                <div style="font-size: 2em;">=</div>
+                <div class="array-box">
+                    <h4>Birleşik Dizi</h4>
+                    <div class="cells">
+                        <div class="cell merged">3</div>
+                        <div class="cell merged">9</div>
+                        <div class="cell merged">10</div>
+                        <div class="cell merged">27</div>
+                        <div class="cell merged">38</div>
+                        <div class="cell merged">82</div>
+                    </div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 15px;">Her iki diziden en küçüğü seç ve sonuca ekle → O(n)</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Karmaşıklık Analizi</h2>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <th style="padding: 15px;">Durum</th>
+                    <th style="padding: 15px;">Zaman</th>
+                    <th style="padding: 15px;">Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd;">En İyi</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(n log n)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Her zaman aynı</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px; border: 1px solid #ddd;">Ortalama</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(n log n)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Her zaman aynı</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd;">En Kötü</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(n log n)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Her zaman aynı - GARANTİLİ!</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Alan</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #e67e22; font-weight: bold;">O(n)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Geçici dizi gerektirir (dezavantaj)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+            <strong>📐 Neden O(n log n)?</strong>
+            <ul style="margin: 10px 0 0 0;">
+                <li><strong>log n seviye:</strong> Dizi her seferinde ikiye bölünür → log₂(n) seviye</li>
+                <li><strong>Her seviyede n iş:</strong> Merge işlemi O(n)</li>
+                <li><strong>Toplam:</strong> n × log n = O(n log n)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Python Implementasyonu</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code1\')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code1"><code class="language-python line-numbers">def merge_sort(arr, depth=0):
+    """
+    Merge Sort - Böl ve Fethet
+    """
+    indent = "  " * depth
+    print(f"{indent}merge_sort({arr})")
+
+    # Base case: 1 veya 0 elemanlı dizi zaten sıralı
+    if len(arr) <= 1:
+        return arr
+
+    # BÖL: Ortadan ikiye ayır
+    mid = len(arr) // 2
+    left = arr[:mid]
+    right = arr[mid:]
+
+    print(f"{indent}  Sol: {left}, Sağ: {right}")
+
+    # FETHET: Recursive olarak sırala
+    left_sorted = merge_sort(left, depth + 1)
+    right_sorted = merge_sort(right, depth + 1)
+
+    # BİRLEŞTİR: İki sıralı diziyi birleştir
+    merged = merge(left_sorted, right_sorted)
+    print(f"{indent}  Birleşti: {merged}")
+
+    return merged
+
+def merge(left, right):
+    """İki sıralı diziyi birleştirir"""
+    result = []
+    i = j = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+
+    # Kalan elemanları ekle
+    result.extend(left[i:])
+    result.extend(right[j:])
+
+    return result
+
+# Test
+dizi = [38, 27, 43, 3, 9, 82, 10]
+print(f"Başlangıç: {dizi}\n")
+
+sonuc = merge_sort(dizi)
+print(f"\n{'='*40}")
+print(f"Sonuç: {sonuc}")</code></pre>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ Avantajları ve ❌ Dezavantajları</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="background: #d4edda; padding: 20px; border-radius: 10px;">
+                <h4 style="color: #155724; margin-top: 0;">✅ Avantajları</h4>
+                <ul style="margin: 0;">
+                    <li><strong>Garantili O(n log n):</strong> Her durumda aynı performans</li>
+                    <li><strong>Stabil:</strong> Eşit elemanların sırası korunur</li>
+                    <li><strong>Paralel:</strong> Alt diziler bağımsız sıralanabilir</li>
+                    <li><strong>Linked List:</strong> Rastgele erişim gerektirmez</li>
+                    <li><strong>External Sort:</strong> Büyük dosyalar için ideal</li>
+                </ul>
+            </div>
+            <div style="background: #f8d7da; padding: 20px; border-radius: 10px;">
+                <h4 style="color: #721c24; margin-top: 0;">❌ Dezavantajları</h4>
+                <ul style="margin: 0;">
+                    <li><strong>O(n) ek alan:</strong> Geçici dizi gerekli</li>
+                    <li><strong>Küçük diziler:</strong> Overhead var, Insertion Sort daha iyi</li>
+                    <li><strong>Cache-unfriendly:</strong> Bellek erişimi dağınık</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌍 Kullanım Alanları</h2>
+        <ul>
+            <li>💾 <strong>External Sorting:</strong> RAM'e sığmayan büyük dosyaları sıralama</li>
+            <li>🔗 <strong>Linked List:</strong> Rastgele erişim olmadığında en iyi seçenek</li>
+            <li>⚡ <strong>Paralel Hesaplama:</strong> Alt diziler bağımsız işlenebilir</li>
+            <li>🐍 <strong>Python Timsort:</strong> Merge Sort + Insertion Sort hibriti</li>
+        </ul>
+    </div>
+
+    <div class="nav-footer">
+        <a href="7d_insertion_sort.html" class="btn">⬅️ Önceki: Insertion Sort</a>
+        <a href="../index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="7f_quick_sort.html" class="btn btn-next">Sonraki: Quick Sort ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+</script>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Pyodide CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    </script>
+</body>
+</html>

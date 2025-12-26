@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.0: Algoritma Analizine Giriş</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+
+    <!-- CodeMirror 6 -->
+    <script type="module">
+        import {EditorView, basicSetup} from "https://cdn.jsdelivr.net/npm/codemirror@6/dist/index.js"
+        import {python} from "https://cdn.jsdelivr.net/npm/@codemirror/lang-python@6/dist/index.js"
+        import {oneDark} from "https://cdn.jsdelivr.net/npm/@codemirror/theme-one-dark@6/dist/index.js"
+
+        window.CodeMirror = {
+            EditorView,
+            basicSetup,
+            python: () => python(),
+            oneDark
+        };
+    </script>
+
+    <!-- Pyodide for Python execution -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>⚡ 1.0: Algoritma Analizi</h1>
+            <p>Neden Bazı Algoritmalar Daha Hızlıdır?</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Başlangıç Sorusu</h2>
+
+            <div style="background: linear-gradient(135deg, #e74c3c15, #c0392b15); border: 3px solid #e74c3c; padding: 30px; border-radius: 15px; margin: 25px 0;">
+                <h3 style="color: var(--text-primary); margin-top: 0;">💡 Aynı İşi Yapan İki Program</h3>
+                <p><strong>Program A:</strong> 1 milyon sayıyı 0.01 saniyede toplar</p>
+                <p><strong>Program B:</strong> 1 milyon sayıyı 12 dakikada toplar</p>
+                <p style="margin-top: 20px; font-size: 1.2em; color: #e74c3c;">
+                    <strong>Her ikisi de doğru sonuç veriyor. Fark nedir?</strong> → ALGORİTMA!
+                </p>
+            </div>
+
+            <p>Algoritma analizi, bir algoritmanın ne kadar <strong>hızlı</strong> ve ne kadar <strong>bellek</strong> kullandığını ölçer.</p>
+        </div>
+
+        <div class="section">
+            <h2>📊 Big O Notasyonu - Basit Açıklama</h2>
+
+            <p>Big O, algoritmanın <strong>giriş boyutu (n) büyüdükçe</strong> ne kadar yavaşladığını gösterir.</p>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4 style="color: #1565c0; margin-top: 0;">🎓 Günlük Hayattan Örnek</h4>
+                <p><strong>Senaryo:</strong> n kitap var, belirli bir kitabı bulacaksın</p>
+                <ul style="margin: 10px 0;">
+                    <li><strong>O(1) - Sabit:</strong> Kitabın yerini biliyorsun → Hemen al (n = 10 da, n = 1000 da aynı süre)</li>
+                    <li><strong>O(n) - Doğrusal:</strong> Rafı baştan sona tara → n kitap varsa n adım</li>
+                    <li><strong>O(n²) - Karesel:</strong> Her kitabı her kitapla karşılaştır → n² işlem</li>
+                </ul>
+            </div>
+
+            <h3>📋 Yaygın Karmaşıklıklar (Hızdan Yavaşa)</h3>
+            <p style="margin-bottom: 30px; font-size: 1.05em; color: var(--text-secondary);">
+                Algoritmaları performanslarına göre en hızlıdan en yavaşa doğru inceleyelim:
+            </p>
+
+            <!-- 1. O(1) - En Hızlı -->
+            <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border-left: 5px solid #28a745; padding: 20px; border-radius: 10px; margin: 25px 0;">
+                <h4 style="color: #155724; margin-top: 0;">🥇 1. O(1) - Sabit Zaman Karmaşıklığı</h4>
+                <p style="margin-bottom: 10px;"><strong>Tanım:</strong> Girdi boyutu (n) ne olursa olsun, algoritma <strong>her zaman aynı sayıda işlem</strong> yapar.</p>
+                <p style="margin-bottom: 10px;"><strong>Örnek:</strong> Dizinin ilk elemanını okumak - n=10 da 1 işlem, n=1,000,000 da yine 1 işlem!</p>
+                <p style="margin-bottom: 0;"><strong>Performans:</strong> ⚡⚡⚡ En hızlı! Gerçek dünyada: hash table lookup, array indexing</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🟢 O(1) - Sabit Zaman: Dizinin İlk Elemanı</span>
+                </div>
+                <pre class="line-numbers"><code class="language-python"># O(1) - Girdi boyutundan bağımsız
+def get_first(arr):
+    """İlk elemanı döndür - her zaman 1 işlem"""
+    return arr[0]
+
+# Test
+small = [1, 2, 3]
+large = list(range(1000000))  # 1 milyon eleman
+
+print(f"3 elemanlı dizi: {get_first(small)}")
+print(f"1M elemanlı dizi: {get_first(large)}")
+print("\n✅ Her ikisi de aynı hızda!")
+print("n = 10 → 1 işlem")
+print("n = 1,000,000 → 1 işlem (aynı!)")</code></pre>
+                <div class="output">Çıktı bekleniyor...</div>
+            </div>
+
+            <!-- 2. O(log n) - Çok Hızlı -->
+            <div style="background: linear-gradient(135deg, #d1ecf1, #bee5eb); border-left: 5px solid #17a2b8; padding: 20px; border-radius: 10px; margin: 25px 0;">
+                <h4 style="color: #0c5460; margin-top: 0;">🥈 2. O(log n) - Logaritmik Zaman Karmaşıklığı</h4>
+                <p style="margin-bottom: 10px;"><strong>Tanım:</strong> Her adımda problem boyutu <strong>yarıya iner</strong>. n 1000x artarsa, sadece ~10 adım daha eklenir!</p>
+                <p style="margin-bottom: 10px;"><strong>Örnek:</strong> Binary search (sıralı dizide arama), ağaçlarda arama. Her adımda yarısını at.</p>
+                <p style="margin-bottom: 0;"><strong>Performans:</strong> ⚡⚡ Çok hızlı! Milyonlarca elemanda bile 20-30 adım. Gerçek dünyada: database indexing, binary search</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🟢 O(log n) - Logaritmik: Sayı Yarılama Oyunu</span>
+                </div>
+                <pre class="line-numbers"><code class="language-python"># O(log n) - Her adımda yarıya iner
+def guessing_game(max_num):
+    """1 ile max_num arası sayı tahmin et
+    Her tahminde aralık yarıya iner"""
+    low, high = 1, max_num
+    attempts = 0
+
+    while low < high:
+        mid = (low + high) // 2
+        attempts += 1
+        # Sayıyı bulduğumuzu varsay
+        high = mid
+
+    return attempts
+
+# Test
+for n in [10, 100, 1000, 1000000]:
+    steps = guessing_game(n)
+    print(f"n = {n:>7,} → {steps:>2} tahmin")
+
+print("\n✅ n 10x arttı (10→100), adım sadece 3 arttı!")
+print("✅ n 1000x arttı (1000→1M), adım sadece 10 arttı!")
+print("\n→ Çok hızlı! log₂(1M) ≈ 20")</code></pre>
+                <div class="output">Çıktı bekleniyor...</div>
+            </div>
+
+            <!-- 3. O(n) - İyi -->
+            <div style="background: linear-gradient(135deg, #fff3cd, #ffeaa7); border-left: 5px solid #ffc107; padding: 20px; border-radius: 10px; margin: 25px 0;">
+                <h4 style="color: #856404; margin-top: 0;">🥉 3. O(n) - Doğrusal Zaman Karmaşıklığı</h4>
+                <p style="margin-bottom: 10px;"><strong>Tanım:</strong> İşlem sayısı, girdi boyutuyla <strong>doğru orantılı</strong> artar. n iki katına çıkarsa, süre de iki katına çıkar.</p>
+                <p style="margin-bottom: 10px;"><strong>Örnek:</strong> Bir dizinin toplamını hesaplamak - her elemanı bir kez ziyaret etmek gerekir.</p>
+                <p style="margin-bottom: 0;"><strong>Performans:</strong> ⚡ İyi! Çoğu basit döngü. Gerçek dünyada: array search, list iteration</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🟡 O(n) - Doğrusal Zaman: Toplam Hesaplama</span>
+                </div>
+                <pre class="line-numbers"><code class="language-python"># O(n) - Her elemanı bir kez işle
+def calculate_sum(arr):
+    """Toplamı hesapla - n işlem"""
+    total = 0
+    for num in arr:  # n kez döner
+        total += num
+    return total
+
+# Test
+data1 = [1, 2, 3, 4, 5]  # 5 eleman
+data2 = list(range(100))  # 100 eleman
+
+print(f"5 eleman: toplam = {calculate_sum(data1)}, işlem = 5")
+print(f"100 eleman: toplam = {calculate_sum(data2)}, işlem = 100")
+print("\n✅ n = 5 → 5 işlem")
+print("✅ n = 100 → 100 işlem")
+print("✅ n = 1000 → 1000 işlem")</code></pre>
+                <div class="output">Çıktı bekleniyor...</div>
+            </div>
+
+            <!-- 4. O(n log n) - Verimli -->
+            <div style="background: linear-gradient(135deg, #e7f3ff, #cfe2ff); border-left: 5px solid #0d6efd; padding: 20px; border-radius: 10px; margin: 25px 0;">
+                <h4 style="color: #084298; margin-top: 0;">4️⃣ 4. O(n log n) - Linearitmik Zaman Karmaşıklığı</h4>
+                <p style="margin-bottom: 10px;"><strong>Tanım:</strong> Her eleman için logaritmik bir işlem yapılır. O(n)'den yavaş ama O(n²)'den çok daha hızlı!</p>
+                <p style="margin-bottom: 10px;"><strong>Örnek:</strong> Verimli sıralama algoritmaları (merge sort, heap sort, quick sort), her eleman için binary search</p>
+                <p style="margin-bottom: 0;"><strong>Performans:</strong> ✅✅ Çok iyi! Büyük verilerde bile pratik. Gerçek dünyada: efficient sorting, divide-and-conquer algoritmaları</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🟡 O(n log n) - Binary Search ile Liste İşlemleri</span>
+                </div>
+                <pre class="line-numbers"><code class="language-python">import math
+
+# O(n log n) - Liste içinde her eleman için binary search
+def process_with_binary_search(arr):
+    """Her eleman için binary search benzeri işlem
+    n eleman × log n işlem = O(n log n)"""
+    total_ops = 0
+    n = len(arr)
+
+    for i in range(n):  # n kez döner
+        # Her eleman için log(i+1) işlem (binary search benzeri)
+        x = i + 1
+        ops = 0
+        while x > 1:  # log n işlem
+            x = x // 2
+            ops += 1
+        total_ops += ops
+
+    return total_ops
+
+# Test
+print("=== O(n log n) - Binary Search Tabanlı İşlemler ===\n")
+print("Her eleman için log(n) işlem yapılıyor...\n")
+
+for n in [10, 100, 1000, 10000]:
+    arr = list(range(n))
+    operations = process_with_binary_search(arr)
+    theoretical = n * math.log2(n)
+
+    print(f"n = {n:>5,}:")
+    print(f"  Gerçek işlem:   {operations:>8,.0f}")
+    print(f"  Teorik n log n: {theoretical:>8,.0f}")
+    print()
+
+# Karmaşıklık karşılaştırması
+print("=== Karmaşıklık Karşılaştırması ===")
+for n in [100, 1000, 10000]:
+    o_n2 = n * n
+    o_nlogn = n * math.log2(n)
+    speedup = o_n2 / o_nlogn
+    print(f"\nn = {n:>6,}:")
+    print(f"  O(n²):      {o_n2:>15,.0f} işlem")
+    print(f"  O(n log n): {o_nlogn:>15,.0f} işlem")
+    print(f"  → {speedup:.0f}x daha hızlı!")</code></pre>
+                <div class="output">Çıktı bekleniyor...</div>
+            </div>
+
+            <!-- 5. O(n²) - Yavaş -->
+            <div style="background: linear-gradient(135deg, #ffe5d9, #ffd7ba); border-left: 5px solid #fd7e14; padding: 20px; border-radius: 10px; margin: 25px 0;">
+                <h4 style="color: #8b4513; margin-top: 0;">⚠️ 5. O(n²) - Karesel Zaman Karmaşıklığı</h4>
+                <p style="margin-bottom: 10px;"><strong>Tanım:</strong> İşlem sayısı, girdi boyutunun <strong>karesiyle</strong> artar. n 10x artarsa, süre 100x artar!</p>
+                <p style="margin-bottom: 10px;"><strong>Örnek:</strong> İç içe döngüler - her eleman için tüm elemanları işle (bubble sort, tüm ikilileri karşılaştır)</p>
+                <p style="margin-bottom: 0;"><strong>Performans:</strong> 🐌 Yavaş! Küçük veriler için sorun yok ama büyük veri için kaçının. Gerçek dünyada: naive sorting, matrix multiplication</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🟠 O(n²) - Karesel Zaman: Tüm İkilileri Bul</span>
+                </div>
+                <pre class="line-numbers"><code class="language-python"># O(n²) - İç içe döngüler
+def count_pairs(arr):
+    """Tüm ikilileri say - n² işlem"""
+    count = 0
+    for i in arr:        # n kez
+        for j in arr:    # n kez (her i için)
+            count += 1
+    return count
+
+# Test
+data = [1, 2, 3, 4]
+pairs = count_pairs(data)
+
+print(f"Dizi: {data} (n = {len(data)})")
+print(f"İşlem sayısı: {pairs}")
+print(f"Formül: n² = {len(data)}² = {pairs}")
+print("\n⚠️ n = 10 → 100 işlem")
+print("⚠️ n = 100 → 10,000 işlem")
+print("⚠️ n = 1000 → 1,000,000 işlem!")
+print("\n→ n 10x artınca, süre 100x artar!")</code></pre>
+                <div class="output">Çıktı bekleniyor...</div>
+            </div>
+
+            <!-- 6. O(2ⁿ) - Çok Yavaş -->
+            <div style="background: linear-gradient(135deg, #f8d7da, #f5c6cb); border-left: 5px solid #dc3545; padding: 20px; border-radius: 10px; margin: 25px 0;">
+                <h4 style="color: #721c24; margin-top: 0;">🛑 6. O(2ⁿ) - Üstel Zaman Karmaşıklığı</h4>
+                <p style="margin-bottom: 10px;"><strong>Tanım:</strong> İşlem sayısı <strong>üstel olarak patlar</strong>! Her n artışında süre 2x katlanır. n=30'dan sonra kullanılamaz!</p>
+                <p style="margin-bottom: 10px;"><strong>Örnek:</strong> Naive recursive Fibonacci, tüm alt kümeleri hesaplama, brute-force kombinasyonlar</p>
+                <p style="margin-bottom: 0;"><strong>Performans:</strong> 🚫 Çok çok yavaş! n=50 için evrenin yaşından uzun sürer. Gerçek dünyada: kaçınılmalı, optimizasyon şart!</p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🔴 O(2ⁿ) - Üstel Zaman: Fibonacci (Naive)</span>
+                </div>
+                <pre class="line-numbers"><code class="language-python"># O(2ⁿ) - ÇOK YAVAŞ! Her çağrı 2 çağrı yapar
+def fibonacci_recursive(n):
+    """Fibonacci - Naive recursive yaklaşım
+    Her çağrı 2 alt çağrı yapar → üstel büyüme!"""
+    if n <= 1:
+        return n
+    return fibonacci_recursive(n-1) + fibonacci_recursive(n-2)
+
+# Test - KÜçÜK değerlerle!
+print("=== O(2ⁿ) - Üstel Karmaşıklık ===\n")
+print("⚠️ DİKKAT: n > 35 için çok yavaş!\n")
+
+for n in [5, 10, 15, 20]:
+    result = fibonacci_recursive(n)
+    operations = 2**n
+    print(f"fib({n:>2}) = {result:>6,} → ~{operations:>10,} işlem")
+
+print("\n⚠️ n = 30 → ~1 milyar işlem (birkaç saniye)")
+print("⚠️ n = 40 → ~1 trilyon işlem (günler!)")
+print("⚠️ n = 50 → Evrenin ömründen uzun sürer!")
+print("\n💡 Çözüm: Dynamic Programming (ileride göreceğiz) → O(n)")</code></pre>
+                <div class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📐 Logaritma Tabanı Önemli mi?</h2>
+
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 12px; margin: 20px 0;">
+                <h4 style="color: #2e7d32; margin-top: 0;">🤔 Soru: log₂(n) ile log₁₀(n) arasındaki fark nedir?</h4>
+
+                <p><strong>Kısa cevap:</strong> Big O notasyonunda <strong>önemsiz!</strong></p>
+                <p><strong>Uzun cevap:</strong> Logaritma değişim formülü:</p>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0; font-family: monospace;">
+                    log₁₀(n) = log₂(n) / log₂(10) ≈ log₂(n) / 3.32
+                </div>
+
+                <p>Yani log₁₀(n) = <strong>sabit × log₂(n)</strong></p>
+                <p>Big O'da sabit katsayılar <strong>göz ardı edilir</strong> → Her ikisi de <strong>O(log n)</strong></p>
+
+                <div class="code-container" style="margin-top: 20px;">
+                    <div class="code-header">
+                        <span class="code-header-title">📊 Logaritma Tabanı Karşılaştırması</span>
+                    </div>
+                    <pre class="line-numbers"><code class="language-python">import math
+
+print("=== Logaritma Tabanı Karşılaştırması ===\n")
+print(f"{'n':>10} | {'log₂(n)':>10} | {'log₁₀(n)':>10} | {'Oran':>10}")
+print("-" * 50)
+
+for n in [10, 100, 1000, 10000, 1000000]:
+    log2_n = math.log2(n)
+    log10_n = math.log10(n)
+    ratio = log2_n / log10_n
+    print(f"{n:>10,} | {log2_n:>10.2f} | {log10_n:>10.2f} | {ratio:>10.2f}")
+
+print("\n💡 Oran hep ~3.32 (log₂(10))")
+print("✅ İkisi de O(log n) - aynı karmaşıklık sınıfı!")
+
+print("\n=== Pratik Önemi ===")
+print("Binary search: log₂(1M) ≈ 20 adım")
+print("Base-10 search: log₁₀(1M) = 6 adım")
+print("→ Sabit farkla (3.32x), Big O'da aynı!")
+print("\n⚠️ Asimptotik analiz: n → ∞ için davranış")
+print("   Sabit farklar kaybolur!")</code></pre>
+                    <div class="output">Çıktı bekleniyor...</div>
+                </div>
+
+                <h4 style="color: #2e7d32; margin-top: 25px;">🎯 O(n log n) için de Aynı!</h4>
+                <p>Merge sort ister log₂(n), ister log₁₀(n) kullanın:</p>
+                <ul>
+                    <li>n × log₂(n) = <strong>O(n log n)</strong></li>
+                    <li>n × log₁₀(n) = n × (log₂(n) / 3.32) = <strong>O(n log n)</strong></li>
+                </ul>
+                <p style="font-weight: bold; color: #2e7d32;">→ Logaritma tabanı Big O notasyonunda önemsiz!</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📈 İnteraktif Karşılaştırma Grafiği</h2>
+
+            <div style="margin: 20px 0; padding: 20px; background: var(--bg-tertiary); border-radius: 10px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px;">
+                    📏 Veri Boyutu (n): <span id="nValue" style="color: #667eea;">1000</span>
+                </label>
+                <input type="range" id="nSlider" min="1" max="10000" value="1000" style="width: 100%;">
+
+                <div style="margin-top: 15px;">
+                    <button class="btn" onclick="setN(10)">n=10</button>
+                    <button class="btn" onclick="setN(100)">n=100</button>
+                    <button class="btn" onclick="setN(1000)">n=1000</button>
+                    <button class="btn" onclick="setN(5000)">n=5000</button>
+                    <button class="btn" onclick="setN(10000)">n=10000</button>
+                </div>
+
+                <div style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border: 2px solid #ffc107;">
+                    <h4 style="margin-top: 0; color: #856404;">🔍 Grafik Zoom Kontrolleri</h4>
+                    <p style="margin-bottom: 10px;">Y ekseni görünümünü ayarlayın:</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" onclick="setYScale('auto')" style="background: #27ae60; color: white;">📊 Otomatik Ölçek</button>
+                        <button class="btn" onclick="setYScale('linear')" style="background: #3498db; color: white;">📈 Lineer</button>
+                        <button class="btn" onclick="setYScale('log')" style="background: #e74c3c; color: white;">📊 Logaritmik</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                <canvas id="complexityChart" style="max-width: 100%; height: 500px;"></canvas>
+            </div>
+
+            <div id="comparisonTable" style="margin-top: 20px;"></div>
+        </div>
+
+        <div class="section">
+            <h2>🌟 Gerçek Dünyada Algoritma Analizi: Neden Bu Kadar Önemli?</h2>
+
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 35px; border-radius: 20px; margin: 30px 0; box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);">
+                <h3 style="color: white; margin-top: 0; font-size: 1.8em;">💡 Scalability: Küçük Farklar, Büyük Sonuçlar</h3>
+                <p style="font-size: 1.15em; line-height: 1.8; margin-bottom: 20px;">
+                    Çoğu insan algoritma hızının önemini <strong>küçük verilerle test ederken</strong> fark edemez.
+                    Asıl fark, kodunuz <strong>milyonlarca kez çalıştırıldığında</strong> ya da <strong>milyarlarca veriyle</strong> karşılaştığında ortaya çıkar!
+                </p>
+            </div>
+
+            <div style="background: #fff3cd; border-left: 6px solid #ffc107; padding: 25px; border-radius: 12px; margin: 25px 0;">
+                <h4 style="color: #856404; margin-top: 0;">📖 Hikaye 1: Netflix'in 1 Milyon Dolarlık Ödülü</h4>
+                <p style="margin-bottom: 15px;">
+                    2006'da Netflix, film öneri algoritmasını <strong>%10 iyileştiren</strong> kişiye <strong>1 milyon dolar</strong> ödül vaat etti.
+                </p>
+                <p style="margin-bottom: 15px;">
+                    <strong>Neden?</strong> Çünkü Netflix'in öneri sistemi günde <strong>milyarlarca kez</strong> çalışıyor.
+                    %10'luk bir doğruluk iyileştirmesi:
+                </p>
+                <ul style="margin-left: 20px;">
+                    <li>✅ Daha mutlu kullanıcılar → Daha az iptal</li>
+                    <li>✅ Daha fazla izlenme → Daha fazla gelir</li>
+                    <li>✅ Daha iyi öneriler → Kullanıcı bağlılığı</li>
+                </ul>
+                <p style="font-weight: bold; color: #856404; margin-top: 15px;">
+                    → Kazanan takım: Matrix factorization + ensemble yöntemleri kullandı
+                </p>
+                <p style="font-size: 0.95em; color: #666; margin-top: 10px;">
+                    <em>Not: Bu yarışma algoritma hızından çok doğruluğu arttırmakla ilgiliydi, ama yine de makine öğrenmesi modellerinin verimliliği kritikti.</em>
+                </p>
+            </div>
+
+            <div style="background: #e3f2fd; border-left: 6px solid #2196f3; padding: 25px; border-radius: 12px; margin: 25px 0;">
+                <h4 style="color: #1565c0; margin-top: 0;">⚡ Hikaye 2: Google Arama - Her Milisaniye Önemli</h4>
+                <p style="margin-bottom: 15px;">
+                    Google, arama sonuçlarını <strong>0.5 saniye yavaşlatınca</strong> trafiğin <strong>%20 düştüğünü</strong> keşfetti.
+                </p>
+                <div style="background: white; padding: 20px; border-radius: 10px; margin: 15px 0;">
+                    <p style="margin: 5px 0;"><strong>Gerçek:</strong> Google milyarlarca web sayfasını indeksler</p>
+                    <p style="margin: 5px 0;"><strong>Kullanılan:</strong> Inverted index + PageRank (graf algoritması)</p>
+                    <p style="margin: 5px 0;"><strong>Karmaşıklık:</strong> Her arama ~O(k log n) - k: arama terimleri, n: toplam sayfa</p>
+                    <hr style="margin: 15px 0;">
+                    <p style="margin: 5px 0; font-weight: bold;">Eğer kötü algoritma kullansaydı:</p>
+                    <p style="margin: 5px 0; color: #d32f2f;">Linear search (O(n)): Milyarlarca sayfayı teker teker tara → Saatler sürer</p>
+                    <p style="margin: 5px 0; color: #388e3c;">Akıllı indeksleme: Önceden işlenmiş index → Milisaniyeler</p>
+                </div>
+                <p style="font-weight: bold; color: #1565c0; margin-top: 15px;">
+                    → Veri yapıları (hash table, B-tree) + akıllı önbellek = Hız
+                </p>
+            </div>
+
+            <div style="background: #fce4ec; border-left: 6px solid #e91e63; padding: 25px; border-radius: 12px; margin: 25px 0;">
+                <h4 style="color: #880e4f; margin-top: 0;">🏥 Hikaye 3: DNA Dizilimi - Burrows-Wheeler Transform</h4>
+                <p style="margin-bottom: 15px;">
+                    İnsan genomunu analiz etmek için <strong>DNA dizilerini hizalama</strong> gerekiyor.
+                </p>
+                <div style="background: white; padding: 20px; border-radius: 10px; margin: 15px 0;">
+                    <p style="margin: 5px 0;"><strong>Problem:</strong> 3 milyar baz çiftini referans genoma eşleştir</p>
+                    <p style="margin: 5px 0; color: #d32f2f;"><strong>Naive yöntem:</strong> Her parçayı tüm genomda ara → Aylar sürer</p>
+                    <p style="margin: 5px 0; color: #388e3c;"><strong>BWA (Burrows-Wheeler Aligner):</strong> Özel indeksleme → Saatler</p>
+                    <hr style="margin: 15px 0;">
+                    <p style="margin: 5px 0;"><strong>Kullanılan teknikler:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>Suffix array (O(n log n) oluşturma)</li>
+                        <li>FM-index (çok hızlı arama)</li>
+                        <li>BWT transformasyonu (veri sıkıştırma)</li>
+                    </ul>
+                </div>
+                <p style="font-weight: bold; color: #880e4f; margin-top: 15px;">
+                    → Fark: İşe yaramaz vs gerçekten kullanılabilir = Tedavi mümkün oluyor!
+                </p>
+            </div>
+
+            <div style="background: #e8f5e9; border-left: 6px solid #4caf50; padding: 25px; border-radius: 12px; margin: 25px 0;">
+                <h4 style="color: #2e7d32; margin-top: 0;">🌍 Hikaye 4: Facebook Feed - Enerji ve Çevre</h4>
+                <p style="margin-bottom: 15px;">
+                    Facebook (Meta) her gün <strong>3 milyar kullanıcıya</strong> kişiselleştirilmiş feed gösteriyor.
+                </p>
+                <div style="background: white; padding: 20px; border-radius: 10px; margin: 15px 0;">
+                    <p style="margin: 5px 0;"><strong>Her kullanıcı:</strong> Günde ~100 post öneriyor</p>
+                    <p style="margin: 5px 0;"><strong>Toplam:</strong> 300 milyar post sıralaması/gün</p>
+                    <p style="margin: 5px 0; color: #d32f2f;"><strong>%1 algoritma iyileştirmesi:</strong> 3 milyar daha az işlem/gün</p>
+                </div>
+                <p style="margin-bottom: 10px;"><strong>Sonuç:</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>✅ Daha az sunucu → Yılda milyonlarca dolar tasarruf</li>
+                    <li>✅ Daha az enerji tüketimi → Binlerce ton CO₂ azaltma</li>
+                    <li>✅ Daha hızlı uygulama → Daha mutlu kullanıcılar</li>
+                </ul>
+                <p style="font-weight: bold; color: #2e7d32; margin-top: 15px;">
+                    → %1 iyileştirme bile gezegeni kurtarmaya yardımcı olabilir!
+                </p>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 35px; border-radius: 20px; margin: 30px 0; box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);">
+                <h3 style="color: white; margin-top: 0; font-size: 1.6em;">🚀 Sizin Kodunuz da Scalable Olmalı!</h3>
+                <p style="font-size: 1.1em; line-height: 1.8; margin-bottom: 15px;">
+                    "Benim projemde sadece 100 kullanıcı var, neden önemli?" diye düşünebilirsiniz. Ama:
+                </p>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li>📱 Bugün 100 kullanıcı → Yarın 10,000 → Gelecek yıl 1 milyon?</li>
+                    <li>🔄 Bir fonksiyon saniyede 1000 kez çağrılıyor mu?</li>
+                    <li>📊 Veri büyüdükçe uygulamanız çökecek mi yoksa hızlanacak mı?</li>
+                    <li>💰 Bulut maliyetleri kontrol dışına çıkacak mı?</li>
+                </ul>
+                <div style="background: rgba(255, 255, 255, 0.2); padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <p style="font-weight: bold; font-size: 1.3em; margin: 0; text-align: center;">
+                        "Scalability baştan düşünülmez, sonradan çözülemez!"
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 30px; border-radius: 15px; margin: 25px 0; border: 2px solid var(--accent-blue);">
+                <h4 style="color: var(--text-primary); margin-top: 0;">📌 Unutmayın:</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 10px;">
+                        <h5 style="color: #667eea; margin-top: 0;">⚡ Hız = Para</h5>
+                        <p style="margin: 0;">Amazon: 100ms yavaşlama = %1 satış kaybı</p>
+                    </div>
+                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 10px;">
+                        <h5 style="color: #667eea; margin-top: 0;">🌍 Hız = Çevre</h5>
+                        <p style="margin: 0;">Daha verimli kod = Daha az sunucu = Daha az karbon</p>
+                    </div>
+                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 10px;">
+                        <h5 style="color: #667eea; margin-top: 0;">💝 Hız = Kullanıcı Mutluluğu</h5>
+                        <p style="margin: 0;">Hızlı uygulama = Mutlu kullanıcı = Daha fazla kullanım</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 12px;">
+                <h4 style="color: #2e7d32; margin-top: 0;">✅ Bu Derste Öğrendikleriniz</h4>
+                <ul>
+                    <li>📊 <strong>Big O notasyonu</strong> - Algoritma hızını ölçme</li>
+                    <li>💻 <strong>Karmaşıklık örnekleri:</strong> O(1), O(log n), O(n), O(n log n), O(n²), O(2ⁿ)</li>
+                    <li>📏 <strong>Logaritma tabanı</strong> - Neden önemsiz olduğu</li>
+                    <li>🌍 <strong>Gerçek dünya uygulamaları</strong></li>
+                </ul>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="font-weight: bold; color: #2e7d32; font-size: 1.1em;">🎯 Ana Mesaj:</p>
+                    <p>Doğru algoritma seçimi hayat kurtarır, milyarlarca dolar tasarruf sağlar ve imkansızı mümkün kılar!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+
+    <!-- Page-specific visualization -->
+    <script>
+        const slider = document.getElementById('nSlider');
+        const nValue = document.getElementById('nValue');
+        let yScaleMode = 'auto';
+        let myChart = null;
+
+        function setN(value) {
+            slider.value = value;
+            nValue.textContent = value;
+            drawChart();
+            updateTable();
+        }
+
+        function setYScale(mode) {
+            yScaleMode = mode;
+            drawChart();
+            updateTable();
+        }
+
+        slider.addEventListener('input', (e) => {
+            nValue.textContent = e.target.value;
+            drawChart();
+            updateTable();
+        });
+
+        function generateData(n, fn) {
+            const data = [];
+            const step = Math.max(1, Math.floor(n / 200));
+            for (let x = 1; x <= n; x += step) {
+                const y = fn(x);
+                if (y !== null && y !== undefined && isFinite(y)) {
+                    data.push({ x, y });
+                }
+            }
+            const lastY = fn(n);
+            if (lastY !== null && lastY !== undefined && isFinite(lastY)) {
+                data.push({ x: n, y: lastY });
+            }
+            return data;
+        }
+
+        function drawChart() {
+            const n = parseInt(slider.value);
+
+            const datasets = [
+                {
+                    label: 'O(1)',
+                    data: generateData(n, x => 1),
+                    borderColor: '#27ae60',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: false
+                },
+                {
+                    label: 'O(log n)',
+                    data: generateData(n, x => Math.log2(x)),
+                    borderColor: '#16a085',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: false
+                },
+                {
+                    label: 'O(n)',
+                    data: generateData(n, x => x),
+                    borderColor: '#3498db',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: false
+                },
+                {
+                    label: 'O(n log n)',
+                    data: generateData(n, x => x * Math.log2(x)),
+                    borderColor: '#9b59b6',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: false
+                },
+                {
+                    label: 'O(n²)',
+                    data: generateData(n, x => x * x),
+                    borderColor: '#e67e22',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: false
+                },
+                {
+                    label: 'O(2ⁿ)',
+                    data: generateData(n, x => x <= 25 ? Math.pow(2, x) : null),
+                    borderColor: '#e74c3c',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: false
+                }
+            ];
+
+            const config = {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Algoritma Karmaşıklık Karşılaştırması (n = ${n})`,
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { font: { size: 13 }, padding: 15, usePointStyle: true }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('tr-TR', {maximumFractionDigits: 0})}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'Input Size (n)', font: { size: 14, weight: 'bold' } },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { font: { size: 11 } }
+                        },
+                        y: {
+                            type: yScaleMode === 'log' ? 'logarithmic' : 'linear',
+                            title: { display: true, text: 'Operations', font: { size: 14, weight: 'bold' } },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: {
+                                font: { size: 11 },
+                                callback: val => {
+                                    if (val >= 1e6) return (val / 1e6).toFixed(0) + 'M';
+                                    if (val >= 1e3) return (val / 1e3).toFixed(0) + 'K';
+                                    return val.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (myChart) myChart.destroy();
+            myChart = new Chart(document.getElementById('complexityChart'), config);
+        }
+
+        function updateTable() {
+            const n = parseInt(slider.value);
+            const table = document.getElementById('comparisonTable');
+
+            const data = [
+                { name: 'O(1)', value: 1 },
+                { name: 'O(log n)', value: Math.log2(n) },
+                { name: 'O(n)', value: n },
+                { name: 'O(n log n)', value: n * Math.log2(n) },
+                { name: 'O(n²)', value: n * n },
+                { name: 'O(2ⁿ)', value: n <= 30 ? Math.pow(2, n) : 'Çok büyük (>1 milyar)' }
+            ];
+
+            let html = `
+                <div style="background: var(--bg-secondary); padding: 20px; border-radius: 10px;">
+                    <h3>📊 n = ${n} için işlem sayısı</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <tr style="background: #34495e; color: white;">
+                            <th style="padding: 12px; text-align: left;">Karmaşıklık</th>
+                            <th style="padding: 12px; text-align: right;">İşlem Sayısı</th>
+                        </tr>
+            `;
+
+            data.forEach((d, i) => {
+                const bg = i % 2 === 0 ? 'var(--bg-tertiary)' : 'var(--bg-secondary)';
+                const valueStr = typeof d.value === 'number' ?
+                    d.value.toLocaleString('tr-TR', {maximumFractionDigits: 0}) :
+                    d.value;
+                html += `
+                    <tr style="background: ${bg};">
+                        <td style="padding: 12px; font-weight: bold;">${d.name}</td>
+                        <td style="padding: 12px; text-align: right; font-family: monospace;">${valueStr}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</table></div>';
+            table.innerHTML = html;
+        }
+
+        drawChart();
+        updateTable();
+    </script>
+</body>
+</html>

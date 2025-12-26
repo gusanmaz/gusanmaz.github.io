@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.3: Python ile Queue Pratiği</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🚀 3.3: Python Deque ve Wrapper Sınıflar</h1>
+            <p>Neden Hazır Yapıları Sarmalamalıyız?</p>
+        </header>
+
+        <div class="section">
+            <h2>⚠️ Neden Python List Queue Olamaz?</h2>
+            <p>Python listeleri hafızada <strong>bitişik (contiguous)</strong> durur. Bu, C'deki dizilere benzer bir yapıdır.</p>
+            <p><code>pop(0)</code> ile en baştan eleman silerseniz, geriye kalan <strong>TÜM</strong> elemanlar bir adım sola kaymak zorundadır.</p>
+
+            <div style="background: linear-gradient(135deg, #fff3cd, #ffeeba); border: 2px solid #ffc107; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <h4 style="margin-top:0;">📊 Kaydırma (Shifting) Maliyeti</h4>
+                <ul>
+                    <li>10 elemanlı listede: 9 kaydırma işlemi</li>
+                    <li>1,000 elemanlı listede: 999 kaydırma işlemi</li>
+                    <li>1,000,000 elemanlı listede: 999,999 kaydırma işlemi!</li>
+                </ul>
+                <p><strong>Sonuç:</strong> <code>list.pop(0)</code> → <span style="color:red;">O(n)</span> zaman karmaşıklığı</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✅ Çözüm: collections.deque</h2>
+            <p><strong>Deque (Double Ended Queue)</strong>, iki ucu açık boru gibidir. İçeride <strong>doubly linked list</strong> benzeri bir yapı kullanır.</p>
+            <p>Hem baştan hem sondan ekleme/çıkarma işlemleri <strong>O(1)</strong> sabit zamanda gerçekleşir.</p>
+
+            <div style="display:flex; justify-content:center; gap:20px; margin:20px 0; font-family:monospace; flex-wrap:wrap;">
+                <div style="padding:10px 15px; border:2px solid #27ae60; border-radius:5px; background:var(--card-bg);">
+                    appendleft() ⬅️ [ DEQUE ] ➡️ append()
+                </div>
+                <div style="padding:10px 15px; border:2px solid #c0392b; border-radius:5px; background:var(--card-bg);">
+                    popleft() ⬅️ [ DEQUE ] ➡️ pop()
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🤔 Deque'nin Problemi: Çok Esnek!</h2>
+
+            <div style="background: linear-gradient(135deg, #f8d7da, #f5c6cb); border: 2px solid #dc3545; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <h4 style="margin-top:0; color:#721c24;">❌ Sorun: Kullanıcı Kısıtlanmıyor</h4>
+                <p><code>deque</code> hem Stack hem Queue gibi kullanılabilir, ama bu <strong>tehlikelidir</strong>:</p>
+                <p><strong>Veri yapısı kuralları ihlal edildi!</strong> Queue FIFO olmalı, ama kullanıcı LIFO işlemi yaptı.</p>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border: 2px solid #28a745; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <h4 style="margin-top:0; color:#155724;">✅ Çözüm: Wrapper Class ile Kısıtlama</h4>
+                <p>Kullanıcıya <strong>sadece izin verilen metodları</strong> sunarak veri yapısı kurallarını zorla:</p>
+                <ul>
+                    <li>Queue için: Sadece <code>enqueue()</code> ve <code>dequeue()</code></li>
+                    <li>Stack için: Sadece <code>push()</code> ve <code>pop()</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🛠️ Queue Wrapper Sınıfı</h2>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code1')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code1">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📚 Stack Wrapper Sınıfı</h2>
+            <p>Aynı deque'yi Stack için de kullanabiliriz, ama farklı metodlar sunarız:</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code-stack')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code-stack">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 Performans Yarışı: List vs Deque</h2>
+            <p>100,000 elemanı baştan silme yarışı. List neden kaybedecek?</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code2')">▶ Yarışı Başlat</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code2">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Özet: Ne Zaman Ne Kullan?</h2>
+            <table style="width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 10px; overflow: hidden;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white;">
+                        <th style="padding: 15px;">İhtiyaç</th>
+                        <th style="padding: 15px;">Kullanım</th>
+                        <th style="padding: 15px;">Neden?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Queue (FIFO)</td>
+                        <td style="padding: 12px;"><code>Queue</code> wrapper</td>
+                        <td style="padding: 12px;">Kullanıcı kısıtlanır, sadece enqueue/dequeue</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Stack (LIFO)</td>
+                        <td style="padding: 12px;"><code>Stack</code> wrapper</td>
+                        <td style="padding: 12px;">Kullanıcı kısıtlanır, sadece push/pop</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">İki uçlu işlem</td>
+                        <td style="padding: 12px;"><code>deque</code> doğrudan</td>
+                        <td style="padding: 12px;">Hem baş hem son gerekli</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px;">Random access</td>
+                        <td style="padding: 12px;"><code>list</code></td>
+                        <td style="padding: 12px;">Index ile erişim O(1)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+        async function runCode(id) {
+            await CodeBlocks.runPython(id);
+        }
+    </script>
+</body>
+</html>

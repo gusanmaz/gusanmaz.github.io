@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.2: Normal Queue Problemi ve Circular Queue</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🔄 3.2: Normal Queue Problemi ve Circular Queue</h1>
+            <p>Neden Dairesel Kuyruk Gerekli?</p>
+        </header>
+
+        <!-- Normal Queue Problemi -->
+        <div class="section">
+            <h2>🤔 Önce Normal (Linear) Queue'yu Anlayalım</h2>
+            <p>Bir diziyi queue olarak kullandığımızda <strong>head</strong> (baş) ve <strong>tail</strong> (kuyruk) pointer'ları kullanırız:</p>
+
+            <ul>
+                <li><strong>head:</strong> İlk elemanın (çıkacak olanın) indeksi</li>
+                <li><strong>tail:</strong> Yeni elemanın ekleneceği indeks</li>
+            </ul>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Normal (Linear) Queue - Problem Gösterimi</span>
+                    <button class="btn btn-run" onclick="runCode('code-linear')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code-linear">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Problemi Görselleştirelim</h2>
+
+            <div style="background: linear-gradient(135deg, #fff5f5, #fed7d7); border: 2px solid #fc8181; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                <h4 style="margin-top:0; color:#c53030;">❌ Normal Queue Problemi: "False Overflow"</h4>
+                <p><strong>tail=5 oldu ama dizi boyutu 5. Başta 2 hücre boş olmasına rağmen yeni eleman ekleyemiyoruz!</strong></p>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #f0fff4, #c6f6d5); border: 2px solid #68d391; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                <h4 style="margin-top:0; color:#276749;">✅ Çözüm: Circular Queue (Modülo ile)</h4>
+                <p>Pointer'ları <code>% capacity</code> ile sarmalayarak dizinin başına dönebiliriz:</p>
+                <pre style="background:var(--code-bg); color:var(--code-text); padding:15px; border-radius:8px; margin:10px 0;">tail = (tail + 1) % capacity  # 5 % 5 = 0 (başa döner!)
+head = (head + 1) % capacity</pre>
+                <p>Bu sayede dizi <strong>dairesel</strong> olarak kullanılır ve hafıza israfı önlenir.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Circular Queue Görsel Simülasyonu</h2>
+            <div id="clock-container" style="width: 300px; height: 300px; margin: 20px auto; position: relative; border: 2px dashed var(--border-color); border-radius: 50%;"></div>
+            <div style="text-align: center;">
+                <button class="btn btn-run" onclick="circularEnqueue()">Enqueue</button>
+                <button class="btn btn-reset" onclick="circularDequeue()">Dequeue</button>
+                <p id="circular-status" style="margin-top: 10px;">Head: 0, Tail: 0</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💻 Circular Queue - Numpy Implementasyonu</h2>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code-circular')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code-circular">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <!-- Karşılaştırma Tablosu -->
+        <div class="section">
+            <h2>📊 Linear vs Circular Queue Karşılaştırması</h2>
+            <table style="width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 10px; overflow: hidden;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white;">
+                        <th style="padding: 15px;">Özellik</th>
+                        <th style="padding: 15px;">Linear Queue</th>
+                        <th style="padding: 15px;">Circular Queue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>Hafıza Kullanımı</strong></td>
+                        <td style="padding: 12px; color: #e74c3c;">❌ İsraf var (false overflow)</td>
+                        <td style="padding: 12px; color: #27ae60;">✅ Tam verimli</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>Pointer Güncelleme</strong></td>
+                        <td style="padding: 12px;"><code>tail++</code></td>
+                        <td style="padding: 12px;"><code>tail = (tail+1) % cap</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>Doluluk Kontrolü</strong></td>
+                        <td style="padding: 12px;"><code>tail == capacity</code></td>
+                        <td style="padding: 12px;"><code>size == capacity</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px;"><strong>Zaman Karmaşıklığı</strong></td>
+                        <td style="padding: 12px;">O(1)</td>
+                        <td style="padding: 12px;">O(1)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modülo Aritmetiği -->
+        <div class="section">
+            <h2>🔢 Modülo (%) Operatörü Nasıl Çalışır?</h2>
+            <p>Modülo, bölme işleminin <strong>kalanını</strong> verir ve circular yapılar için mükemmeldir:</p>
+
+            <pre style="background: var(--code-bg); color: var(--code-text); padding: 20px; border-radius: 10px; overflow-x: auto;"><code># Kapasite = 5 iken:
+0 % 5 = 0  # Başlangıç
+1 % 5 = 1
+2 % 5 = 2
+3 % 5 = 3
+4 % 5 = 4
+5 % 5 = 0  # ← Tekrar başa döndü!
+6 % 5 = 1
+7 % 5 = 2
+
+# Bu sayede dizi hiçbir zaman "taşmaz",
+# sadece başa döner (wrap-around)</code></pre>
+
+            <p><strong>Gerçek hayat analojisi:</strong> Saat kadranı! 12'den sonra 1'e döner (12 % 12 = 0, sonra 1, 2, 3...).</p>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+        // Circular Visual
+        const CAP = 8;
+        const RADIUS = 130;
+        let cHead = 0, cTail = 0, cSize = 0;
+        const items = new Array(CAP).fill(null);
+
+        function initCircularVisual() {
+            const container = document.getElementById('clock-container');
+            container.innerHTML = '';
+
+            for(let i = 0; i < CAP; i++) {
+                const angle = (i * (360 / CAP)) - 90;
+                const rad = angle * (Math.PI / 180);
+                const x = 150 + RADIUS * Math.cos(rad) - 25;
+                const y = 150 + RADIUS * Math.sin(rad) - 25;
+                const cell = document.createElement('div');
+                cell.className = 'circular-cell';
+                cell.id = `cell-${i}`;
+                cell.style.cssText = `
+                    position: absolute;
+                    width: 50px;
+                    height: 50px;
+                    background: var(--card-bg);
+                    border: 2px solid var(--border-color);
+                    border-radius: 50%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 14px;
+                    transition: all 0.3s;
+                    left: ${x}px;
+                    top: ${y}px;
+                `;
+                cell.innerHTML = `<span style="font-size: 10px; color: var(--muted); position: absolute; top: -15px;">${i}</span><span class="val">-</span>`;
+                container.appendChild(cell);
+            }
+            updateCircularPointers();
+        }
+
+        function updateCircularPointers() {
+            for(let i = 0; i < CAP; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                if(items[i] !== null) {
+                    cell.style.background = 'var(--accent)';
+                    cell.style.color = 'white';
+                    cell.querySelector('.val').innerText = items[i];
+                } else {
+                    cell.style.background = 'var(--card-bg)';
+                    cell.style.color = 'var(--text-color)';
+                    cell.querySelector('.val').innerText = '-';
+                }
+            }
+            document.getElementById('circular-status').innerText = `Head: ${cHead}, Tail: ${cTail}, Size: ${cSize}`;
+        }
+
+        function circularEnqueue() {
+            if(cSize < CAP) {
+                items[cTail] = String.fromCharCode(65 + Math.floor(Math.random()*26));
+                cTail = (cTail + 1) % CAP;
+                cSize++;
+                updateCircularPointers();
+            }
+        }
+
+        function circularDequeue() {
+            if(cSize > 0) {
+                items[cHead] = null;
+                cHead = (cHead + 1) % CAP;
+                cSize--;
+                updateCircularPointers();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initCircularVisual);
+
+        // Pyodide runner
+        async function runCode(id) {
+            await CodeBlocks.runPython(id);
+        }
+    </script>
+</body>
+</html>

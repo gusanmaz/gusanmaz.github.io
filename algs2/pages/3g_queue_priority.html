@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.7: Priority Queue - Öncelikli Kuyruk</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>⭐ 3.7: Priority Queue (Öncelikli Kuyruk)</h1>
+            <p>Heap Veri Yapısı ve heapq Modülü</p>
+        </header>
+
+        <div class="section">
+            <h2>🤔 Priority Queue Nedir?</h2>
+            <p><strong>Priority Queue</strong>, normal kuyruktan farklı olarak elemanları <em>öncelik sırasına</em> göre işler. En yüksek (veya en düşük) öncelikli eleman her zaman ilk çıkar.</p>
+
+            <div style="display: flex; gap: 30px; margin: 20px 0; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <h3>Normal Queue (FIFO)</h3>
+                    <div style="background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <span style="font-size: 24px;">1️⃣</span>
+                        <span>İlk gelen → İlk çıkar</span>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <h3>Priority Queue</h3>
+                    <div style="background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <span style="font-size: 24px;">⭐</span>
+                        <span>En öncelikli → İlk çıkar</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Gerçek Hayat Örnekleri</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex:1; min-width:200px; background: var(--card-bg); padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #e74c3c; color: white; font-weight: bold;">🏥</div>
+                    <div>
+                        <strong>Acil Servis</strong>
+                        <p style="margin:0; font-size:14px; color:var(--muted);">Kalp krizi > Kırık kol > Soğuk algınlığı</p>
+                    </div>
+                </div>
+                <div style="flex:1; min-width:200px; background: var(--card-bg); padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f39c12; color: white; font-weight: bold;">✈️</div>
+                    <div>
+                        <strong>Havalimanı</strong>
+                        <p style="margin:0; font-size:14px; color:var(--muted);">First Class > Business > Economy</p>
+                    </div>
+                </div>
+                <div style="flex:1; min-width:200px; background: var(--card-bg); padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #3498db; color: white; font-weight: bold;">💻</div>
+                    <div>
+                        <strong>İşletim Sistemi</strong>
+                        <p style="margin:0; font-size:14px; color:var(--muted);">Sistem süreci > Kullanıcı uygulaması</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🌳 Heap Veri Yapısı</h2>
+            <p>Priority Queue genellikle <strong>Binary Heap</strong> ile implemente edilir. Heap, tam ikili ağaç (complete binary tree) özelliğini korur.</p>
+
+            <h3>Zaman Karmaşıklığı</h3>
+            <table style="width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 10px; overflow: hidden;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                        <th style="padding: 15px;">Operasyon</th>
+                        <th style="padding: 15px;">Heap</th>
+                        <th style="padding: 15px;">Sıralı Liste</th>
+                        <th style="padding: 15px;">Sırasız Liste</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>Insert (Ekleme)</strong></td>
+                        <td style="padding: 12px; color:#27ae60;">O(log n)</td>
+                        <td style="padding: 12px; color:#e74c3c;">O(n)</td>
+                        <td style="padding: 12px; color:#27ae60;">O(1)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>Extract Min/Max</strong></td>
+                        <td style="padding: 12px; color:#27ae60;">O(log n)</td>
+                        <td style="padding: 12px; color:#27ae60;">O(1)</td>
+                        <td style="padding: 12px; color:#e74c3c;">O(n)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px;"><strong>Peek (Bakma)</strong></td>
+                        <td style="padding: 12px; color:#27ae60;">O(1)</td>
+                        <td style="padding: 12px; color:#27ae60;">O(1)</td>
+                        <td style="padding: 12px; color:#e74c3c;">O(n)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🐍 Python heapq Modülü</h2>
+            <p>Python'da <code>heapq</code> modülü <strong>Min-Heap</strong> implementasyonu sağlar.</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code1')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code1">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💻 Priority Queue Sınıfı</h2>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code2')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code2">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Dijkstra'nın En Kısa Yol Algoritması</h2>
+            <p>Priority Queue'nun en ünlü kullanım alanlarından biri <strong>Dijkstra algoritması</strong>dır. GPS navigasyonunda kullanılır.</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code3')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code3">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+        async function runCode(id) {
+            await CodeBlocks.runPython(id);
+        }
+    </script>
+</body>
+</html>

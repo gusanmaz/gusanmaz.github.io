@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.4: BST Örnek Sorular</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <style>
+
+        .problem-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-top: 5px solid #3498db;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .easy { background: #d4edda; color: #155724; }
+        .medium { background: var(--card-bg)3cd; color: #856404; }
+        .hard { background: #f8d7da; color: #721c24; }
+
+        .problem-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .problem-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .hint-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .solution-toggle {
+            cursor: pointer;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            border: 2px dashed #ddd;
+            transition: all 0.3s;
+        }
+
+        .solution-toggle:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .solution-content {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .test-case {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 8px 0;
+            font-family: monospace;
+        }
+        </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+<header>
+        <h1>🧩 5.4: BST Örnek Sorular</h1>
+        <p>Pratik Yaparak Öğrenin</p>
+    </header>
+
+    <!-- SORU 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <div class="problem-number">1</div>
+            <h3 style="margin:0;">BST'nin Yüksekliğini Bulma</h3>
+            <span class="difficulty easy">Kolay</span>
+        </div>
+
+        <p>Bir BST'nin yüksekliğini (height) bulan fonksiyon yazın. Yükseklik, kökten en derin yaprağa olan kenar sayısıdır.</p>
+
+        <div class="test-case">
+            <strong>Örnek:</strong> Ağaç [50, 30, 70, 20, 40] → Yükseklik: 2
+        </div>
+
+        <div class="hint-box">
+            <strong>💡 İpucu:</strong> Recursive düşünün: Bir node'un yüksekliği = 1 + max(sol_yükseklik, sağ_yükseklik)
+        </div>
+
+        <div class="solution-toggle" onclick="toggleSolution('sol1')">
+            👁️ Çözümü Göster/Gizle
+        </div>
+
+        <div class="solution-content" id="sol1">
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Çözümü</span>
+                    <div>
+                        <button class="btn btn-run" onclick="CodeBlocks.run(\'code1\')">▶ Çalıştır</button>
+                    </div>
+                </div>
+
+                <pre id="view-code1"><code class="language-python line-numbers">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+def height(node):
+    """
+    BST yüksekliğini bul - O(n)
+    Her node'u bir kez ziyaret etmemiz gerekir
+    """
+    # Base case: Boş node
+    if node is None:
+        return -1  # Boş ağacın yüksekliği -1
+
+    # Recursive: Sol ve sağ alt ağaçların yüksekliği
+    left_height = height(node.left)
+    right_height = height(node.right)
+
+    # Maksimum + 1 (bu node için)
+    return 1 + max(left_height, right_height)
+
+# Test
+root = Node(50)
+root.left = Node(30)
+root.right = Node(70)
+root.left.left = Node(20)
+root.left.right = Node(40)
+
+print("🌳 Ağaç yapısı:")
+print("       50")
+print("      /  \\")
+print("    30    70")
+print("   /  \\")
+print("  20   40")
+print()
+print(f"Yükseklik: {height(root)}")  # 2
+
+# Daha derin ağaç test et
+root.left.left.left = Node(10)
+print(f"\n10 eklendi → Yeni yükseklik: {height(root)}")  # 3</code></pre>
+
+                
+
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SORU 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <div class="problem-number">2</div>
+            <h3 style="margin:0;">Minimum ve Maksimum Değer</h3>
+            <span class="difficulty easy">Kolay</span>
+        </div>
+
+        <p>BST'deki minimum ve maksimum değerleri bulan fonksiyonlar yazın.</p>
+
+        <div class="test-case">
+            <strong>Örnek:</strong> Ağaç [50, 30, 70, 20, 40, 60, 80] → Min: 20, Max: 80
+        </div>
+
+        <div class="hint-box">
+            <strong>💡 İpucu:</strong> BST özelliği: En küçük değer en soldaki node, en büyük değer en sağdaki node!
+        </div>
+
+        <div class="solution-toggle" onclick="toggleSolution('sol2')">
+            👁️ Çözümü Göster/Gizle
+        </div>
+
+        <div class="solution-content" id="sol2">
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Çözümü</span>
+                    <div>
+                        <button class="btn btn-run" onclick="CodeBlocks.run(\'code2\')">▶ Çalıştır</button>
+                    </div>
+                </div>
+
+                <pre id="view-code2"><code class="language-python line-numbers">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+def find_min(node):
+    """
+    BST'deki minimum değer - O(h)
+    Her zaman sola git!
+    """
+    if node is None:
+        return None
+
+    current = node
+    while current.left:
+        current = current.left
+
+    return current.data
+
+def find_max(node):
+    """
+    BST'deki maksimum değer - O(h)
+    Her zaman sağa git!
+    """
+    if node is None:
+        return None
+
+    current = node
+    while current.right:
+        current = current.right
+
+    return current.data
+
+# Recursive versiyonlar
+def find_min_recursive(node):
+    if node is None:
+        return None
+    if node.left is None:
+        return node.data
+    return find_min_recursive(node.left)
+
+def find_max_recursive(node):
+    if node is None:
+        return None
+    if node.right is None:
+        return node.data
+    return find_max_recursive(node.right)
+
+# Test
+root = Node(50)
+root.left = Node(30)
+root.right = Node(70)
+root.left.left = Node(20)
+root.left.right = Node(40)
+root.right.left = Node(60)
+root.right.right = Node(80)
+
+print("🌳 Ağaç: [50, 30, 70, 20, 40, 60, 80]")
+print()
+print(f"Minimum (iteratif): {find_min(root)}")
+print(f"Maksimum (iteratif): {find_max(root)}")
+print()
+print(f"Minimum (recursive): {find_min_recursive(root)}")
+print(f"Maksimum (recursive): {find_max_recursive(root)}")</code></pre>
+
+                
+
+                <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SORU 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <div class="problem-number">3</div>
+            <h3 style="margin:0;">BST Doğrulama</h3>
+            <span class="difficulty medium">Orta</span>
+        </div>
+
+        <p>Verilen bir binary tree'nin geçerli bir BST olup olmadığını kontrol eden fonksiyon yazın.</p>
+
+        <div class="test-case">
+            <strong>Örnek 1:</strong> [50, 30, 70] → True (Geçerli BST)<br>
+            <strong>Örnek 2:</strong> [50, 70, 30] (sol çocuk > kök) → False
+        </div>
+
+        <div class="hint-box">
+            <strong>💡 İpucu:</strong> Inorder traversal kullanın! BST ise inorder çıktı sıralı olmalı.
+        </div>
+
+        <div class="solution-toggle" onclick="toggleSolution('sol3')">
+            👁️ Çözümü Göster/Gizle
+        </div>
+
+        <div class="solution-content" id="sol3">
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Çözümü</span>
+                    <div>
+                        <button class="btn btn-run" onclick="CodeBlocks.run(\'code3\')">▶ Çalıştır</button>
+                    </div>
+                </div>
+
+                <pre id="view-code3"><code class="language-python line-numbers">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+def is_valid_bst_inorder(root):
+    """
+    Yöntem 1: Inorder traversal ile kontrol
+    BST ise → inorder çıktı kesinlikle sıralı!
+    """
+    result = []
+
+    def inorder(node):
+        if node:
+            inorder(node.left)
+            result.append(node.data)
+            inorder(node.right)
+
+    inorder(root)
+
+    # Sıralı mı kontrol et
+    for i in range(1, len(result)):
+        if result[i] <= result[i-1]:
+            return False
+    return True
+
+def is_valid_bst_bounds(node, min_val=float('-inf'), max_val=float('inf')):
+    """
+    Yöntem 2: Min/Max sınırları ile kontrol
+    Her node belirli bir aralıkta olmalı!
+    """
+    if node is None:
+        return True
+
+    # Bu node sınırlar içinde mi?
+    if node.data <= min_val or node.data >= max_val:
+        return False
+
+    # Sol: max sınır = bu node'un değeri
+    # Sağ: min sınır = bu node'un değeri
+    return (is_valid_bst_bounds(node.left, min_val, node.data) and
+            is_valid_bst_bounds(node.right, node.data, max_val))
+
+# Test 1: Geçerli BST
+print("=" * 50)
+print("Test 1: Geçerli BST")
+print("=" * 50)
+root1 = Node(50)
+root1.left = Node(30)
+root1.right = Node(70)
+root1.left.left = Node(20)
+root1.left.right = Node(40)
+
+print(f"Inorder yöntemi: {is_valid_bst_inorder(root1)}")
+print(f"Bounds yöntemi: {is_valid_bst_bounds(root1)}")
+
+# Test 2: Geçersiz BST (sol çocuk > kök)
+print("\n" + "=" * 50)
+print("Test 2: Geçersiz BST (sol > kök)")
+print("=" * 50)
+root2 = Node(50)
+root2.left = Node(60)  # YANLIŞ! 60 > 50
+root2.right = Node(70)
+
+print(f"Inorder yöntemi: {is_valid_bst_inorder(root2)}")
+print(f"Bounds yöntemi: {is_valid_bst_bounds(root2)}")
+
+# Test 3: Karmaşık geçersiz BST
+print("\n" + "=" * 50)
+print("Test 3: Gizli hata (sol alt ağaçta büyük değer)")
+print("=" * 50)
+#       50
+#      /  \
+#    30    70
+#   /  \
+#  20  60  ← 60 > 50, BST kuralı ihlali!
+root3 = Node(50)
+root3.left = Node(30)
+root3.right = Node(70)
+root3.left.left = Node(20)
+root3.left.right = Node(60)  # YANLIŞ!
+
+print(f"Inorder yöntemi: {is_valid_bst_inorder(root3)}")
+print(f"Bounds yöntemi: {is_valid_bst_bounds(root3)}")</code></pre>
+
+                
+
+                <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SORU 4 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <div class="problem-number">4</div>
+            <h3 style="margin:0;">k'ıncı En Küçük Eleman</h3>
+            <span class="difficulty medium">Orta</span>
+        </div>
+
+        <p>BST'deki k'ıncı en küçük elemanı bulan fonksiyon yazın.</p>
+
+        <div class="test-case">
+            <strong>Örnek:</strong> Ağaç [50, 30, 70, 20, 40], k=3 → 40 (20, 30, 40)
+        </div>
+
+        <div class="hint-box">
+            <strong>💡 İpucu:</strong> Inorder traversal sıralı çıktı verir. k'ıncı eleman = inorder[k-1]
+        </div>
+
+        <div class="solution-toggle" onclick="toggleSolution('sol4')">
+            👁️ Çözümü Göster/Gizle
+        </div>
+
+        <div class="solution-content" id="sol4">
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Çözümü</span>
+                    <div>
+                        <button class="btn btn-run" onclick="CodeBlocks.run(\'code4\')">▶ Çalıştır</button>
+                    </div>
+                </div>
+
+                <pre id="view-code4"><code class="language-python line-numbers">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+def kth_smallest(root, k):
+    """
+    k'ıncı en küçük eleman - O(n)
+    Inorder traversal ile
+    """
+    result = []
+
+    def inorder(node):
+        if node and len(result) < k:  # Optimizasyon: k eleman yeterli
+            inorder(node.left)
+            result.append(node.data)
+            inorder(node.right)
+
+    inorder(root)
+
+    if k <= len(result):
+        return result[k-1]
+    return None
+
+def kth_smallest_iterative(root, k):
+    """
+    k'ıncı en küçük eleman - O(h + k)
+    Stack ile iteratif inorder - daha verimli!
+    """
+    stack = []
+    current = root
+    count = 0
+
+    while stack or current:
+        # En sola git
+        while current:
+            stack.append(current)
+            current = current.left
+
+        # Backtrack
+        current = stack.pop()
+        count += 1
+
+        if count == k:
+            return current.data
+
+        current = current.right
+
+    return None
+
+# Test
+root = Node(50)
+root.left = Node(30)
+root.right = Node(70)
+root.left.left = Node(20)
+root.left.right = Node(40)
+root.right.left = Node(60)
+root.right.right = Node(80)
+
+print("🌳 Ağaç: [50, 30, 70, 20, 40, 60, 80]")
+print("📋 Sıralı: [20, 30, 40, 50, 60, 70, 80]")
+print()
+
+for k in [1, 3, 5, 7]:
+    result = kth_smallest(root, k)
+    print(f"{k}. en küçük: {result}")</code></pre>
+
+                
+
+                <div id="output-code4" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SORU 5 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <div class="problem-number">5</div>
+            <h3 style="margin:0;">Lowest Common Ancestor (LCA)</h3>
+            <span class="difficulty medium">Orta</span>
+        </div>
+
+        <p>BST'de iki node'un en yakın ortak atasını (LCA) bulan fonksiyon yazın.</p>
+
+        <div class="test-case">
+            <strong>Örnek:</strong> Ağaç [50, 30, 70, 20, 40], nodes: 20 ve 40 → LCA: 30
+        </div>
+
+        <div class="hint-box">
+            <strong>💡 İpucu:</strong> BST özelliği: İki değer de kökten küçükse sola, büyükse sağa git. Aksi halde kök LCA'dır!
+        </div>
+
+        <div class="solution-toggle" onclick="toggleSolution('sol5')">
+            👁️ Çözümü Göster/Gizle
+        </div>
+
+        <div class="solution-content" id="sol5">
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Çözümü</span>
+                    <div>
+                        <button class="btn btn-run" onclick="CodeBlocks.run(\'code5\')">▶ Çalıştır</button>
+                    </div>
+                </div>
+
+                <pre id="view-code5"><code class="language-python line-numbers">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+def lca(root, p, q):
+    """
+    Lowest Common Ancestor - O(h)
+    BST özelliğini kullan!
+    """
+    current = root
+
+    while current:
+        # İkisi de solda
+        if p < current.data and q < current.data:
+            current = current.left
+        # İkisi de sağda
+        elif p > current.data and q > current.data:
+            current = current.right
+        # Biri solda, biri sağda (veya biri current)
+        else:
+            return current.data
+
+    return None
+
+def lca_recursive(root, p, q):
+    """Recursive versiyon"""
+    if root is None:
+        return None
+
+    if p < root.data and q < root.data:
+        return lca_recursive(root.left, p, q)
+    elif p > root.data and q > root.data:
+        return lca_recursive(root.right, p, q)
+    else:
+        return root.data
+
+# Test
+root = Node(50)
+root.left = Node(30)
+root.right = Node(70)
+root.left.left = Node(20)
+root.left.right = Node(40)
+root.right.left = Node(60)
+root.right.right = Node(80)
+
+print("🌳 Ağaç yapısı:")
+print("       50")
+print("      /  \\")
+print("    30    70")
+print("   /  \\  /  \\")
+print("  20  40 60  80")
+print()
+
+test_cases = [(20, 40), (20, 80), (60, 80), (30, 70)]
+for p, q in test_cases:
+    result = lca(root, p, q)
+    print(f"LCA({p}, {q}) = {result}")</code></pre>
+
+                
+
+                <div id="output-code5" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📚 Ek Pratik Soruları</h2>
+        <ul>
+            <li>🔄 BST'yi tersine çevirin (mirror)</li>
+            <li>📏 BST dengeli mi kontrol edin</li>
+            <li>🔢 BST'deki node sayısını bulun</li>
+            <li>📊 Belirli aralıktaki değerleri yazdırın</li>
+            <li>🔗 Sıralı diziden dengeli BST oluşturun</li>
+            <li>🌿 Tüm yaprakları yazdırın</li>
+        </ul>
+    </div>
+
+    <!-- Auto-generated navigation -->
+        <div class="nav-footer">
+        <a href="5c_bst_traversal.html" class="btn">⬅️ Önceki: Traversal</a>
+        <a href="bst.html" class="btn" style="background:#11998e">📋 BST Menü</a>
+        <a href="6a_linear_search.html" class="btn btn-next">Sonraki: Linear Search ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    function toggleSolution(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    
+
+    
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+</script>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Pyodide CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+
+    function toggleSolution(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    
+
+    
+        const code = document.getElementById(id).value;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    
+        else { editor.style.display = 'block'; view.style.display = 'none'; editor.focus(); }
+    }
+
+    </script>
+</body>
+</html>

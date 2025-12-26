@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.3: Numpy Detaylı İnceleme</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+
+    <!-- CodeMirror 6 -->
+    <script type="module">
+        import {EditorView, basicSetup} from "https://cdn.jsdelivr.net/npm/codemirror@6/dist/index.js"
+        import {python} from "https://cdn.jsdelivr.net/npm/@codemirror/lang-python@6/dist/index.js"
+        import {oneDark} from "https://cdn.jsdelivr.net/npm/@codemirror/theme-one-dark@6/dist/index.js"
+
+        window.CodeMirror = {
+            EditorView,
+            basicSetup,
+            python: () => python(),
+            oneDark
+        };
+    </script>
+
+    <!-- Pyodide for Python execution -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <style>
+        /* Cache Visual */
+        .cache-demo { display: flex; flex-direction: column; gap: 20px; margin: 20px 0; }
+        .mem-block { display: flex; gap: 5px; padding: 10px; background: var(--bg-tertiary); border-radius: 5px; overflow-x: auto; }
+        .mem-cell {
+            min-width: 40px; height: 40px; border: 1px solid var(--border-color); background: var(--bg-secondary);
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            color: var(--text-primary);
+        }
+        .highlight { background: #2ecc71 !important; color: white; font-weight: bold; transform: scale(1.1); }
+        .cache-line { border: 2px dashed #e67e22; position: relative; }
+        .cache-line::after { content: "Cache Line"; position: absolute; top: -15px; left: 0; font-size: 10px; color: #e67e22; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🔢 1.3: Numpy Detaylı İnceleme</h1>
+            <p>Python'da C Dizilerinin Gücü</p>
+        </header>
+
+        <div class="section" style="background: #fff3cd; border-left-color: #ffc107;">
+            <h2>📌 Numpy Nedir? (Ön Bilgi)</h2>
+            <p><strong>NumPy</strong> (Numerical Python), Python'da hızlı matematiksel işlemler yapmak için kullanılan bir kütüphanedir. Python'un standart kütüphanesi değildir, ayrıca yüklenir.</p>
+
+            <h4>Kurulum:</h4>
+            <pre><code class="language-bash">pip install numpy</code></pre>
+
+            <h4>Kullanım:</h4>
+            <pre class="line-numbers"><code class="language-python">import numpy as np  # np kısaltması yaygın kullanılır
+
+# Numpy dizisi oluşturma
+arr = np.array([1, 2, 3, 4, 5])
+
+# Sıfırlardan oluşan dizi
+zeros = np.zeros(10)  # [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+# Rastgele sayılardan oluşan dizi
+random = np.random.rand(5)  # 5 adet 0-1 arası rastgele sayı</code></pre>
+
+            <p><strong>Bu derste Numpy'ı neden öğreniyoruz?</strong> Veri yapılarının performansını anlamak için C dizilerinin davranışını görmemiz gerekiyor. Numpy, Python'da C dizisi gibi davranan yapılar sunar.</p>
+        </div>
+
+        <div class="section">
+            <h2>Numpy Array vs Python List</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #34495e; color: white;">
+                        <th style="padding: 12px; text-align: left;">Özellik</th>
+                        <th style="padding: 12px; text-align: left;">Python List 🐍</th>
+                        <th style="padding: 12px; text-align: left;">Numpy Array 🔢</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: var(--bg-tertiary);">
+                        <td style="padding: 12px;"><strong>Bellek</strong></td>
+                        <td style="padding: 12px;">Dağınık (Referans)</td>
+                        <td style="padding: 12px;">Bitişik (Blok)</td>
+                    </tr>
+                    <tr style="background: var(--bg-secondary);">
+                        <td style="padding: 12px;"><strong>Hız</strong></td>
+                        <td style="padding: 12px;">Yavaş (Cache Miss)</td>
+                        <td style="padding: 12px;">Çok Hızlı (Cache Hit)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🏎️ CPU Cache ve Data Locality (Veri Yerelliği)</h2>
+            <p>İşlemciler (CPU) veriyi RAM'den tek tek almaz, bloklar halinde (Cache Line) alır. Numpy bu mekanizmayı mükemmel kullanır.</p>
+
+            <div class="cache-demo">
+                <div>
+                    <h4>✅ Numpy / C Dizisi (Bitişik)</h4>
+                    <p style="font-size:0.9em">CPU ilk elemanı okurken, yanındaki elemanlar da otomatik olarak Cache'e gelir. Sonraki okumalar ışık hızındadır.</p>
+                    <div class="mem-block">
+                        <div class="mem-cell highlight">10</div>
+                        <div class="mem-cell highlight">20</div>
+                        <div class="mem-cell highlight">30</div>
+                        <div class="mem-cell highlight">40</div>
+                        <div class="mem-cell">...</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4>❌ Python Listesi (Dağınık / Pointer Chasing)</h4>
+                    <p style="font-size:0.9em">Liste sadece adresleri tutar. Gerçek veriler RAM'in rastgele yerlerindedir. CPU sürekli RAM'e gitmek zorunda kalır (Cache Miss).</p>
+                    <div class="mem-block" style="justify-content: space-between;">
+                        <div class="mem-cell highlight">10</div>
+                        <div class="mem-cell">...</div>
+                        <div class="mem-cell">...</div>
+                        <div class="mem-cell highlight">20</div>
+                        <div class="mem-cell">...</div>
+                        <div class="mem-cell highlight">30</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background:#fff3cd; padding:15px; border-radius:5px; border-left:5px solid #f1c40f;">
+                <strong>Teknik Detay:</strong> Python listesinde bir elemana erişmek için iki işlem gerekir:
+                1. Listeden adresi oku. 2. Adrese git ve değeri al (Dereferencing).
+                Bu "zıplama" işlemi CPU'nun tahmin mekanizmasını (Branch Prediction/Prefetching) bozar.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 Kod Laboratuvarı: Vektörel Hız</h2>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">import numpy as np
+import time
+
+# 1 Milyon eleman
+boyut = 1_000_000
+arr = np.random.rand(boyut)
+liste = list(arr)
+
+# Python Döngüsü
+start = time.time()
+toplam_py = sum(liste)
+print(f"Python: {time.time() - start:.6f} sn")
+
+# Numpy Vektörel
+start = time.time()
+toplam_np = np.sum(arr)
+print(f"Numpy : {time.time() - start:.6f} sn")</code></pre>
+
+                <div class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+
+    <!-- Page-specific: Load numpy for Pyodide -->
+    <script>
+        // Ensure numpy is loaded when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for Pyodide to be ready
+            if (window.PyodideManager) {
+                try {
+                    await window.PyodideManager.init();
+                    await window.PyodideManager.loadPackage('numpy');
+                    console.log('✅ Numpy loaded successfully');
+                } catch (error) {
+                    console.error('Failed to load numpy:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

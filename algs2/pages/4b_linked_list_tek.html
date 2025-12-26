@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.2: Singly Linked List (Tek Yönlü Liste)</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+
+    <style>
+        .operation-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        
+        .operation-card h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .complexity-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .o1 { background: #d4edda; color: #155724; }
+        .on { background: #f8d7da; color: #721c24; }
+        
+        .visual-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .mini-node {
+            display: flex;
+            border: 2px solid #2c3e50;
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 14px;
+        }
+        
+        .mini-node .data {
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .mini-node .next {
+            padding: 8px 10px;
+            background: #ecf0f1;
+            font-size: 10px;
+        }
+        
+        .mini-node.new-node .data {
+            background: #27ae60;
+        }
+        
+        .mini-node.highlight .data {
+            background: #e74c3c;
+        }
+        
+        .arrow { color: #e74c3c; font-weight: bold; }
+        
+        .step-explanation {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+    <header>
+        <h1>➡️ 4.2: Singly Linked List</h1>
+        <p>Tek Yönlü Bağlı Liste Implementasyonu</p>
+    </header>
+
+    <div class="section">
+        <h2>📋 Temel Operasyonlar</h2>
+        
+        <!-- BAŞA EKLEME -->
+        <div class="operation-card" style="border-left-color: #27ae60;">
+            <h4>
+                <span>1️⃣ Başa Ekleme (prepend)</span>
+                <span class="complexity-badge o1">O(1)</span>
+            </h4>
+            <p>Yeni node oluştur, next'ini head'e bağla, head'i güncelle.</p>
+            
+            <div class="visual-step">
+                <span style="color:#27ae60; font-weight:bold;">HEAD →</span>
+                <div class="mini-node"><div class="data">A</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node"><div class="data">B</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <span style="background:#e74c3c; color:white; padding:5px 10px; border-radius:5px;">NULL</span>
+            </div>
+            
+            <div style="text-align: center; font-size: 20px; color: #27ae60;">⬇️ prepend("X")</div>
+            
+            <div class="visual-step">
+                <span style="color:#27ae60; font-weight:bold;">HEAD →</span>
+                <div class="mini-node new-node"><div class="data">X</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node"><div class="data">A</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node"><div class="data">B</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <span style="background:#e74c3c; color:white; padding:5px 10px; border-radius:5px;">NULL</span>
+            </div>
+            
+            <div class="step-explanation">
+                💡 <strong>Neden O(1)?</strong> Sadece 2 işlem: new_node.next = head, head = new_node
+            </div>
+        </div>
+        
+        <!-- SONA EKLEME -->
+        <div class="operation-card" style="border-left-color: #e74c3c;">
+            <h4>
+                <span>2️⃣ Sona Ekleme (append)</span>
+                <span class="complexity-badge on">O(n)</span>
+            </h4>
+            <p>Son node'u bulmak için tüm listeyi dolaşmak gerekir.</p>
+            
+            <div class="visual-step">
+                <span style="color:#27ae60; font-weight:bold;">HEAD →</span>
+                <div class="mini-node"><div class="data">A</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node"><div class="data">B</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node highlight"><div class="data">C</div><div class="next">null</div></div>
+                <span style="margin-left:20px; color:#f39c12;">← Son node'u bul</span>
+            </div>
+            
+            <div style="text-align: center; font-size: 20px; color: #e74c3c;">⬇️ append("X")</div>
+            
+            <div class="visual-step">
+                <span style="color:#27ae60; font-weight:bold;">HEAD →</span>
+                <div class="mini-node"><div class="data">A</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node"><div class="data">B</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node"><div class="data">C</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node new-node"><div class="data">X</div><div class="next">null</div></div>
+            </div>
+            
+            <div class="step-explanation">
+                💡 <strong>Neden O(n)?</strong> Son node'u bulmak için n eleman gezilmeli. (Tail pointer ile O(1) yapılabilir!)
+            </div>
+        </div>
+        
+        <!-- SİLME -->
+        <div class="operation-card" style="border-left-color: #9b59b6;">
+            <h4>
+                <span>3️⃣ Silme (delete)</span>
+                <span class="complexity-badge on">O(n)</span>
+            </h4>
+            <p>Silinecek node'un <strong>önceki</strong> node'unu bulmak gerekir.</p>
+            
+            <div class="visual-step">
+                <span style="color:#27ae60; font-weight:bold;">HEAD →</span>
+                <div class="mini-node"><div class="data">A</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node highlight"><div class="data" style="background:#9b59b6;">B</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node"><div class="data">C</div><div class="next">null</div></div>
+                <span style="margin-left:20px; color:#9b59b6;">← "B"yi sil</span>
+            </div>
+            
+            <div style="text-align: center; font-size: 20px; color: #9b59b6;">⬇️ delete("B")</div>
+            
+            <div class="visual-step">
+                <span style="color:#27ae60; font-weight:bold;">HEAD →</span>
+                <div class="mini-node"><div class="data">A</div><div class="next">→</div></div>
+                <span class="arrow">→</span>
+                <div class="mini-node"><div class="data">C</div><div class="next">null</div></div>
+                <span style="margin-left:20px; color:#27ae60;">✅ A.next = C</span>
+            </div>
+            
+            <div class="step-explanation">
+                💡 <strong>Önemli:</strong> Silmek için önceki node'u bilmek gerekir. Tek yönlü listede geri gidemeyiz!
+            </div>
+        </div>
+        
+        <!-- ARAMA -->
+        <div class="operation-card" style="border-left-color: #f39c12;">
+            <h4>
+                <span>4️⃣ Arama (search)</span>
+                <span class="complexity-badge on">O(n)</span>
+            </h4>
+            <p>Baştan itibaren tek tek kontrol edilir.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Tam Python Implementasyonu</h2>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code1\')">▶ Çalıştır</button>
+                    <button class="btn" onclick="CodeBlocks.toggleEdit(\'code1\')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code1"><code class="language-python">class Node:
+    """Tek yönlü bağlı liste düğümü"""
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class SinglyLinkedList:
+    """Tek Yönlü Bağlı Liste"""
+    
+    def __init__(self):
+        self.head = None
+        self.size = 0
+    
+    def prepend(self, data):
+        """Başa ekle - O(1)"""
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+        self.size += 1
+        print(f"✅ Başa eklendi: {data}")
+    
+    def append(self, data):
+        """Sona ekle - O(n)"""
+        new_node = Node(data)
+        
+        if not self.head:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.next:  # Son node'u bul
+                current = current.next
+            current.next = new_node
+        
+        self.size += 1
+        print(f"✅ Sona eklendi: {data}")
+    
+    def delete(self, data):
+        """Belirli değeri sil - O(n)"""
+        if not self.head:
+            print("❌ Liste boş!")
+            return
+        
+        # Silinecek head ise
+        if self.head.data == data:
+            self.head = self.head.next
+            self.size -= 1
+            print(f"🗑️ Silindi: {data}")
+            return
+        
+        # Ara ve sil
+        current = self.head
+        while current.next:
+            if current.next.data == data:
+                current.next = current.next.next
+                self.size -= 1
+                print(f"🗑️ Silindi: {data}")
+                return
+            current = current.next
+        
+        print(f"❌ Bulunamadı: {data}")
+    
+    def search(self, data):
+        """Değeri ara - O(n)"""
+        current = self.head
+        index = 0
+        while current:
+            if current.data == data:
+                print(f"🔍 Bulundu: {data} (index: {index})")
+                return index
+            current = current.next
+            index += 1
+        print(f"🔍 Bulunamadı: {data}")
+        return -1
+    
+    def display(self):
+        """Listeyi göster"""
+        if not self.head:
+            print("Liste: [BOŞ]")
+            return
+        
+        elements = []
+        current = self.head
+        while current:
+            elements.append(str(current.data))
+            current = current.next
+        
+        print(f"Liste: HEAD → {' → '.join(elements)} → NULL")
+        print(f"Boyut: {self.size}")
+
+# Test
+print("🔗 Singly Linked List Demo\n")
+liste = SinglyLinkedList()
+
+liste.append(10)
+liste.append(20)
+liste.append(30)
+liste.display()
+
+print()
+liste.prepend(5)
+liste.display()
+
+print()
+liste.delete(20)
+liste.display()
+
+print()
+liste.search(30)
+liste.search(100)</code></pre>
+
+            
+            
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚡ Tail Pointer ile Optimizasyon</h2>
+        <p>Sona ekleme işlemini O(1) yapmak için <strong>tail pointer</strong> kullanabiliriz:</p>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code2\')">▶ Çalıştır</button>
+                    <button class="btn" onclick="CodeBlocks.toggleEdit(\'code2\')">✏️ Düzenle</button>
+                </div>
+            </div>
+            
+            <pre id="view-code2"><code class="language-python">class OptimizedLinkedList:
+    """Tail pointer ile optimize edilmiş liste"""
+    
+    def __init__(self):
+        self.head = None
+        self.tail = None  # Son node'u takip et!
+        self.size = 0
+    
+    def append(self, data):
+        """Sona ekle - Artık O(1)!"""
+        new_node = Node(data)
+        
+        if not self.head:
+            self.head = new_node
+            self.tail = new_node
+        else:
+            self.tail.next = new_node  # Direkt tail'e bağla
+            self.tail = new_node       # Tail'i güncelle
+        
+        self.size += 1
+    
+    def prepend(self, data):
+        """Başa ekle - O(1)"""
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+        
+        if not self.tail:  # İlk elemansa tail'i de ayarla
+            self.tail = new_node
+        
+        self.size += 1
+    
+    def display(self):
+        elements = []
+        current = self.head
+        while current:
+            elements.append(str(current.data))
+            current = current.next
+        print(f"HEAD → {' → '.join(elements)} → NULL")
+        print(f"(head={self.head.data if self.head else 'None'}, tail={self.tail.data if self.tail else 'None'})")
+
+# Test
+print("⚡ Optimized Linked List (Tail Pointer)\n")
+opt_list = OptimizedLinkedList()
+
+import time
+N = 10000
+
+# Normal append (simüle)
+start = time.time()
+for i in range(N):
+    opt_list.append(i)
+print(f"✅ {N} eleman O(1) append: {time.time()-start:.4f} sn")
+print(f"Son eleman: {opt_list.tail.data}")</code></pre>
+
+            
+            
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Zaman Karmaşıklığı Özeti</h2>
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <th style="padding: 15px;">Operasyon</th>
+                    <th style="padding: 15px;">Temel</th>
+                    <th style="padding: 15px;">Tail ile</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Başa Ekleme</strong></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o1">O(1)</span></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o1">O(1)</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Sona Ekleme</strong></td>
+                    <td style="padding: 12px;"><span class="complexity-badge on">O(n)</span></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o1">O(1)</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Baştan Silme</strong></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o1">O(1)</span></td>
+                    <td style="padding: 12px;"><span class="complexity-badge o1">O(1)</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>Sondan Silme</strong></td>
+                    <td style="padding: 12px;"><span class="complexity-badge on">O(n)</span></td>
+                    <td style="padding: 12px;"><span class="complexity-badge on">O(n)</span></td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px;"><strong>Arama</strong></td>
+                    <td style="padding: 12px;"><span class="complexity-badge on">O(n)</span></td>
+                    <td style="padding: 12px;"><span class="complexity-badge on">O(n)</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="margin-top: 10px; color: #666; font-size: 14px;">⚠️ Sondan silme her zaman O(n) çünkü önceki node'u bulmak gerekir (tek yönlü!)</p>
+    </div>
+
+    <div class="nav-footer"></div>
+</div>
+
+<!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Pyodide CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+</body>
+</html>

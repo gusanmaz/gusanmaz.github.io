@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.3: Selection Sort (Seçmeli Sıralama)</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <style>
+
+        .visual-container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .array-visual {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 200px;
+            align-items: flex-end;
+        }
+        .array-cell {
+            width: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .array-cell .bar {
+            width: 100%;
+            background: linear-gradient(to top, #3498db, #2980b9);
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .array-cell .index {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        .array-cell.current .bar {
+            background: linear-gradient(to top, #9b59b6, #8e44ad);
+        }
+        .array-cell.comparing .bar {
+            background: linear-gradient(to top, #f39c12, #e67e22);
+        }
+        .array-cell.minimum .bar {
+            background: linear-gradient(to top, #e74c3c, #c0392b);
+            transform: scale(1.1);
+        }
+        .array-cell.sorted .bar {
+            background: linear-gradient(to top, #27ae60, #1e8449);
+        }
+        .step-info {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 15px 0;
+            min-height: 60px;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        </style>
+</head>
+
+<body>
+
+
+<div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+    <header>
+        <h1>🎯 7.3: Selection Sort (Seçmeli Sıralama)</h1>
+        <p>En Küçüğü Bul ve Başa Koy</p>
+    </header>
+
+    <div class="section">
+        <h2>📌 Selection Sort Nedir?</h2>
+        <p><strong>Selection Sort</strong>, her adımda sıralanmamış bölümden en küçük elemanı bulup, sıralı bölümün sonuna ekleyen bir algoritmadır.</p>
+
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: #1565c0;">🎯 Algoritma Mantığı</h4>
+            <ol style="margin-bottom: 0;">
+                <li>Dizinin sıralanmamış bölümünde en küçük elemanı bul</li>
+                <li>Bu elemanı sıralanmamış bölümün ilk elemanıyla takas et</li>
+                <li>Sıralı bölüm bir eleman büyür</li>
+                <li>Tüm dizi sıralanana kadar tekrarla</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="visual-container">
+        <h3 style="text-align: center;">🎮 İnteraktif Selection Sort Simülasyonu</h3>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #9b59b6, #8e44ad);"></div>
+                <span>Mevcut Pozisyon</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #f39c12, #e67e22);"></div>
+                <span>Karşılaştırılan</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #e74c3c, #c0392b);"></div>
+                <span>Bulunan Minimum</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #27ae60, #1e8449);"></div>
+                <span>Sıralanmış</span>
+            </div>
+        </div>
+
+        <div class="array-visual" id="arrayVisual"></div>
+
+        <div class="step-info" id="stepInfo">
+            🎯 "Başlat" butonuna tıklayarak sıralamayı izleyin.
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn btn-run" onclick="startSort()">▶️ Başlat</button>
+            <button class="btn" onclick="stepSort()">⏭️ Adım</button>
+            <button class="btn btn-reset" onclick="resetSort()">🔄 Sıfırla</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Karmaşıklık Analizi</h2>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <th style="padding: 15px;">Durum</th>
+                    <th style="padding: 15px;">Karşılaştırma</th>
+                    <th style="padding: 15px;">Takas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Her zaman</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">O(n²)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(n)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60;">
+            <strong>💡 Selection Sort'un Avantajı:</strong>
+            <p style="margin: 5px 0 0 0;">En fazla <strong>n-1 takas</strong> yapar (her geçişte sadece 1 takas). Takas maliyetli olduğunda (büyük objeler) tercih edilebilir.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Python Implementasyonu</h2>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code1\')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code1"><code class="language-python line-numbers">def selection_sort(arr):
+    """
+    Selection Sort Algoritması
+
+    Her adımda en küçük elemanı bulup başa koyar.
+    """
+    n = len(arr)
+    comparisons = 0
+    swaps = 0
+
+    for i in range(n - 1):
+        # Minimum elemanın indeksini bul
+        min_idx = i
+
+        print(f"\n--- Adım {i + 1} ---")
+        print(f"Aranan pozisyon: {i}")
+
+        for j in range(i + 1, n):
+            comparisons += 1
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+                print(f"  Yeni minimum bulundu: arr[{min_idx}] = {arr[min_idx]}")
+
+        # Swap yap (eğer gerekirse)
+        if min_idx != i:
+            print(f"TAKAS: arr[{i}]={arr[i]} ↔ arr[{min_idx}]={arr[min_idx]}")
+            arr[i], arr[min_idx] = arr[min_idx], arr[i]
+            swaps += 1
+        else:
+            print(f"Takas gerekmedi, {arr[i]} zaten doğru yerde")
+
+        print(f"Dizi: {arr}")
+
+    return comparisons, swaps
+
+# Test
+dizi = [64, 25, 12, 22, 11]
+print(f"Başlangıç: {dizi}\n")
+
+comp, swap = selection_sort(dizi)
+
+print(f"\n{'='*40}")
+print(f"Sonuç: {dizi}")
+print(f"Toplam karşılaştırma: {comp}")
+print(f"Toplam takas: {swap}")</code></pre>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚠️ Selection Sort Stabil Değildir!</h2>
+
+        <div style="background: #f8d7da; padding: 20px; border-radius: 10px; border-left: 4px solid #e74c3c;">
+            <h4 style="margin-top: 0; color: #721c24;">Örnek: Stabilite Problemi</h4>
+            <p>Dizi: [(5, A), (3, B), (5, C), (2, D)] - değer ve etiket</p>
+            <p>Sıralama sonrası: [(2, D), (3, B), (5, <strong>C</strong>), (5, <strong>A</strong>)]</p>
+            <p>5'lerin sırası değişti! (A önce gelmeliydi ama C önce geldi)</p>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="7b_bubble_sort.html" class="btn">⬅️ Önceki: Bubble Sort</a>
+        <a href="../index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="7d_insertion_sort.html" class="btn btn-next">Sonraki: Insertion Sort ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    let array = [64, 25, 12, 22, 11];
+    const originalArray = [...array];
+    let i = 0, j = 0, minIdx = 0;
+    let phase = 'findMin'; // findMin veya swap
+    let isRunning = false;
+    let sortInterval = null;
+
+    function renderArray() {
+        const container = document.getElementById('arrayVisual');
+        container.innerHTML = '';
+        const maxVal = Math.max(...array);
+
+        array.forEach((val, idx) => {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.id = `cell-${idx}`;
+
+            // Sıralanmış elemanlar
+            if (idx < i) {
+                cell.classList.add('sorted');
+            } else if (idx === i) {
+                cell.classList.add('current');
+            } else if (idx === j && phase === 'findMin') {
+                cell.classList.add('comparing');
+            }
+
+            if (idx === minIdx && idx >= i) {
+                cell.classList.add('minimum');
+            }
+
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = `${(val / maxVal) * 150 + 30}px`;
+            bar.innerText = val;
+
+            const index = document.createElement('div');
+            index.className = 'index';
+            index.innerText = `[${idx}]`;
+
+            cell.appendChild(bar);
+            cell.appendChild(index);
+            container.appendChild(cell);
+        });
+    }
+
+    function stepSort() {
+        const n = array.length;
+
+        if (i >= n - 1) {
+            document.querySelectorAll('.array-cell').forEach(c => c.classList.add('sorted'));
+            document.getElementById('stepInfo').innerHTML = '✅ Sıralama tamamlandı!';
+            pauseSort();
+            return;
+        }
+
+        if (phase === 'findMin') {
+            if (j === i) {
+                minIdx = i;
+                j = i + 1;
+            }
+
+            if (j < n) {
+                if (array[j] < array[minIdx]) {
+                    minIdx = j;
+                    document.getElementById('stepInfo').innerHTML =
+                        `🔍 Yeni minimum: arr[${minIdx}] = ${array[minIdx]}`;
+                } else {
+                    document.getElementById('stepInfo').innerHTML =
+                        `🔍 Karşılaştır: arr[${j}]=${array[j]} ≥ min=${array[minIdx]}`;
+                }
+                j++;
+            } else {
+                phase = 'swap';
+            }
+        } else {
+            // Swap phase
+            if (minIdx !== i) {
+                document.getElementById('stepInfo').innerHTML =
+                    `🔄 TAKAS: arr[${i}]=${array[i]} ↔ arr[${minIdx}]=${array[minIdx]}`;
+                [array[i], array[minIdx]] = [array[minIdx], array[i]];
+            } else {
+                document.getElementById('stepInfo').innerHTML =
+                    `✓ ${array[i]} zaten doğru yerde`;
+            }
+            i++;
+            j = i;
+            phase = 'findMin';
+        }
+
+        renderArray();
+    }
+
+    function startSort() {
+        if (i >= array.length - 1) resetSort();
+        isRunning = true;
+        sortInterval = setInterval(() => {
+            if (i < array.length - 1) {
+                stepSort();
+            } else {
+                stepSort(); // Son adım
+                pauseSort();
+            }
+        }, 500);
+    }
+
+    function pauseSort() {
+        isRunning = false;
+        if (sortInterval) clearInterval(sortInterval);
+    }
+
+    function resetSort() {
+        pauseSort();
+        array = [...originalArray];
+        i = 0; j = 0; minIdx = 0;
+        phase = 'findMin';
+        renderArray();
+        document.getElementById('stepInfo').innerHTML = '🎯 "Başlat" butonuna tıklayarak sıralamayı izleyin.';
+    }
+
+    renderArray();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+</script>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Pyodide CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+
+    let array = [64, 25, 12, 22, 11];
+    const originalArray = [...array];
+    let i = 0, j = 0, minIdx = 0;
+    let phase = 'findMin'; // findMin veya swap
+    let isRunning = false;
+    let sortInterval = null;
+
+    function renderArray() {
+        const container = document.getElementById('arrayVisual');
+        container.innerHTML = '';
+        const maxVal = Math.max(...array);
+
+        array.forEach((val, idx) => {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.id = `cell-${idx}`;
+
+            // Sıralanmış elemanlar
+            if (idx < i) {
+                cell.classList.add('sorted');
+            } else if (idx === i) {
+                cell.classList.add('current');
+            } else if (idx === j && phase === 'findMin') {
+                cell.classList.add('comparing');
+            }
+
+            if (idx === minIdx && idx >= i) {
+                cell.classList.add('minimum');
+            }
+
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = `${(val / maxVal) * 150 + 30}px`;
+            bar.innerText = val;
+
+            const index = document.createElement('div');
+            index.className = 'index';
+            index.innerText = `[${idx}]`;
+
+            cell.appendChild(bar);
+            cell.appendChild(index);
+            container.appendChild(cell);
+        });
+    }
+
+    function stepSort() {
+        const n = array.length;
+
+        if (i >= n - 1) {
+            document.querySelectorAll('.array-cell').forEach(c => c.classList.add('sorted'));
+            document.getElementById('stepInfo').innerHTML = '✅ Sıralama tamamlandı!';
+            pauseSort();
+            return;
+        }
+
+        if (phase === 'findMin') {
+            if (j === i) {
+                minIdx = i;
+                j = i + 1;
+            }
+
+            if (j < n) {
+                if (array[j] < array[minIdx]) {
+                    minIdx = j;
+                    document.getElementById('stepInfo').innerHTML =
+                        `🔍 Yeni minimum: arr[${minIdx}] = ${array[minIdx]}`;
+                } else {
+                    document.getElementById('stepInfo').innerHTML =
+                        `🔍 Karşılaştır: arr[${j}]=${array[j]} ≥ min=${array[minIdx]}`;
+                }
+                j++;
+            } else {
+                phase = 'swap';
+            }
+        } else {
+            // Swap phase
+            if (minIdx !== i) {
+                document.getElementById('stepInfo').innerHTML =
+                    `🔄 TAKAS: arr[${i}]=${array[i]} ↔ arr[${minIdx}]=${array[minIdx]}`;
+                [array[i], array[minIdx]] = [array[minIdx], array[i]];
+            } else {
+                document.getElementById('stepInfo').innerHTML =
+                    `✓ ${array[i]} zaten doğru yerde`;
+            }
+            i++;
+            j = i;
+            phase = 'findMin';
+        }
+
+        renderArray();
+    }
+
+    function startSort() {
+        if (i >= array.length - 1) resetSort();
+        isRunning = true;
+        sortInterval = setInterval(() => {
+            if (i < array.length - 1) {
+                stepSort();
+            } else {
+                stepSort(); // Son adım
+                pauseSort();
+            }
+        }, 500);
+    }
+
+    function pauseSort() {
+        isRunning = false;
+        if (sortInterval) clearInterval(sortInterval);
+    }
+
+    function resetSort() {
+        pauseSort();
+        array = [...originalArray];
+        i = 0; j = 0; minIdx = 0;
+        phase = 'findMin';
+        renderArray();
+        document.getElementById('stepInfo').innerHTML = '🎯 "Başlat" butonuna tıklayarak sıralamayı izleyin.';
+    }
+
+    renderArray();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+    async function main() { pyodide = await loadPyodide(); pyodideReady = true; }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    </script>
+</body>
+</html>

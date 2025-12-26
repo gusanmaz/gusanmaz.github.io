@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.6: Aritmetik İfadeler</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- CodeMirror 6 -->
+    <script type="module">
+        import {EditorView, basicSetup} from "https://cdn.jsdelivr.net/npm/codemirror@6/dist/index.js"
+        import {python} from "https://cdn.jsdelivr.net/npm/@codemirror/lang-python@6/dist/index.js"
+        import {oneDark} from "https://cdn.jsdelivr.net/npm/@codemirror/theme-one-dark@6/dist/index.js"
+
+        window.CodeMirror = {
+            EditorView,
+            basicSetup,
+            python: () => python(),
+            oneDark
+        };
+    </script>
+
+    <!-- Pyodide for Python execution -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🧮 2.6: Aritmetik İfadeler ve Stack</h1>
+            <p>Polish Notation ve Dijkstra'nın İki-Stack Algoritması</p>
+        </header>
+
+        <div class="section">
+            <h2>1️⃣ Dijkstra'nın İki-Stack Algoritması</h2>
+            <p>İfade: <code>( 1 + ( ( 2 + 3 ) * ( 4 * 5 ) ) )</code></p>
+            <p>Bu algoritma, matematiksel ifadeleri iki stack kullanarak değerlendirir:</p>
+            <ul>
+                <li><strong>Operand Stack:</strong> Sayıları tutar</li>
+                <li><strong>Operator Stack:</strong> Operatörleri (+, -, *, /) tutar</li>
+            </ul>
+
+            <div style="display: flex; gap: 20px; margin: 20px 0; justify-content: center; flex-wrap: wrap;">
+                <div style="border: 2px solid var(--border-color); padding: 15px; min-width: 180px; background: var(--bg-secondary); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <h4 style="margin:0 0 15px 0; border-bottom:2px solid var(--accent-blue); padding-bottom: 8px; text-align:center; color: var(--accent-blue);">📊 Operand Stack</h4>
+                    <div id="vis-val-stack" style="display: flex; flex-direction: column-reverse; gap: 5px; min-height: 150px;"></div>
+                </div>
+                <div style="border: 2px solid var(--border-color); padding: 15px; min-width: 180px; background: var(--bg-secondary); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <h4 style="margin:0 0 15px 0; border-bottom:2px solid var(--accent-orange); padding-bottom: 8px; text-align:center; color: var(--accent-orange);">⚙️ Operator Stack</h4>
+                    <div id="vis-op-stack" style="display: flex; flex-direction: column-reverse; gap: 5px; min-height: 150px;"></div>
+                </div>
+            </div>
+
+            <div style="text-align: center; background: var(--bg-tertiary); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <div id="step-desc" style="font-weight: bold; color: var(--accent-blue); margin-bottom: 15px; min-height: 30px; font-size: 1.1em;">Başlamak için ilerleyin...</div>
+                <button class="btn btn-next" onclick="nextStep()">➡️ Adım İlerle</button>
+                <button class="btn" onclick="resetVis()" style="background: var(--accent-red);">🔄 Sıfırla</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2️⃣ Kod İle Hesaplama</h2>
+            <p>Aynı algoritmayı Python ile uygulayalım:</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python - İki Stack Algoritması</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(0)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(0)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def evaluate_infix(expression):
+    values = []    # Sayılar
+    ops = []       # Operatörler
+
+    tokens = expression.replace('(', ' ( ').replace(')', ' ) ').split()
+
+    for token in tokens:
+        if token == '(':
+            pass # Atla
+        elif token in "+-*/":
+            ops.append(token)
+        elif token == ')':
+            # Kapanış gelince işlemi yap
+            op = ops.pop()
+            val2 = values.pop()
+            val1 = values.pop()
+
+            if op == '+': res = val1 + val2
+            elif op == '-': res = val1 - val2
+            elif op == '*': res = val1 * val2
+            elif op == '/': res = val1 / val2
+
+            values.append(res)
+            print(f"İşlem: {val1} {op} {val2} = {res}")
+        else:
+            values.append(float(token))
+
+    return values.pop()
+
+expr = "( 1 + ( ( 2 + 3 ) * ( 4 * 5 ) ) )"
+print(f"\\nSonuç: {evaluate_infix(expr)}")</code></pre>
+
+                <div class="output" id="output-0"></div>
+            </div>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific visualization -->
+    <script>
+        // Visualization for Dijkstra's Two-Stack Algorithm
+        const tokens = ['(', '1', '+', '(', '(', '2', '+', '3', ')', '*', '(', '4', '*', '5', ')', ')', ')'];
+        let stepIndex = 0;
+        let valStack = [];
+        let opStack = [];
+
+        function updateVisuals() {
+            const valDiv = document.getElementById('vis-val-stack');
+            const opDiv = document.getElementById('vis-op-stack');
+            valDiv.innerHTML = valStack.map(v => `<div style="background:var(--accent-blue); color:white; padding:8px 12px; text-align:center; border-radius:6px; font-weight:bold;">${v}</div>`).join('');
+            opDiv.innerHTML = opStack.map(v => `<div style="background:var(--accent-orange); color:white; padding:8px 12px; text-align:center; border-radius:6px; font-weight:bold;">${v}</div>`).join('');
+        }
+
+        function nextStep() {
+            if(stepIndex >= tokens.length) {
+                document.getElementById('step-desc').innerHTML = `✅ <strong>Sonuç: ${valStack[0]}</strong>`;
+                return;
+            }
+            const t = tokens[stepIndex];
+            const desc = document.getElementById('step-desc');
+
+            if(t === '(') {
+                desc.innerHTML = `👉 Token: <strong>'${t}'</strong> - Açılış parantezi atla.`;
+            }
+            else if (['+', '*', '-', '/'].includes(t)) {
+                opStack.push(t);
+                desc.innerHTML = `👉 Token: <strong>'${t}'</strong> - Operator Stack'e ekle.`;
+            }
+            else if (t === ')') {
+                const op = opStack.pop();
+                const v2 = valStack.pop();
+                const v1 = valStack.pop();
+                let res = 0;
+                if(op === '+') res = v1 + v2;
+                else if(op === '*') res = v1 * v2;
+                else if(op === '-') res = v1 - v2;
+                else if(op === '/') res = v1 / v2;
+                valStack.push(res);
+                desc.innerHTML = `👉 Token: <strong>'${t}'</strong> - Kapanış geldi: <strong>${v1} ${op} ${v2} = ${res}</strong>`;
+            }
+            else {
+                valStack.push(parseInt(t));
+                desc.innerHTML = `👉 Token: <strong>'${t}'</strong> - Operand Stack'e ekle.`;
+            }
+            stepIndex++;
+            updateVisuals();
+        }
+
+        function resetVis() {
+            stepIndex = 0;
+            valStack = [];
+            opStack = [];
+            document.getElementById('step-desc').innerText = "Başlamak için ilerleyin...";
+            updateVisuals();
+        }
+
+        // Initialize visualization
+        updateVisuals();
+    </script>
+</body>
+</html>

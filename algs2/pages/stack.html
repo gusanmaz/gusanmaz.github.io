@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack (Yığın) - Ana Menü</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #8e44ad 0%, #c0392b 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--bg-primary);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+
+        h1 {
+            color: #8e44ad;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .visual-demo {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 5px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8eb);
+            border-radius: 10px;
+            margin: 20px auto;
+            width: fit-content;
+        }
+
+        .stack-item {
+            padding: 12px 40px;
+            background: #8e44ad;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stack-item:last-child {
+            background: #c0392b;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: var(--text-primary);
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            text-align: left;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--text-primary);
+            text-align: left;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-1 { border-color: #3498db; }
+        .card-1:hover { background: #ebf5fb; }
+        .card-1 h3 { color: #3498db; }
+
+        .card-2 { border-color: #9b59b6; }
+        .card-2:hover { background: #f5eef8; }
+        .card-2 h3 { color: #9b59b6; }
+
+        .card-3 { border-color: #e74c3c; }
+        .card-3:hover { background: #fdedec; }
+        .card-3 h3 { color: #e74c3c; }
+
+        .card-4 { border-color: #27ae60; }
+        .card-4:hover { background: #e9f7ef; }
+        .card-4 h3 { color: #27ae60; }
+
+        .card-5 { border-color: #e67e22; }
+        .card-5:hover { background: #fef5e7; }
+        .card-5 h3 { color: #e67e22; }
+
+        .card-6 { border-color: #1abc9c; }
+        .card-6:hover { background: #e8f8f5; }
+        .card-6 h3 { color: #1abc9c; }
+
+        .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .card h3 {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            background: rgba(0,0,0,0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgba(0,0,0,0.3);
+            transform: translateX(-3px);
+        }
+
+        /* Dark mode adjustments */
+        [data-theme="dark"] .visual-demo {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+
+        [data-theme="dark"] h1 {
+            color: #9b59b6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+    <a href="../index.html" class="back-link">🏠 Ana Menü</a>
+
+    <div class="container">
+        <h1>📚 Stack (Yığın) Dünyası</h1>
+        <p class="subtitle">LIFO: Last In, First Out</p>
+
+        <div class="visual-demo">
+            <div class="stack-item">A</div>
+            <div class="stack-item">B</div>
+            <div class="stack-item">C</div>
+            <div class="stack-item">D ← TOP</div>
+        </div>
+
+        <h2 class="section-title">📚 Temel Kavramlar</h2>
+        <div class="card-container">
+            <a href="2a_stack_giris.html" class="card card-1">
+                <span class="icon">📚</span>
+                <h3>2.1: Stack Nedir?</h3>
+                <p>LIFO prensibi, push/pop operasyonları, görselleştirme</p>
+            </a>
+
+            <a href="2b_stack_numpy.html" class="card card-2">
+                <span class="icon">🔢</span>
+                <h3>2.2: Numpy ile Stack</h3>
+                <p>Sabit boyutlu dizi, stack pointer, bellek yönetimi</p>
+            </a>
+
+            <a href="2c_stack_analiz.html" class="card card-3">
+                <span class="icon">📊</span>
+                <h3>2.3: Big O Analizi</h3>
+                <p>Zaman ve alan karmaşıklığı, performans karşılaştırma</p>
+            </a>
+        </div>
+
+        <h2 class="section-title">🛠️ Pratik & Algoritmalar</h2>
+        <div class="card-container">
+            <a href="2d_stack_python.html" class="card card-4">
+                <span class="icon">🐍</span>
+                <h3>2.4: Python List Stack</h3>
+                <p>Python listesi ile stack, wrapper class</p>
+            </a>
+
+            <a href="2e_stack_ornekler.html" class="card card-5">
+                <span class="icon">🧩</span>
+                <h3>2.5: Örnekler</h3>
+                <p>Parantez dengeleme, undo/redo, browser history</p>
+            </a>
+
+            <a href="2f_stack_aritmetik.html" class="card card-6">
+                <span class="icon">🔣</span>
+                <h3>2.6: Aritmetik İfadeler</h3>
+                <p>Dijkstra'nın iki stack algoritması, infix evaluation</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+</body>
+</html>

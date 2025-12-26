@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.3: Heap Sort - Sıralama Algoritması</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="../src/main.css" rel="stylesheet" />
+    <script type="module">
+        import { CodeBlocks } from '../src/code-blocks.js';
+        window.CodeBlocks = CodeBlocks;
+        document.addEventListener('DOMContentLoaded', () => {
+            CodeBlocks.init();
+        });
+    </script>
+    <style>
+        .sort-visual {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 30px 0;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: 250px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .bar {
+            flex: 1;
+            max-width: 60px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .bar.sorted {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+        }
+
+        .bar.comparing {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            transform: translateY(-10px);
+        }
+
+        .bar.heap {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        }
+
+        .bar-value {
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .control-btn.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .status-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+            min-height: 60px;
+        }
+
+        .step-visualization {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 3a1 1 0 011 1v1a1 1 0 11-2 0V4a1 1 0 011-1zm0 10a3 3 0 100-6 3 3 0 000 6zm0 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM4 10a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm10 0a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1zM5.05 5.05a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zm9.9 9.9a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zm-9.9 0a1 1 0 011.414 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707zm9.9-9.9a1 1 0 011.414 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707z"/>
+        </svg>
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+        </svg>
+    </button>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 9.3: Heap Sort</h1>
+            <p>Heap Kullanarak O(n log n) Sıralama</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Heap Sort Nedir?</h2>
+            <p><strong>Heap Sort</strong>, heap veri yapısını kullanarak dizi sıralama algoritmasıdır.</p>
+
+            <div style="background: var(--success-bg); padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #2e7d32;">💡 Ana Fikir</h4>
+                <ol style="margin: 10px 0; padding-left: 25px;">
+                    <li>Diziyi <strong>Max Heap'e</strong> çevir (Heapify)</li>
+                    <li>Root (en büyük) her seferinde <strong>son eleman ile swap</strong> yap</li>
+                    <li>Heap boyutunu 1 azalt, root'u tekrar heapify yap</li>
+                    <li>Heap boşalana kadar tekrarla</li>
+                </ol>
+                <p style="margin: 10px 0 0 0;"><strong>Sonuç:</strong> Küçükten büyüğe sıralı dizi!</p>
+            </div>
+
+            <div style="background: var(--info-bg); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h3 style="margin-top: 0;">⚡ Heap Sort Özellikleri</h3>
+                <ul>
+                    <li>✅ <strong>Zaman:</strong> Her durumda O(n log n)</li>
+                    <li>✅ <strong>Yer:</strong> O(1) - In-place sorting</li>
+                    <li>❌ <strong>Stable değil:</strong> Aynı değerli elemanların sırası bozulabilir</li>
+                    <li>✅ <strong>Worst case garantili:</strong> Quick sort'tan daha güvenilir</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎬 İnteraktif Heap Sort Animasyonu</h2>
+            <p>Heap sort algoritmasının çalışmasını adım adım izleyin!</p>
+
+            <div class="sort-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Heap Sort Görselleştirme</h3>
+
+                <div id="sortStatus" class="status-info">
+                    <strong>Durum:</strong> Başlamaya hazır. "Başlat" butonuna basın!
+                </div>
+
+                <div id="barContainer" class="bar-container"></div>
+
+                <div class="controls">
+                    <button class="control-btn secondary" onclick="heapSortViz.reset()">🔄 Sıfırla</button>
+                    <button class="control-btn secondary" onclick="heapSortViz.randomize()">🎲 Rastgele Dizi</button>
+                    <button class="control-btn primary" onclick="heapSortViz.start()">▶ Başlat</button>
+                    <button class="control-btn primary" onclick="heapSortViz.step()">⏯️ Adım İlerle</button>
+                    <button class="control-btn secondary" onclick="heapSortViz.toggleSpeed()">⚡ Hız: <span id="speedLabel">Normal</span></button>
+                </div>
+
+                <div class="step-visualization">
+                    <h4 style="margin-top: 0;">📊 Adım Detayları</h4>
+                    <div id="stepDetails" style="font-family: monospace; font-size: 14px; line-height: 1.8;">
+                        Algoritma başlamadı...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🌳 Heap Sort - Ağaç Görselleştirmesi</h2>
+            <p>Heap yapısının her adımda nasıl değiştiğini görün</p>
+
+            <div class="sort-visual">
+                <h3 style="text-align: center; margin-top: 0;">🧪 Heap Ağacı Animasyonu</h3>
+                <p style="text-align: center; color: #666; font-size: 0.9em;">Build heap ve extract adımlarını izleyin</p>
+
+                <canvas id="heapTreeCanvas" width="700" height="450"
+                    style="border: 2px solid #e0e0e0; border-radius: 10px; background: white; display: block; margin: 20px auto;"></canvas>
+
+                <div id="treeStatus" class="status-info">
+                    <strong>Adım 1:</strong> Rastgele diziyi max heap'e çevirme
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn secondary" onclick="heapTreeViz.reset()">🔄 Sıfırla</button>
+                    <button class="control-btn primary" onclick="heapTreeViz.nextStep()">▶ Sonraki Adım</button>
+                    <button class="control-btn primary" onclick="heapTreeViz.autoPlay()">⏩ Otomatik</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Heap Sort Algoritması - Python Kodu</h2>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Heap Sort - Adım Adım</span>
+                    <button class="btn btn-run" onclick="CodeBlocks.run('code1')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code1"><code class="language-python line-numbers">def heapify(arr, n, i):
+    """i'nci elemanı heap'te aşağı batır"""
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < n and arr[left] > arr[largest]:
+        largest = left
+
+    if right < n and arr[right] > arr[largest]:
+        largest = right
+
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest)
+
+def heap_sort(arr):
+    """Heap sort algoritması"""
+    n = len(arr)
+
+    print("=== HEAP SORT ===\n")
+    print(f"Başlangıç: {arr}\n")
+
+    # ADIM 1: Build Max Heap (Max Heap Oluştur)
+    print("ADIM 1: Build Max Heap (Max Heap Oluştur)")
+    print("-" * 40)
+
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+
+    print(f"Max Heap: {arr}")
+    print(f"Root (en büyük): {arr[0]}\n")
+
+    # ADIM 2: Extract elemanları tek tek (Elemanları Çıkar ve Sırala)
+    print("ADIM 2: Extract & Sort (Çıkar ve Sırala)")
+    print("-" * 40)
+
+    for i in range(n - 1, 0, -1):
+        # Root'u (en büyük) sona taşı
+        arr[0], arr[i] = arr[i], arr[0]
+        print(f"Swap: 0 ↔ {i} → {arr}")
+        print(f"  Sıralanmış kısım: {arr[i:]} ✅")
+
+        # Kalan heap'i düzelt
+        heapify(arr, i, 0)
+        print(f"  Heapify sonrası: {arr[:i]} (heap) + {arr[i:]} (sıralı)")
+        print()
+
+    print(f"✅ Sıralama tamamlandı: {arr}")
+    return arr
+
+# Test
+arr = [12, 11, 13, 5, 6, 7]
+sorted_arr = heap_sort(arr.copy())
+
+# Doğrulama
+print("\n=== Doğrulama ===")
+print(f"Sıralı mı? {sorted_arr == sorted(sorted_arr)}")
+print(f"Sonuç: {sorted_arr}")</code></pre>
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚖️ Heap Sort vs Diğer Sıralama Algoritmaları</h2>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                        <th style="padding: 12px;">Algoritma</th>
+                        <th style="padding: 12px;">Best</th>
+                        <th style="padding: 12px;">Average</th>
+                        <th style="padding: 12px;">Worst</th>
+                        <th style="padding: 12px;">Space</th>
+                        <th style="padding: 12px;">Stable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: var(--warning-bg);">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>Heap Sort</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #4caf50;">O(n log n) ✅</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">❌</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Quick Sort</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #f44336;">O(n²) ❌</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">❌</td>
+                    </tr>
+                    <tr style="background: var(--secondary-bg);">
+                        <td style="padding: 10px; border: 1px solid #ddd;">Merge Sort</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">O(n log n)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #f44336;">O(n) ❌</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">✅</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #856404;">🎯 Heap Sort Ne Zaman Kullanılır?</h4>
+                <ul style="margin: 10px 0;">
+                    <li>✅ <strong>Worst case garantisi</strong> önemliyse (embedded sistemler)</li>
+                    <li>✅ <strong>Bellek kısıtlı</strong> (O(1) extra space)</li>
+                    <li>❌ Stable sorting gerekiyorsa kullanma (Merge Sort kullan)</li>
+                    <li>❌ Küçük dizilerde (Insertion Sort daha hızlı)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: var(--success-bg); padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Heap Sort:</strong> Build heap → Extract max tekrar tekrar</li>
+                    <li><strong>Zaman:</strong> O(n log n) - her durumda garantili!</li>
+                    <li><strong>Yer:</strong> O(1) - In-place sıralama</li>
+                    <li><strong>Avantaj:</strong> Worst case garantisi, az bellek</li>
+                    <li><strong>Dezavantaj:</strong> Stable değil, pratikte cache friendly değil</li>
+                    <li><strong>Animasyonlar:</strong> Hem bar chart hem de ağaç görselleştirmesi ile adım adım izlediniz</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-footer" data-auto-nav></div>
+    </div>
+    
+</body>
+</html>
+
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>

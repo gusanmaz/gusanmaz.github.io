@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.4: Python ile Stack Pratiği</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- CodeMirror 6 -->
+    <script type="module">
+        import {EditorView, basicSetup} from "https://cdn.jsdelivr.net/npm/codemirror@6/dist/index.js"
+        import {python} from "https://cdn.jsdelivr.net/npm/@codemirror/lang-python@6/dist/index.js"
+        import {oneDark} from "https://cdn.jsdelivr.net/npm/@codemirror/theme-one-dark@6/dist/index.js"
+
+        window.CodeMirror = {
+            EditorView,
+            basicSetup,
+            python: () => python(),
+            oneDark
+        };
+    </script>
+
+    <!-- Pyodide for Python execution -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🐍 2.4: Python ile Stack Pratiği</h1>
+            <p>Listeler ve Sarmalayıcı Sınıflar (Wrapper Classes)</p>
+        </header>
+
+        <div class="section">
+            <h2>1️⃣ En Kolay Yol: Python Listesi</h2>
+            <p>Python'da <code>list</code> veri yapısı zaten bir Stack'tir.</p>
+            <ul>
+                <li><strong>Push</strong> = <code>list.append(x)</code></li>
+                <li><strong>Pop</strong> = <code>list.pop()</code></li>
+            </ul>
+            <p style="background: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                💡 <strong>Not:</strong> Python list'leri dinamik boyutlu ve çok hızlıdır. Pratikte çoğu durumda direkt list kullanmak yeterlidir.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>2️⃣ Wrapper Class ile Stack</h2>
+            <p>Daha temiz bir API için list'i bir sınıf içine sarabiliriz:</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python - Stack Wrapper Class</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(0)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(0)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">class Stack:
+    def __init__(self):
+        self._items = []
+
+    def push(self, item):
+        self._items.append(item)
+        print(f"-> Push: {item}")
+
+    def pop(self):
+        if self.is_empty():
+            return "Boş!"
+        item = self._items.pop()
+        print(f"<- Pop: {item}")
+        return item
+
+    def peek(self):
+        if self.is_empty():
+            return None
+        return self._items[-1]
+
+    def is_empty(self):
+        return len(self._items) == 0
+
+# Test
+s = Stack()
+s.push("Kitap 1")
+s.push("Kitap 2")
+print(f"En üst: {s.peek()}")
+s.pop()
+s.pop()</code></pre>
+
+                <div class="output" id="output-0"></div>
+            </div>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+</body>
+</html>

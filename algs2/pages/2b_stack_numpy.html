@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.2: Numpy ile Stack</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- CodeMirror 6 -->
+    <script type="module">
+        import {EditorView, basicSetup} from "https://cdn.jsdelivr.net/npm/codemirror@6/dist/index.js"
+        import {python} from "https://cdn.jsdelivr.net/npm/@codemirror/lang-python@6/dist/index.js"
+        import {oneDark} from "https://cdn.jsdelivr.net/npm/@codemirror/theme-one-dark@6/dist/index.js"
+
+        // Make CodeMirror available globally
+        window.CodeMirror = {
+            EditorView,
+            basicSetup,
+            python: () => python(),
+            oneDark
+        };
+    </script>
+
+    <!-- Pyodide for Python execution -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🏗️ 2.2: Numpy ile Stack Kodlama</h1>
+            <p>Donanım Seviyesinde Stack Mantığı</p>
+        </header>
+
+        <div class="section section-info">
+            <h2>📌 Ön Bilgi: Bu Sayfada Ne Öğreneceğiz?</h2>
+            <p>
+                Bu sayfada <strong>sabit boyutlu</strong> bir stack nasıl oluşturulur göreceğiz.
+                Numpy kullanmamızın sebebi, C dilindeki diziler gibi sabit boyutlu, bitişik bellekte
+                tutulan bir yapı elde etmektir.
+            </p>
+
+            <h3>Neden Sabit Boyutlu Stack?</h3>
+            <ul>
+                <li>✅ Gerçek dünyada (gömülü sistemler, oyun motorları) bellek önceden ayrılır</li>
+                <li>✅ Performans kritik uygulamalarda dinamik bellek ayırma maliyetli olabilir</li>
+                <li>✅ Bu örnek, stack'in temel mantığını anlamanıza yardımcı olacak</li>
+            </ul>
+
+            <p>
+                <strong>Not:</strong> Pratikte Python'da stack için <code>list</code> kullanmak
+                daha yaygındır (bir sonraki ders).
+            </p>
+        </div>
+
+        <div class="visual-container">
+            <h3>Stack Pointer (Top) Görselleştirme</h3>
+            <div id="visual-array" style="display: flex; justify-content: center; gap: 4px; margin: 30px 0;"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-run" onclick="demoPush()">Push (Ekle)</button>
+                <button class="btn btn-reset" onclick="demoPop()">Pop (Çıkar)</button>
+                <button class="btn btn-danger" onclick="demoReset()">Reset</button>
+            </div>
+            <p id="demo-msg" style="font-weight: bold; margin-top: 20px; min-height: 24px; color: #555;"></p>
+        </div>
+
+        <div class="section">
+            <h2>💻 Tam Kod Implementasyonu</h2>
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python - Numpy Stack</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(0)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(0)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">import numpy as np
+
+class NumpyStack:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = np.zeros(capacity, dtype=int)
+        self.top = 0
+
+    def push(self, value):
+        if self.top == self.capacity:
+            print("❌ Stack Overflow! Stack dolu.")
+            return False
+        self.data[self.top] = value
+        self.top += 1
+        print(f"✅ Push({value}) -> Top: {self.top}, Data: {self.data}")
+        return True
+
+    def pop(self):
+        if self.top == 0:
+            print("❌ Stack Underflow! Stack boş.")
+            return None
+        self.top -= 1
+        val = self.data[self.top]
+        self.data[self.top] = 0  # Opsiyonel: Temizle
+        print(f"🔻 Pop() -> {val}, Top: {self.top}, Data: {self.data}")
+        return val
+
+    def peek(self):
+        if self.top == 0:
+            print("❌ Stack boş!")
+            return None
+        return self.data[self.top - 1]
+
+    def is_empty(self):
+        return self.top == 0
+
+    def size(self):
+        return self.top
+
+# Test Kodu
+print("=== Numpy Stack Testi ===\n")
+s = NumpyStack(5)
+
+print("1. Eleman ekleme:")
+s.push(10)
+s.push(20)
+s.push(30)
+
+print("\n2. Peek:")
+print(f"👀 En üstteki: {s.peek()}")
+
+print("\n3. Pop işlemleri:")
+s.pop()
+s.pop()
+
+print("\n4. Tekrar push:")
+s.push(99)
+s.push(88)
+
+print("\n5. Overflow testi:")
+s.push(77)
+s.push(66)
+s.push(55)  # Bu overflow verecek
+
+print(f"\n6. Final durum - Boyut: {s.size()}")</code></pre>
+
+                <div class="output" id="output-0"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔍 Kod Açıklaması</h2>
+
+            <h3>1. __init__(self, capacity)</h3>
+            <ul>
+                <li><code>np.zeros(capacity, dtype=int)</code>: capacity boyutunda, 0'larla dolu numpy array</li>
+                <li><code>self.top = 0</code>: Stack pointer, bir sonraki boş pozisyonu gösterir</li>
+            </ul>
+
+            <h3>2. push(value)</h3>
+            <ul>
+                <li>Önce dolu mu kontrol et: <code>if self.top == self.capacity</code></li>
+                <li>Değeri ekle: <code>self.data[self.top] = value</code></li>
+                <li>Pointer'ı ilerlet: <code>self.top += 1</code></li>
+            </ul>
+
+            <h3>3. pop()</h3>
+            <ul>
+                <li>Önce boş mu kontrol et: <code>if self.top == 0</code></li>
+                <li>Pointer'ı geri al: <code>self.top -= 1</code></li>
+                <li>Değeri oku: <code>val = self.data[self.top]</code></li>
+                <li>Opsiyonel: Hücreyi temizle <code>self.data[self.top] = 0</code></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📊 Zaman Karmaşıklığı</h2>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="background: var(--accent-blue); color: white;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">İşlem</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Zaman Karmaşıklığı</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>push()</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: var(--accent-green);">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Sabit zamanda indeksleme ve atama</td>
+                    </tr>
+                    <tr style="background: var(--bg-tertiary);">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>pop()</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: var(--accent-green);">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Sabit zamanda indeksleme</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>peek()</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: var(--accent-green);">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Sadece indeksleme</td>
+                    </tr>
+                    <tr style="background: var(--bg-tertiary);">
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>is_empty()</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: var(--accent-green);">O(1)</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Sadece sayı karşılaştırma</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific visualization -->
+    <script>
+        // Numpy-style array visualization
+        const CAPACITY = 5;
+        let demoData = new Array(CAPACITY).fill(0);
+        let demoTop = 0;
+
+        function renderDemoArray() {
+            const container = document.getElementById('visual-array');
+            container.innerHTML = '';
+
+            demoData.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.style.cssText = `
+                    width: 60px;
+                    height: 60px;
+                    border: 3px solid ${idx < demoTop ? 'var(--accent-blue)' : '#ddd'};
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    background: ${idx < demoTop ? 'linear-gradient(135deg, var(--accent-blue), var(--accent-blue-dark))' : 'var(--bg-tertiary)'};
+                    color: ${idx < demoTop ? 'white' : 'var(--text-secondary)'};
+                    font-weight: bold;
+                    font-size: 18px;
+                    border-radius: 12px;
+                    position: relative;
+                    transition: all 0.3s;
+                    box-shadow: ${idx < demoTop ? '0 4px 15px rgba(52, 152, 219, 0.3)' : 'none'};
+                `;
+
+                // Index label
+                const indexLabel = document.createElement('div');
+                indexLabel.textContent = idx;
+                indexLabel.style.cssText = `
+                    position: absolute;
+                    bottom: -25px;
+                    font-size: 12px;
+                    color: var(--text-secondary);
+                `;
+
+                cell.textContent = val || '0';
+                cell.appendChild(indexLabel);
+
+                // Top pointer
+                if (idx === demoTop && demoTop < CAPACITY) {
+                    const pointer = document.createElement('div');
+                    pointer.textContent = '▲ TOP';
+                    pointer.style.cssText = `
+                        position: absolute;
+                        top: -35px;
+                        font-size: 12px;
+                        font-weight: bold;
+                        color: var(--accent-red);
+                    `;
+                    cell.appendChild(pointer);
+                }
+
+                container.appendChild(cell);
+            });
+        }
+
+        function demoPush() {
+            if (demoTop >= CAPACITY) {
+                updateDemoMsg("❌ Stack Overflow! Stack dolu.", 'red');
+                return;
+            }
+
+            const value = Math.floor(Math.random() * 90) + 10;
+            demoData[demoTop] = value;
+            demoTop++;
+            renderDemoArray();
+            updateDemoMsg(`✅ Push(${value}) → Top: ${demoTop}`, 'green');
+        }
+
+        function demoPop() {
+            if (demoTop === 0) {
+                updateDemoMsg("❌ Stack Underflow! Stack boş.", 'red');
+                return;
+            }
+
+            demoTop--;
+            const value = demoData[demoTop];
+            demoData[demoTop] = 0;
+            renderDemoArray();
+            updateDemoMsg(`🔻 Pop() → ${value} çıkarıldı, Top: ${demoTop}`, '#c0392b');
+        }
+
+        function demoReset() {
+            demoData = new Array(CAPACITY).fill(0);
+            demoTop = 0;
+            renderDemoArray();
+            updateDemoMsg("🔄 Stack sıfırlandı", '#666');
+        }
+
+        function updateDemoMsg(text, color) {
+            const msg = document.getElementById('demo-msg');
+            if (msg) {
+                msg.textContent = text;
+                msg.style.color = color;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDemoArray();
+            updateDemoMsg("Stack boş. Push ile eleman ekleyin!", '#555');
+
+            // Load numpy for Python code
+            PyodideManager.init().then(() => {
+                PyodideManager.loadPackage('numpy');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.2: Bubble Sort (Kabarcık Sıralama)</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <style>
+
+        .visual-container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .array-visual {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 80px;
+            align-items: flex-end;
+        }
+        .array-cell {
+            width: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .array-cell .bar {
+            width: 100%;
+            background: linear-gradient(to top, #3498db, #2980b9);
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .array-cell .index {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        .array-cell.comparing .bar {
+            background: linear-gradient(to top, #f39c12, #e67e22);
+            transform: scale(1.1);
+        }
+        .array-cell.swapping .bar {
+            background: linear-gradient(to top, #e74c3c, #c0392b);
+        }
+        .array-cell.sorted .bar {
+            background: linear-gradient(to top, #27ae60, #1e8449);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-info {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 15px 0;
+            min-height: 60px;
+        }
+        .stats-box {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px 25px;
+            background: var(--card-bg);
+            border-radius: 10px;
+        }
+        .stat-item .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-item .label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .pass-indicator {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .pass-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        .pass-dot.active { background: #f39c12; }
+        .pass-dot.completed { background: #27ae60; }
+        </style>
+</head>
+
+<body>
+
+
+<div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+    <header>
+        <h1>🫧 7.2: Bubble Sort (Kabarcık Sıralama)</h1>
+        <p>En Basit Sıralama Algoritması</p>
+    </header>
+
+    <div class="section">
+        <h2>📌 Bubble Sort Nedir?</h2>
+        <p><strong>Bubble Sort</strong>, yan yana elemanları karşılaştırıp büyük olanı sağa taşıyan basit bir sıralama algoritmasıdır. Her geçişte en büyük eleman su içindeki kabarcık gibi "yukarı çıkar".</p>
+
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: #1565c0;">🎯 Algoritma Mantığı</h4>
+            <ol style="margin-bottom: 0;">
+                <li>Dizinin başından sonuna kadar git</li>
+                <li>Her adımda yan yana iki elemanı karşılaştır</li>
+                <li>Soldaki büyükse → İkisini takas et (swap)</li>
+                <li>Dizinin sonuna ulaşınca, en büyük eleman sonda olur</li>
+                <li>Bu işlemi (n-1) kez tekrarla</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="visual-container">
+        <h3 style="text-align: center;">🎮 İnteraktif Bubble Sort Simülasyonu</h3>
+
+        <div class="pass-indicator" id="passIndicator">
+            <!-- JS ile doldurulacak -->
+        </div>
+
+        <div class="array-visual" id="arrayVisual">
+            <!-- JS ile doldurulacak -->
+        </div>
+
+        <div class="stats-box">
+            <div class="stat-item">
+                <div class="value" id="comparisons">0</div>
+                <div class="label">Karşılaştırma</div>
+            </div>
+            <div class="stat-item">
+                <div class="value" id="swaps">0</div>
+                <div class="label">Takas</div>
+            </div>
+            <div class="stat-item">
+                <div class="value" id="currentPass">0</div>
+                <div class="label">Geçiş (Pass)</div>
+            </div>
+        </div>
+
+        <div class="step-info" id="stepInfo">
+            🎯 "Başlat" butonuna tıklayarak sıralamayı izleyin.
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-run" onclick="startSort()">▶️ Başlat</button>
+            <button class="btn" onclick="stepSort()">⏭️ Adım</button>
+            <button class="btn" onclick="pauseSort()">⏸️ Duraklat</button>
+            <button class="btn btn-reset" onclick="resetSort()">🔄 Sıfırla</button>
+            <div class="speed-control">
+                <label>Hız:</label>
+                <input type="range" id="speedSlider" min="100" max="1000" value="500">
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Karmaşıklık Analizi</h2>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <th style="padding: 15px;">Durum</th>
+                    <th style="padding: 15px;">Zaman</th>
+                    <th style="padding: 15px;">Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>En İyi</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(n)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Dizi zaten sıralı (optimizasyonlu versiyon)</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Ortalama</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">O(n²)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Rastgele sıralı dizi</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>En Kötü</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">O(n²)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">Ters sıralı dizi</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Alan</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">O(1)</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">In-place, ek bellek gerekmez</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <strong>📐 Neden O(n²)?</strong>
+            <p style="margin: 5px 0 0 0;">
+                n elemanlı dizi için:<br>
+                • 1. geçiş: (n-1) karşılaştırma<br>
+                • 2. geçiş: (n-2) karşılaştırma<br>
+                • ...<br>
+                • Toplam: (n-1) + (n-2) + ... + 1 = <strong>n(n-1)/2 ≈ n²/2 = O(n²)</strong>
+            </p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💻 Python Implementasyonları</h2>
+
+        <h3>1. Temel Versiyon</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code1\')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code1"><code class="language-python line-numbers">def bubble_sort_basic(arr):
+    """Temel Bubble Sort"""
+    n = len(arr)
+    comparisons = 0
+    swaps = 0
+
+    for i in range(n - 1):
+        print(f"\n--- Geçiş {i + 1} ---")
+
+        for j in range(n - 1 - i):
+            comparisons += 1
+            print(f"Karşılaştır: arr[{j}]={arr[j]} vs arr[{j+1}]={arr[j+1]}", end="")
+
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swaps += 1
+                print(f" → TAKAS!")
+            else:
+                print(f" → OK")
+
+        print(f"Dizi: {arr}")
+
+    return comparisons, swaps
+
+# Test
+dizi = [64, 34, 25, 12, 22, 11]
+print(f"Başlangıç: {dizi}\n")
+
+karsilastirma, takas = bubble_sort_basic(dizi.copy())
+print(f"\n{'='*40}")
+print(f"Sonuç: {dizi}")
+print(f"Toplam karşılaştırma: {karsilastirma}")
+print(f"Toplam takas: {takas}")</code></pre>
+            <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+        </div>
+
+        <h3>2. Optimizasyonlu Versiyon (Early Termination)</h3>
+        <div class="code-container">
+            <div class="code-header">
+                <span>Python Kodu</span>
+                <div>
+                    <button class="btn btn-run" onclick="CodeBlocks.run(\'code2\')">▶ Çalıştır</button>
+                </div>
+            </div>
+            <pre id="view-code2"><code class="language-python line-numbers">def bubble_sort_optimized(arr):
+    """
+    Optimizasyonlu Bubble Sort
+
+    Eğer bir geçişte hiç takas olmadıysa,
+    dizi zaten sıralıdır - erken çık!
+    """
+    n = len(arr)
+    comparisons = 0
+
+    for i in range(n - 1):
+        swapped = False  # Bu geçişte takas oldu mu?
+
+        for j in range(n - 1 - i):
+            comparisons += 1
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
+
+        print(f"Geçiş {i+1}: {arr}")
+
+        # Takas olmadıysa, dizi sıralı!
+        if not swapped:
+            print(f"✅ Takas yok - Erken çıkış!")
+            break
+
+    return comparisons
+
+# Test 1: Normal dizi
+print("Test 1: Normal Dizi")
+dizi1 = [64, 34, 25, 12, 22, 11]
+print(f"Başlangıç: {dizi1}")
+comp1 = bubble_sort_optimized(dizi1)
+print(f"Karşılaştırma: {comp1}\n")
+
+# Test 2: Zaten sıralı dizi
+print("Test 2: Zaten Sıralı Dizi")
+dizi2 = [11, 12, 22, 25, 34, 64]
+print(f"Başlangıç: {dizi2}")
+comp2 = bubble_sort_optimized(dizi2)
+print(f"Karşılaştırma: {comp2}")
+print("\n💡 Sıralı dizide sadece 1 geçiş yeterli!")</code></pre>
+            <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📝 Adım Adım Örnek</h2>
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+            <p><strong>Başlangıç:</strong> [5, 3, 8, 4, 2]</p>
+
+            <h4>Geçiş 1:</h4>
+            <ul style="font-family: monospace;">
+                <li>[<span style="color:#e74c3c">5, 3</span>, 8, 4, 2] → 5 > 3? Evet → Takas → [<span style="color:#27ae60">3, 5</span>, 8, 4, 2]</li>
+                <li>[3, <span style="color:#e74c3c">5, 8</span>, 4, 2] → 5 > 8? Hayır → [3, 5, 8, 4, 2]</li>
+                <li>[3, 5, <span style="color:#e74c3c">8, 4</span>, 2] → 8 > 4? Evet → Takas → [3, 5, <span style="color:#27ae60">4, 8</span>, 2]</li>
+                <li>[3, 5, 4, <span style="color:#e74c3c">8, 2</span>] → 8 > 2? Evet → Takas → [3, 5, 4, <span style="color:#27ae60">2, 8</span>]</li>
+            </ul>
+            <p>Geçiş 1 sonucu: [3, 5, 4, 2, <span style="background:#27ae60; color:white; padding:2px 5px; border-radius:3px;">8</span>] ← En büyük yerinde!</p>
+
+            <h4>Geçiş 2:</h4>
+            <ul style="font-family: monospace;">
+                <li>[<span style="color:#27ae60">3, 5</span>, 4, 2, 8] → Takas yok</li>
+                <li>[3, <span style="color:#e74c3c">5, 4</span>, 2, 8] → Takas → [3, <span style="color:#27ae60">4, 5</span>, 2, 8]</li>
+                <li>[3, 4, <span style="color:#e74c3c">5, 2</span>, 8] → Takas → [3, 4, <span style="color:#27ae60">2, 5</span>, 8]</li>
+            </ul>
+            <p>Geçiş 2 sonucu: [3, 4, 2, <span style="background:#27ae60; color:white; padding:2px 5px; border-radius:3px;">5, 8</span>]</p>
+
+            <p><strong>...</strong> (devam eder)</p>
+
+            <p><strong>Final:</strong> [<span style="background:#27ae60; color:white; padding:2px 5px; border-radius:3px;">2, 3, 4, 5, 8</span>]</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ Avantajları ve ❌ Dezavantajları</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="background: #d4edda; padding: 20px; border-radius: 10px;">
+                <h4 style="color: #155724; margin-top: 0;">✅ Avantajları</h4>
+                <ul style="margin: 0;">
+                    <li><strong>Basit:</strong> Anlaması ve yazması kolay</li>
+                    <li><strong>In-place:</strong> O(1) ek alan</li>
+                    <li><strong>Stabil:</strong> Eşit elemanların sırası korunur</li>
+                    <li><strong>Adaptive:</strong> Sıralı dizide O(n)</li>
+                    <li><strong>Öğretici:</strong> Sıralama mantığını öğrenmek için ideal</li>
+                </ul>
+            </div>
+            <div style="background: #f8d7da; padding: 20px; border-radius: 10px;">
+                <h4 style="color: #721c24; margin-top: 0;">❌ Dezavantajları</h4>
+                <ul style="margin: 0;">
+                    <li><strong>Yavaş:</strong> O(n²) - büyük verilerde kullanılamaz</li>
+                    <li><strong>Çok takas:</strong> Diğer O(n²) algoritmalardan daha fazla</li>
+                    <li><strong>Pratikte kullanılmaz:</strong> Daha iyi alternatifler var</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🆚 Selection Sort ile Karşılaştırma</h2>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #667eea; color: white;">
+                    <th style="padding: 12px;">Özellik</th>
+                    <th style="padding: 12px;">Bubble Sort</th>
+                    <th style="padding: 12px;">Selection Sort</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Karşılaştırma Sayısı</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n²)</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">O(n²)</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #ddd;">Takas Sayısı</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #e74c3c;">O(n²) - Çok</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">O(n) - Az</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">Stabil mi?</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">✅ Evet</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #e74c3c;">❌ Hayır</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 10px; border: 1px solid #ddd;">Adaptive mi?</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #27ae60;">✅ Evet (O(n))</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: #e74c3c;">❌ Hayır</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="nav-footer">
+        <a href="7a_sorting_intro.html" class="btn">⬅️ Önceki: Sıralama Giriş</a>
+        <a href="../index.html" class="btn" style="background:#e67e22">🏠 Ana Menü</a>
+        <a href="7c_selection_sort.html" class="btn btn-next">Sonraki: Selection Sort ➡️</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script>
+    // Bubble Sort Animasyonu
+    let array = [64, 34, 25, 12, 22, 11];
+    const originalArray = [...array];
+    let i = 0, j = 0;
+    let comparisons = 0, swaps = 0;
+    let isRunning = false;
+    let sortInterval = null;
+    let sorted = false;
+
+    function renderArray() {
+        const container = document.getElementById('arrayVisual');
+        container.innerHTML = '';
+        const maxVal = Math.max(...array);
+
+        array.forEach((val, idx) => {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.id = `cell-${idx}`;
+
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = `${(val / maxVal) * 150 + 30}px`;
+            bar.innerText = val;
+
+            const index = document.createElement('div');
+            index.className = 'index';
+            index.innerText = `[${idx}]`;
+
+            cell.appendChild(bar);
+            cell.appendChild(index);
+            container.appendChild(cell);
+        });
+
+        // Pass göstergesini güncelle
+        renderPassIndicator();
+    }
+
+    function renderPassIndicator() {
+        const container = document.getElementById('passIndicator');
+        container.innerHTML = '';
+        const n = array.length;
+
+        for (let p = 1; p < n; p++) {
+            const dot = document.createElement('div');
+            dot.className = 'pass-dot';
+            dot.innerText = p;
+
+            if (p < i + 1) {
+                dot.classList.add('completed');
+            } else if (p === i + 1) {
+                dot.classList.add('active');
+            }
+
+            container.appendChild(dot);
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('comparisons').innerText = comparisons;
+        document.getElementById('swaps').innerText = swaps;
+        document.getElementById('currentPass').innerText = i + 1;
+    }
+
+    function highlightCells(idx1, idx2, type) {
+        document.querySelectorAll('.array-cell').forEach(c => {
+            c.classList.remove('comparing', 'swapping', 'sorted');
+        });
+
+        if (idx1 >= 0) document.getElementById(`cell-${idx1}`)?.classList.add(type);
+        if (idx2 >= 0) document.getElementById(`cell-${idx2}`)?.classList.add(type);
+
+        // Sıralanan elemanları işaretle
+        for (let k = array.length - i; k < array.length; k++) {
+            document.getElementById(`cell-${k}`)?.classList.add('sorted');
+        }
+    }
+
+    function stepSort() {
+        if (sorted) {
+            document.getElementById('stepInfo').innerHTML = '✅ Sıralama tamamlandı!';
+            return;
+        }
+
+        const n = array.length;
+
+        if (i < n - 1) {
+            if (j < n - 1 - i) {
+                highlightCells(j, j + 1, 'comparing');
+                comparisons++;
+
+                if (array[j] > array[j + 1]) {
+                    document.getElementById('stepInfo').innerHTML =
+                        `🔄 Karşılaştır: ${array[j]} > ${array[j+1]} → TAKAS!`;
+                    [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                    swaps++;
+
+                    setTimeout(() => {
+                        highlightCells(j, j + 1, 'swapping');
+                        setTimeout(() => renderArray(), 150);
+                    }, 100);
+                } else {
+                    document.getElementById('stepInfo').innerHTML =
+                        `✓ Karşılaştır: ${array[j]} ≤ ${array[j+1]} → Takas yok`;
+                }
+
+                j++;
+            } else {
+                j = 0;
+                i++;
+                document.getElementById('stepInfo').innerHTML =
+                    `📍 Geçiş ${i} tamamlandı! En büyük ${i}. eleman yerinde.`;
+            }
+        } else {
+            sorted = true;
+            document.querySelectorAll('.array-cell').forEach(c => c.classList.add('sorted'));
+            document.getElementById('stepInfo').innerHTML = '✅ Sıralama tamamlandı!';
+        }
+
+        updateStats();
+        renderArray();
+    }
+
+    function startSort() {
+        if (sorted) resetSort();
+        isRunning = true;
+        const speed = 1100 - document.getElementById('speedSlider').value;
+
+        sortInterval = setInterval(() => {
+            if (!sorted && isRunning) {
+                stepSort();
+            } else {
+                pauseSort();
+            }
+        }, speed);
+    }
+
+    function pauseSort() {
+        isRunning = false;
+        if (sortInterval) clearInterval(sortInterval);
+    }
+
+    function resetSort() {
+        pauseSort();
+        array = [...originalArray];
+        i = 0;
+        j = 0;
+        comparisons = 0;
+        swaps = 0;
+        sorted = false;
+        renderArray();
+        updateStats();
+        document.getElementById('stepInfo').innerHTML = '🎯 "Başlat" butonuna tıklayarak sıralamayı izleyin.';
+    }
+
+    // Başlangıç
+    renderArray();
+    updateStats();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+
+    async function main() {
+        pyodide = await loadPyodide();
+        pyodideReady = true;
+    }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+</script>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Pyodide CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+
+    // Bubble Sort Animasyonu
+    let array = [64, 34, 25, 12, 22, 11];
+    const originalArray = [...array];
+    let i = 0, j = 0;
+    let comparisons = 0, swaps = 0;
+    let isRunning = false;
+    let sortInterval = null;
+    let sorted = false;
+
+    function renderArray() {
+        const container = document.getElementById('arrayVisual');
+        container.innerHTML = '';
+        const maxVal = Math.max(...array);
+
+        array.forEach((val, idx) => {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.id = `cell-${idx}`;
+
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = `${(val / maxVal) * 150 + 30}px`;
+            bar.innerText = val;
+
+            const index = document.createElement('div');
+            index.className = 'index';
+            index.innerText = `[${idx}]`;
+
+            cell.appendChild(bar);
+            cell.appendChild(index);
+            container.appendChild(cell);
+        });
+
+        // Pass göstergesini güncelle
+        renderPassIndicator();
+    }
+
+    function renderPassIndicator() {
+        const container = document.getElementById('passIndicator');
+        container.innerHTML = '';
+        const n = array.length;
+
+        for (let p = 1; p < n; p++) {
+            const dot = document.createElement('div');
+            dot.className = 'pass-dot';
+            dot.innerText = p;
+
+            if (p < i + 1) {
+                dot.classList.add('completed');
+            } else if (p === i + 1) {
+                dot.classList.add('active');
+            }
+
+            container.appendChild(dot);
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('comparisons').innerText = comparisons;
+        document.getElementById('swaps').innerText = swaps;
+        document.getElementById('currentPass').innerText = i + 1;
+    }
+
+    function highlightCells(idx1, idx2, type) {
+        document.querySelectorAll('.array-cell').forEach(c => {
+            c.classList.remove('comparing', 'swapping', 'sorted');
+        });
+
+        if (idx1 >= 0) document.getElementById(`cell-${idx1}`)?.classList.add(type);
+        if (idx2 >= 0) document.getElementById(`cell-${idx2}`)?.classList.add(type);
+
+        // Sıralanan elemanları işaretle
+        for (let k = array.length - i; k < array.length; k++) {
+            document.getElementById(`cell-${k}`)?.classList.add('sorted');
+        }
+    }
+
+    function stepSort() {
+        if (sorted) {
+            document.getElementById('stepInfo').innerHTML = '✅ Sıralama tamamlandı!';
+            return;
+        }
+
+        const n = array.length;
+
+        if (i < n - 1) {
+            if (j < n - 1 - i) {
+                highlightCells(j, j + 1, 'comparing');
+                comparisons++;
+
+                if (array[j] > array[j + 1]) {
+                    document.getElementById('stepInfo').innerHTML =
+                        `🔄 Karşılaştır: ${array[j]} > ${array[j+1]} → TAKAS!`;
+                    [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                    swaps++;
+
+                    setTimeout(() => {
+                        highlightCells(j, j + 1, 'swapping');
+                        setTimeout(() => renderArray(), 150);
+                    }, 100);
+                } else {
+                    document.getElementById('stepInfo').innerHTML =
+                        `✓ Karşılaştır: ${array[j]} ≤ ${array[j+1]} → Takas yok`;
+                }
+
+                j++;
+            } else {
+                j = 0;
+                i++;
+                document.getElementById('stepInfo').innerHTML =
+                    `📍 Geçiş ${i} tamamlandı! En büyük ${i}. eleman yerinde.`;
+            }
+        } else {
+            sorted = true;
+            document.querySelectorAll('.array-cell').forEach(c => c.classList.add('sorted'));
+            document.getElementById('stepInfo').innerHTML = '✅ Sıralama tamamlandı!';
+        }
+
+        updateStats();
+        renderArray();
+    }
+
+    function startSort() {
+        if (sorted) resetSort();
+        isRunning = true;
+        const speed = 1100 - document.getElementById('speedSlider').value;
+
+        sortInterval = setInterval(() => {
+            if (!sorted && isRunning) {
+                stepSort();
+            } else {
+                pauseSort();
+            }
+        }, speed);
+    }
+
+    function pauseSort() {
+        isRunning = false;
+        if (sortInterval) clearInterval(sortInterval);
+    }
+
+    function resetSort() {
+        pauseSort();
+        array = [...originalArray];
+        i = 0;
+        j = 0;
+        comparisons = 0;
+        swaps = 0;
+        sorted = false;
+        renderArray();
+        updateStats();
+        document.getElementById('stepInfo').innerHTML = '🎯 "Başlat" butonuna tıklayarak sıralamayı izleyin.';
+    }
+
+    // Başlangıç
+    renderArray();
+    updateStats();
+
+    // Pyodide
+    let pyodideReady = false;
+    let pyodide = null;
+
+    async function main() {
+        pyodide = await loadPyodide();
+        pyodideReady = true;
+    }
+    main();
+
+    async function runPython(id) {
+        if(!pyodideReady) { alert("Python yükleniyor..."); return; }
+        const code = document.getElementById('view-' + id).textContent;
+        const out = document.getElementById('output-' + id);
+        out.innerText = "Çalışıyor...";
+        try {
+            pyodide.runPython(`import sys; from io import StringIO; sys.stdout = StringIO()`);
+            await pyodide.runPythonAsync(code);
+            out.innerText = pyodide.runPython("sys.stdout.getvalue()");
+        } catch(e) { out.innerText = e; }
+    }
+
+    </script>
+</body>
+</html>

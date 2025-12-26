@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.6: BFS - Genişlik Öncelikli Arama</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🌳 3.6: BFS - Genişlik Öncelikli Arama</h1>
+            <p>Breadth-First Search: Queue'nun En Güçlü Uygulaması</p>
+        </header>
+
+        <div class="section">
+            <h2>🤔 BFS Nedir?</h2>
+            <p><strong>Breadth-First Search (Genişlik Öncelikli Arama)</strong>, bir graf veya ağaç yapısında düğümleri <em>seviye seviye</em> gezerek arama yapan algoritmadır.</p>
+            <ul>
+                <li>🌊 Bir taşı suya attığınızda oluşan dalgalar gibi yayılır.</li>
+                <li>📍 En kısa yol problemlerinde sıkça kullanılır.</li>
+                <li>🎮 Oyunlarda harita keşfi, GPS navigasyon, sosyal ağ analizi.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🎮 BFS Algoritması Akışı</h2>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 20px 0;">
+                <div style="padding: 12px 25px; background: #e8f5e9; border: 2px solid #27ae60; border-radius: 8px; font-weight: bold; text-align: center;">
+                    Başlangıç düğümünü Queue'ya ekle
+                </div>
+                <div style="font-size: 20px; color: var(--text-color);">⬇️</div>
+                <div style="padding: 12px 25px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; font-weight: bold; text-align: center;">
+                    Queue boş mu?
+                </div>
+                <div style="display:flex; gap: 50px;">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                        <span style="color:#27ae60; font-weight:bold;">HAYIR</span>
+                        <div style="padding: 12px 25px; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; font-weight: bold;">
+                            Dequeue: Düğümü çıkar
+                        </div>
+                        <div style="padding: 12px 25px; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; font-weight: bold;">
+                            Komşularını Queue'ya ekle
+                        </div>
+                        <div style="padding: 12px 25px; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 8px; font-weight: bold;">
+                            Düğümü "ziyaret edildi" işaretle
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                        <span style="color:#e74c3c; font-weight:bold;">EVET</span>
+                        <div style="padding: 12px 25px; background: #ffcdd2; border: 2px solid #e74c3c; border-radius: 8px; font-weight: bold;">
+                            BİTTİ
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💻 Python İmplementasyonu</h2>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code1')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code1">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🗺️ En Kısa Yol Bulma (Labirent)</h2>
+            <p>BFS'in en güçlü özelliği: <strong>ağırlıksız graflarda en kısa yolu garanti eder!</strong></p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Python Kodu</span>
+                    <button class="btn btn-run" onclick="runCode('code2')">▶ Çalıştır</button>
+                </div>
+
+                
+
+                <div class="output" id="output-code2">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 BFS vs DFS Karşılaştırması</h2>
+            <table style="width:100%; border-collapse: collapse; background: var(--card-bg); border-radius: 10px; overflow: hidden;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <th style="padding: 15px;">Özellik</th>
+                        <th style="padding: 15px;">BFS (Queue)</th>
+                        <th style="padding: 15px;">DFS (Stack)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>Veri Yapısı</strong></td>
+                        <td style="padding: 12px;">Queue (FIFO)</td>
+                        <td style="padding: 12px;">Stack (LIFO)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>Zaman</strong></td>
+                        <td style="padding: 12px;">O(V + E)</td>
+                        <td style="padding: 12px;">O(V + E)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>Bellek</strong></td>
+                        <td style="padding: 12px;">O(V) - Daha fazla</td>
+                        <td style="padding: 12px;">O(h) - Daha az</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;"><strong>En Kısa Yol</strong></td>
+                        <td style="padding: 12px; color:#27ae60;">✅ Garanti</td>
+                        <td style="padding: 12px; color:#e74c3c;">❌ Garanti yok</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px;"><strong>Kullanım</strong></td>
+                        <td style="padding: 12px;">Sosyal ağ, GPS, Oyun AI</td>
+                        <td style="padding: 12px;">Labirent, Puzzle, Backtracking</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+        async function runCode(id) {
+            await CodeBlocks.runPython(id);
+        }
+    </script>
+</body>
+</html>

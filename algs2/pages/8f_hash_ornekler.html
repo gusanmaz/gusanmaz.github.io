@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.6: Hash Table - Gerçek Dünya Örnekleri</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="../src/main.css" rel="stylesheet" />
+    <script type="module">
+        import { CodeBlocks } from '../src/code-blocks.js';
+        window.CodeBlocks = CodeBlocks;
+        document.addEventListener('DOMContentLoaded', () => {
+            CodeBlocks.init();
+        });
+    </script>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 3a1 1 0 011 1v1a1 1 0 11-2 0V4a1 1 0 011-1zm0 10a3 3 0 100-6 3 3 0 000 6zm0 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM4 10a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm10 0a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1zM5.05 5.05a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zm9.9 9.9a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zm-9.9 0a1 1 0 011.414 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707zm9.9-9.9a1 1 0 011.414 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707z"/>
+        </svg>
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+        </svg>
+    </button>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 8.6: Hash Table Gerçek Örnekler</h1>
+            <p>Günlük Hayatta Nerede Kullanılıyor?</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 Hash Table Nerede Kullanılır?</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px 0;">
+                <div style="background: var(--info-bg); padding: 20px; border-radius: 12px; border-left: 4px solid #2196f3;">
+                    <h4 style="margin-top: 0;">🔐 Şifre Saklama</h4>
+                    <p style="font-size: 0.9em;">Kullanıcı adı → Hash'lenmiş şifre</p>
+                </div>
+                <div style="background: var(--purple-bg); padding: 20px; border-radius: 12px; border-left: 4px solid #9c27b0;">
+                    <h4 style="margin-top: 0;">💾 Cache/Önbellek</h4>
+                    <p style="font-size: 0.9em;">URL → Sayfa içeriği (hızlı erişim)</p>
+                </div>
+                <div style="background: var(--warning-bg); padding: 20px; border-radius: 12px; border-left: 4px solid #ff9800;">
+                    <h4 style="margin-top: 0;">🗄️ Veritabanı İndeks</h4>
+                    <p style="font-size: 0.9em;">ID → Kayıt lokasyonu</p>
+                </div>
+                <div style="background: var(--success-bg); padding: 20px; border-radius: 12px; border-left: 4px solid #4caf50;">
+                    <h4 style="margin-top: 0;">🔢 Frekans Sayma</h4>
+                    <p style="font-size: 0.9em;">Kelime → Kaç kez geçti</p>
+                </div>
+                <div style="background: #fce4ec; padding: 20px; border-radius: 12px; border-left: 4px solid #e91e63;">
+                    <h4 style="margin-top: 0;">🌐 DNS</h4>
+                    <p style="font-size: 0.9em;">Domain → IP adresi</p>
+                </div>
+                <div style="background: #e0f2f1; padding: 20px; border-radius: 12px; border-left: 4px solid #009688;">
+                    <h4 style="margin-top: 0;">📱 Telefon Rehberi</h4>
+                    <p style="font-size: 0.9em;">İsim → Telefon numarası</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Örnek 1: Kelime Frekansı Sayıcı</h2>
+            <p>Bir metinde hangi kelime kaç kez geçiyor?</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Kelime Sayacı</span>
+                    <button class="btn btn-run" onclick="CodeBlocks.run('code1')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code1"><code class="language-python line-numbers">def kelime_frekans(metin):
+    """Metindeki her kelimenin kaç kez geçtiğini say"""
+    
+    # Kelime frekans sözlüğü
+    frekans = {}
+    
+    # Metni kelimelere ayır
+    kelimeler = metin.lower().split()
+    
+    for kelime in kelimeler:
+        # Noktalama işaretlerini temizle
+        kelime = kelime.strip('.,!?;:"')
+        
+        # Hash table'da say
+        if kelime in frekans:
+            frekans[kelime] += 1
+        else:
+            frekans[kelime] = 1
+    
+    return frekans
+
+# Test
+metin = """
+Python programlama dilini öğreniyorum. Python çok güzel bir dil.
+Python ile veri yapıları öğrenmek eğlenceli. Veri yapıları önemli.
+"""
+
+frekans = kelime_frekans(metin)
+
+print("=== Kelime Frekansları ===")
+# En sık kullanılandan az kullanılana sırala
+sirali = sorted(frekans.items(), key=lambda x: x[1], reverse=True)
+
+for kelime, sayi in sirali:
+    print(f"{kelime:15} : {'█' * sayi} ({sayi})")
+
+# En çok kullanılan 3 kelime
+print("\n🏆 En Çok Kullanılan 3 Kelime:")
+for i, (kelime, sayi) in enumerate(sirali[:3], 1):
+    print(f"{i}. {kelime} ({sayi} kez)")
+
+# Alternatif: Counter kullan (yerleşik)
+from collections import Counter
+frekans2 = Counter(metin.lower().split())
+print(f"\n✅ Counter ile: {frekans2.most_common(3)}")</code></pre>
+                <div id="output-code1" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Örnek 2: İki Dizide Ortak Elemanlar</h2>
+            <p>İki listede hangi elemanlar ortak?</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Ortak Elemanlar Bulma</span>
+                    <button class="btn btn-run" onclick="CodeBlocks.run('code2')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code2"><code class="language-python line-numbers">def ortak_bul_yavas(liste1, liste2):
+    """❌ Yavaş Yöntem: O(n × m)"""
+    ortak = []
+    for eleman in liste1:
+        if eleman in liste2:
+            ortak.append(eleman)
+    return ortak
+
+def ortak_bul_hizli(liste1, liste2):
+    """✅ Hızlı Yöntem: O(n + m) - Hash Table"""
+    # liste2'yi hash table'a çevir
+    tablo = set(liste2)  # set = hash table
+    
+    ortak = []
+    for eleman in liste1:
+        if eleman in tablo:  # O(1) arama!
+            ortak.append(eleman)
+    
+    return ortak
+
+# Test
+import time
+
+liste1 = list(range(0, 10000, 2))  # Çift sayılar: 0, 2, 4, ...
+liste2 = list(range(5000, 15000))   # 5000'den başlayan
+
+print(f"Liste1: {len(liste1)} eleman")
+print(f"Liste2: {len(liste2)} eleman")
+
+# Yavaş yöntem
+start = time.time()
+ortak1 = ortak_bul_yavas(liste1, liste2)
+yava_sure = time.time() - start
+print(f"\n❌ Yavaş (O(n×m)): {yava_sure*1000:.2f} ms → {len(ortak1)} ortak")
+
+# Hızlı yöntem
+start = time.time()
+ortak2 = ortak_bul_hizli(liste1, liste2)
+hizli_sure = time.time() - start
+print(f"✅ Hızlı (O(n+m)): {hizli_sure*1000:.2f} ms → {len(ortak2)} ortak")
+
+kat = yava_sure / hizli_sure
+print(f"\n⚡ Hash table {kat:.0f}x daha hızlı!")
+
+# İlk 10 ortak eleman
+print(f"\nİlk 10 ortak: {ortak2[:10]}")</code></pre>
+                <div id="output-code2" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎓 Örnek 3: Öğrenci Not Sistemi</h2>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Not Yönetim Sistemi</span>
+                    <button class="btn btn-run" onclick="CodeBlocks.run('code3')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code3"><code class="language-python line-numbers">class NotSistemi:
+    """Hash table ile öğrenci not yönetimi"""
+    
+    def __init__(self):
+        self.ogrenciler = {}  # ogrenci_no → bilgiler
+    
+    def ogrenci_ekle(self, no, ad, soyad):
+        """Yeni öğrenci ekle"""
+        self.ogrenciler[no] = {
+            "ad": ad,
+            "soyad": soyad,
+            "notlar": {}  # ders → not
+        }
+        print(f"✅ {ad} {soyad} ({no}) eklendi")
+    
+    def not_ekle(self, no, ders, not_degeri):
+        """Öğrenciye not ekle"""
+        if no not in self.ogrenciler:
+            print(f"❌ {no} numaralı öğrenci bulunamadı")
+            return
+        
+        self.ogrenciler[no]["notlar"][ders] = not_degeri
+        print(f"✅ {no} - {ders}: {not_degeri}")
+    
+    def ortalama(self, no):
+        """Öğrencinin ortalamasını hesapla"""
+        if no not in self.ogrenciler:
+            return None
+        
+        notlar = self.ogrenciler[no]["notlar"]
+        if not notlar:
+            return 0
+        
+        return sum(notlar.values()) / len(notlar)
+    
+    def rapor(self):
+        """Tüm öğrencilerin raporu"""
+        print("\n" + "="*60)
+        print(f"{'No':<8} {'Ad Soyad':<20} {'Dersler':<15} {'Ortalama':<10}")
+        print("="*60)
+        
+        for no, bilgi in self.ogrenciler.items():
+            ad_soyad = f"{bilgi['ad']} {bilgi['soyad']}"
+            ders_sayisi = len(bilgi['notlar'])
+            ort = self.ortalama(no)
+            
+            print(f"{no:<8} {ad_soyad:<20} {ders_sayisi} ders{' ':6} {ort:>6.2f}")
+        
+        print("="*60)
+
+# Kullanım
+sistem = NotSistemi()
+
+# Öğrenci ekle
+print("=== Öğrenci Ekleme ===")
+sistem.ogrenci_ekle("1001", "Ahmet", "Yılmaz")
+sistem.ogrenci_ekle("1002", "Ayşe", "Kaya")
+sistem.ogrenci_ekle("1003", "Mehmet", "Demir")
+
+# Not ekle
+print("\n=== Not Ekleme ===")
+sistem.not_ekle("1001", "Matematik", 85)
+sistem.not_ekle("1001", "Fizik", 90)
+sistem.not_ekle("1001", "Kimya", 78)
+
+sistem.not_ekle("1002", "Matematik", 92)
+sistem.not_ekle("1002", "Fizik", 88)
+
+sistem.not_ekle("1003", "Matematik", 76)
+sistem.not_ekle("1003", "Fizik", 82)
+sistem.not_ekle("1003", "Kimya", 85)
+sistem.not_ekle("1003", "Biyoloji", 90)
+
+# Rapor
+sistem.rapor()
+
+# Tek öğrenci bilgisi
+print(f"\n🎓 1001 numaralı öğrenci ortalaması: {sistem.ortalama('1001'):.2f}")</code></pre>
+                <div id="output-code3" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔐 Örnek 4: Basit Cache (Önbellek)</h2>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Cache Sistemi</span>
+                    <button class="btn btn-run" onclick="CodeBlocks.run('code4')">▶ Çalıştır</button>
+                </div>
+                <pre id="view-code4"><code class="language-python line-numbers">import time
+
+class SimpleCache:
+    """Basit önbellek sistemi"""
+    
+    def __init__(self):
+        self.cache = {}  # key → (value, timestamp)
+        self.hit_count = 0   # Kaç kez cache'ten geldi
+        self.miss_count = 0  # Kaç kez hesaplandı
+    
+    def get(self, key, hesaplama_func):
+        """
+        Cache'te varsa getir, yoksa hesapla ve sakla
+        """
+        if key in self.cache:
+            # Cache HIT
+            self.hit_count += 1
+            print(f"  ✅ Cache'te bulundu: {key}")
+            return self.cache[key]
+        else:
+            # Cache MISS - hesapla
+            self.miss_count += 1
+            print(f"  ❌ Cache'te yok, hesaplanıyor: {key}")
+            
+            value = hesaplama_func(key)
+            self.cache[key] = value
+            return value
+    
+    def stats(self):
+        """İstatistikler"""
+        total = self.hit_count + self.miss_count
+        if total == 0:
+            return
+        
+        hit_rate = self.hit_count / total * 100
+        print(f"\n📊 Cache İstatistikleri:")
+        print(f"   Hit: {self.hit_count} (%{hit_rate:.1f})")
+        print(f"   Miss: {self.miss_count}")
+        print(f"   Toplam: {total}")
+
+# Yavaş hesaplama simülasyonu
+def faktoriyel_yavas(n):
+    """Faktoriyel hesapla (yavaş)"""
+    time.sleep(0.5)  # Sanki uzun hesaplama yapıyoruz
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
+
+# Test
+cache = SimpleCache()
+
+print("=== Faktoriyel Hesaplamaları ===\n")
+
+# İlk çağrılar (cache miss)
+print("1. çağrı:")
+sonuc = cache.get(5, faktoriyel_yavas)
+print(f"   5! = {sonuc}")
+
+print("\n2. çağrı:")
+sonuc = cache.get(7, faktoriyel_yavas)
+print(f"   7! = {sonuc}")
+
+print("\n3. çağrı:")
+sonuc = cache.get(5, faktoriyel_yavas)  # Bu sefer cache'ten gelecek!
+print(f"   5! = {sonuc}")
+
+print("\n4. çağrı:")
+sonuc = cache.get(7, faktoriyel_yavas)  # Bu da cache'ten!
+print(f"   7! = {sonuc}")
+
+cache.stats()
+
+print("\n💡 5 ve 7 ikinci sefer anında geldi (0.5 sn yerine ~0 sn)")</code></pre>
+                <div id="output-code4" class="output">Çıktı bekleniyor...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Özet</h2>
+            <div style="background: var(--success-bg); padding: 25px; border-radius: 10px;">
+                <h4 style="margin-top: 0; color: #2e7d32;">✅ Bu Bölümde Öğrendikleriniz</h4>
+                <ul>
+                    <li><strong>Kelime sayma:</strong> Text analizi, frekans hesaplama</li>
+                    <li><strong>Ortak elemanlar:</strong> Set intersection - çok hızlı!</li>
+                    <li><strong>Not sistemi:</strong> Nested dict ile organize veri</li>
+                    <li><strong>Cache:</strong> Pahalı hesaplamaları bir kez yap, tekrar kullan</li>
+                    <li><strong>Gerçek kullanım:</strong> Veritabanı, DNS, önbellek, şifre saklama...</li>
+                </ul>
+
+                <h4 style="color: #1565c0; margin-top: 20px;">🎓 Hash Table Modülü Tamamlandı!</h4>
+                <p style="margin: 5px 0 0 0;">Hash table'ı öğrendiniz - Python'un en güçlü silahlarından biri! Artık dict kullanırken altında ne olduğunu biliyorsunuz.</p>
+            </div>
+        </div>
+
+        <div class="nav-footer" data-auto-nav></div>
+    </div>
+    
+</body>
+</html>
+
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>

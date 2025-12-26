@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0.1: Python Fonksiyonlar</title>
+
+    <!-- Unified CSS -->
+    <link rel="stylesheet" href="../src/main.css">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- CodeMirror 6 -->
+    <script type="module">
+        import {EditorView, basicSetup} from "https://cdn.jsdelivr.net/npm/codemirror@6/dist/index.js"
+        import {python} from "https://cdn.jsdelivr.net/npm/@codemirror/lang-python@6/dist/index.js"
+        import {oneDark} from "https://cdn.jsdelivr.net/npm/@codemirror/theme-one-dark@6/dist/index.js"
+
+        window.CodeMirror = {
+            EditorView,
+            basicSetup,
+            python: () => python(),
+            oneDark
+        };
+    </script>
+
+    <!-- Pyodide for Python execution -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Mermaid for flowcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+
+        <header>
+            <h1>🐍 0.1: Python Fonksiyonlar</h1>
+            <p>Fonksiyon Tanımlama, Parametreler ve Return Değerleri</p>
+        </header>
+
+        <!-- Giriş Bölümü -->
+        <div class="section">
+            <h2>📖 Fonksiyon Nedir?</h2>
+
+            <p style="font-size: 1.1em; margin-bottom: 20px;">
+                <strong>Fonksiyon</strong>, belirli bir görevi yerine getiren, yeniden kullanılabilir kod bloklarıdır.
+                Fonksiyonlar sayesinde kodlarımızı daha organize, okunabilir ve bakımı kolay hale getiririz.
+            </p>
+
+            <div class="concept-box">
+                <strong>🎯 Fonksiyonların Faydaları:</strong>
+                <ul>
+                    <li><strong>Kod Tekrarını Önler:</strong> Aynı işlemi farklı yerlerde kullanmak için kodu kopyalamaya gerek kalmaz</li>
+                    <li><strong>Modüler Yapı:</strong> Büyük programları küçük parçalara böleriz</li>
+                    <li><strong>Kolay Bakım:</strong> Bir değişikliği sadece fonksiyon içinde yaparız</li>
+                    <li><strong>Okunabilirlik:</strong> Kod daha anlaşılır ve düzenli olur</li>
+                    <li><strong>Test Edilebilirlik:</strong> Her fonksiyonu ayrı ayrı test edebiliriz</li>
+                </ul>
+            </div>
+
+            <h3>📊 Fonksiyon Anatomisi</h3>
+
+            <div class="visual-anatomy">
+                <pre><code class="language-python">def fonksiyon_adi(parametre1, parametre2):
+    """Docstring - fonksiyonun açıklaması"""
+    # Fonksiyon gövdesi
+    sonuc = parametre1 + parametre2
+    return sonuc</code></pre>
+
+                <div class="anatomy-parts">
+                    <div class="anatomy-part">
+                        <h5>🔑 def</h5>
+                        <p>Fonksiyon tanımlama anahtar kelimesi</p>
+                    </div>
+                    <div class="anatomy-part">
+                        <h5>📛 İsim</h5>
+                        <p>Fonksiyonun benzersiz adı</p>
+                    </div>
+                    <div class="anatomy-part">
+                        <h5>📥 Parametreler</h5>
+                        <p>Fonksiyona gönderilen değişkenler</p>
+                    </div>
+                    <div class="anatomy-part">
+                        <h5>📤 Return</h5>
+                        <p>Fonksiyonun döndürdüğü değer</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="important-note">
+                <strong>⚡ Önemli Terimler:</strong><br>
+                <strong>Parametre:</strong> Fonksiyon tanımında parantez içinde belirtilen değişkenler<br>
+                <strong>Argüman:</strong> Fonksiyonu çağırırken gönderdiğimiz gerçek değerler<br>
+                <strong>Return:</strong> Fonksiyonun geri döndürdüğü değer<br>
+                <strong>def:</strong> Fonksiyon tanımlamak için kullanılan anahtar kelime
+            </div>
+        </div>
+
+        <!-- Fonksiyon Tanımlama ve Çağırma -->
+        <div class="section">
+            <h2>🔧 Fonksiyon Tanımlama ve Çağırma</h2>
+
+            <h3>Basit Bir Fonksiyon</h3>
+            <p>En basit haliyle, hiç parametre almayan ve değer döndürmeyen bir fonksiyon:</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(1)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(1)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def selamla():
+    """Bu fonksiyon basit bir selamlama yapar"""
+    print("Merhaba Dünya!")
+    print("Python öğreniyorum!")
+
+# Fonksiyonu çağırma
+selamla()
+print("---")
+selamla()  # Birden fazla kez çağırabiliriz</code></pre>
+
+                <div class="output" id="output-1"></div>
+            </div>
+
+            <h3>Parametreli Fonksiyonlar</h3>
+            <p>Fonksiyonlara dışarıdan veri göndererek daha esnek hale getirebiliriz:</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(2)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(2)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def selamla_kisi(isim):
+    """Belirtilen kişiye selamlar"""
+    print(f"Merhaba {isim}!")
+    print(f"{isim}, nasılsın?")
+
+# Farklı argümanlarla çağırma
+selamla_kisi("Ahmet")
+print("---")
+selamla_kisi("Ayşe")
+print("---")
+selamla_kisi("Mehmet")</code></pre>
+
+                <div class="output" id="output-2"></div>
+            </div>
+
+            <h3>Return ile Değer Döndürme</h3>
+            <p><code>return</code> anahtar kelimesi, fonksiyonun bir değer döndürmesini sağlar:</p>
+
+            <div class="diagram-container">
+                <div class="mermaid">
+flowchart LR
+    A[Fonksiyon Çağırma] --> B[Fonksiyon Çalışır]
+    B --> C{Return var mı?}
+    C -->|Evet| D[Değer Döndür]
+    C -->|Hayır| E[None Döndür]
+    D --> F[Değer Kullanılabilir]
+    E --> F
+    style A fill:#667eea,color:#fff
+    style D fill:#28a745,color:#fff
+    style E fill:#ffc107,color:#333
+                </div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(3)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(3)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def topla(a, b):
+    """İki sayıyı toplar ve sonucu döndürür"""
+    sonuc = a + b
+    return sonuc
+
+def kare_al(sayi):
+    """Bir sayının karesini döndürür"""
+    return sayi * sayi
+
+# Return değerlerini kullanma
+toplam = topla(15, 25)
+print(f"Toplam: {toplam}")
+
+kare = kare_al(7)
+print(f"7'nin karesi: {kare}")
+
+# Return değerini doğrudan kullanma
+print(f"5 + 8 = {topla(5, 8)}")
+print(f"12'nin karesi: {kare_al(12)}")
+
+# Return değerini başka işlemlerde kullanma
+sonuc = topla(10, 20) + kare_al(5)
+print(f"10+20 + 5^2 = {sonuc}")</code></pre>
+
+                <div class="output" id="output-3"></div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Dikkat:</strong> <code>return</code> olmadan bir fonksiyon <code>None</code> döndürür.
+                <code>print()</code> ile <code>return</code> farklıdır! <code>print()</code> sadece ekrana yazar,
+                <code>return</code> ise değeri fonksiyondan çıkartır.
+            </div>
+        </div>
+
+        <!-- Min Bulma Algoritması -->
+        <div class="section">
+            <h2>🎨 Örnek: Dizide Minimum Bulma</h2>
+
+            <h3>📋 Flowchart (Akış Şeması)</h3>
+
+            <div class="diagram-container">
+                <div class="mermaid">
+flowchart TD
+    A([BAŞLA]) --> B[liste parametresini al]
+    B --> C[min = liste'#91;0'#93;]
+    C --> D[i = 0]
+    D --> E{i < liste uzunluğu?}
+    E -->|Evet| F{liste'#91;i'#93; < min?}
+    F -->|Evet| G[min = liste'#91;i'#93;]
+    F -->|Hayır| H[i = i + 1]
+    G --> H
+    H --> E
+    E -->|Hayır| I[return min]
+    I --> J([BİTİR])
+
+    style A fill:#667eea,color:#fff
+    style J fill:#667eea,color:#fff
+    style I fill:#28a745,color:#fff
+    style G fill:#f093fb,color:#fff
+    style E fill:#ffc107,color:#333
+    style F fill:#17a2b8,color:#fff
+                </div>
+            </div>
+
+            <h3>📝 Pseudocode (Sözde Kod)</h3>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">Pseudocode</span>
+                </div>
+
+                <pre class="line-numbers"><code class="language-plaintext">FUNCTION min_bul(liste):
+    min ← liste[0]
+
+    FOR her eleman IN liste:
+        IF eleman < min:
+            min ← eleman
+        END IF
+    END FOR
+
+    RETURN min
+END FUNCTION
+
+// Kullanım
+sayilar ← [45, 23, 67, 12, 89]
+sonuc ← min_bul(sayilar)
+PRINT sonuc</code></pre>
+            </div>
+
+            <h3>🐍 Python Kodu</h3>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(4)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(4)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def min_bul(liste):
+    """Listedeki minimum değeri bulur"""
+    if len(liste) == 0:
+        return None
+
+    min_deger = liste[0]
+
+    for eleman in liste:
+        if eleman < min_deger:
+            min_deger = eleman
+
+    return min_deger
+
+# Test edelim
+sayilar1 = [45, 23, 67, 12, 89, 34]
+sayilar2 = [100, 50, 75, 25, 90]
+sayilar3 = [-5, -10, -3, -20, -1]
+
+print(f"Liste 1: {sayilar1}")
+print(f"Minimum: {min_bul(sayilar1)}")
+print()
+print(f"Liste 2: {sayilar2}")
+print(f"Minimum: {min_bul(sayilar2)}")
+print()
+print(f"Liste 3: {sayilar3}")
+print(f"Minimum: {min_bul(sayilar3)}")</code></pre>
+
+                <div class="output" id="output-4"></div>
+            </div>
+        </div>
+
+        <!-- Daha fazla örnek -->
+        <div class="section">
+            <h2>💪 Daha Fazla Algoritma Örnekleri</h2>
+
+            <h3>Ortalama Hesaplama</h3>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(5)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(5)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def ortalama_hesapla(liste):
+    """Listedeki sayıların ortalamasını hesaplar"""
+    if len(liste) == 0:
+        return 0
+
+    toplam = 0
+    for sayi in liste:
+        toplam += sayi
+
+    ortalama = toplam / len(liste)
+    return ortalama
+
+# Test
+notlar1 = [85, 90, 78, 92, 88]
+notlar2 = [60, 70, 65, 80, 75]
+
+print(f"Notlar 1: {notlar1}")
+print(f"Ortalama: {ortalama_hesapla(notlar1):.2f}")
+print()
+print(f"Notlar 2: {notlar2}")
+print(f"Ortalama: {ortalama_hesapla(notlar2):.2f}")</code></pre>
+
+                <div class="output" id="output-5"></div>
+            </div>
+
+            <h3>Linear Search (Doğrusal Arama)</h3>
+
+            <div class="diagram-container">
+                <div class="mermaid">
+flowchart TD
+    A([BAŞLA]) --> B[liste, aranan al]
+    B --> C[i = 0]
+    C --> D{i < liste uzunluğu?}
+    D -->|Evet| E{liste i == aranan?}
+    E -->|Evet| F[return i]
+    E -->|Hayır| G[i = i + 1]
+    G --> D
+    D -->|Hayır| H[return -1]
+    F --> I([BİTİR])
+    H --> I
+
+    style A fill:#667eea,color:#fff
+    style I fill:#667eea,color:#fff
+    style F fill:#28a745,color:#fff
+    style H fill:#dc3545,color:#fff
+                </div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(6)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(6)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def linear_search(liste, aranan):
+    """
+    Listedeki bir elemanı arar ve indeksini döndürür.
+    Bulunamazsa -1 döndürür.
+    """
+    for i in range(len(liste)):
+        if liste[i] == aranan:
+            return i  # Bulundu, indeksini döndür
+
+    return -1  # Bulunamadı
+
+# Test
+isimler = ["Ali", "Ayşe", "Mehmet", "Fatma", "Ahmet"]
+sayilar = [10, 25, 30, 45, 50, 75]
+
+print(f"İsimler: {isimler}")
+print(f"'Mehmet' aranıyor...")
+indeks = linear_search(isimler, "Mehmet")
+if indeks != -1:
+    print(f"Bulundu! İndeks: {indeks}")
+else:
+    print("Bulunamadı!")
+
+print()
+print(f"'Zeynep' aranıyor...")
+indeks = linear_search(isimler, "Zeynep")
+if indeks != -1:
+    print(f"Bulundu! İndeks: {indeks}")
+else:
+    print("Bulunamadı!")
+
+print()
+print(f"Sayılar: {sayilar}")
+print(f"45 aranıyor: İndeks = {linear_search(sayilar, 45)}")
+print(f"100 aranıyor: İndeks = {linear_search(sayilar, 100)}")</code></pre>
+
+                <div class="output" id="output-6"></div>
+            </div>
+
+            <h3>Asal Sayı Kontrolü</h3>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(7)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(7)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def asal_mi(sayi):
+    """
+    Bir sayının asal olup olmadığını kontrol eder
+    Return: True (asal) veya False (asal değil)
+    """
+    if sayi < 2:
+        return False
+
+    if sayi == 2:
+        return True
+
+    if sayi % 2 == 0:
+        return False
+
+    # 3'ten başlayarak sayının kareköküne kadar kontrol et
+    for i in range(3, int(sayi**0.5) + 1, 2):
+        if sayi % i == 0:
+            return False
+
+    return True
+
+def asal_sayilari_listele(baslangic, bitis):
+    """Verilen aralıktaki asal sayıları listeler"""
+    asal_liste = []
+    for sayi in range(baslangic, bitis + 1):
+        if asal_mi(sayi):
+            asal_liste.append(sayi)
+    return asal_liste
+
+# Test
+print("Asal mı kontrolleri:")
+test_sayilar = [2, 3, 4, 5, 10, 17, 19, 20, 23, 25]
+for sayi in test_sayilar:
+    sonuc = "ASAL" if asal_mi(sayi) else "ASAL DEĞİL"
+    print(f"{sayi}: {sonuc}")
+
+print("\n1-50 arası asal sayılar:")
+asallar = asal_sayilari_listele(1, 50)
+print(asallar)
+print(f"Toplam {len(asallar)} adet asal sayı var")</code></pre>
+
+                <div class="output" id="output-7"></div>
+            </div>
+        </div>
+
+        <!-- Pass by Reference -->
+        <div class="section">
+            <h2>🔄 Pass by Value vs Pass by Reference</h2>
+
+            <div class="concept-box">
+                <strong>🧠 Önemli Kavram:</strong><br>
+                Python'da değişkenler iki şekilde davranır:
+                <ul>
+                    <li><strong>Immutable (Değiştirilemez):</strong> int, float, str, tuple → Pass by Value gibi davranır</li>
+                    <li><strong>Mutable (Değiştirilebilir):</strong> list, dict, set → Pass by Reference gibi davranır</li>
+                </ul>
+            </div>
+
+            <h3>Immutable Tipler (Sayılar, String'ler)</h3>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(8)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(8)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def sayi_degistir(x):
+    """Sayıyı değiştirmeye çalışır"""
+    print(f"Fonksiyon içinde (önce): x = {x}")
+    x = x + 10
+    print(f"Fonksiyon içinde (sonra): x = {x}")
+    return x
+
+# Ana program
+sayi = 5
+print(f"Fonksiyon öncesi: sayi = {sayi}")
+sonuc = sayi_degistir(sayi)
+print(f"Fonksiyon sonrası: sayi = {sayi}")
+print(f"Return değeri: sonuc = {sonuc}")
+print("\nGöründüğü gibi, orijinal 'sayi' değişmedi!")</code></pre>
+
+                <div class="output" id="output-8"></div>
+            </div>
+
+            <h3>Mutable Tipler (Listeler) - Pass by Reference</h3>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(9)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(9)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def liste_degistir(liste):
+    """Listeyi değiştirir"""
+    print(f"Fonksiyon içinde (önce): {liste}")
+    liste.append(99)
+    liste[0] = 999
+    print(f"Fonksiyon içinde (sonra): {liste}")
+
+# Ana program
+sayilar = [1, 2, 3, 4, 5]
+print(f"Fonksiyon öncesi: {sayilar}")
+liste_degistir(sayilar)
+print(f"Fonksiyon sonrası: {sayilar}")
+print("\n⚠️ DİKKAT: Orijinal liste değişti!")</code></pre>
+
+                <div class="output" id="output-9"></div>
+            </div>
+        </div>
+
+        <!-- Recursive Functions -->
+        <div class="section">
+            <h2>♻️ Recursive (Özyinelemeli) Fonksiyonlar</h2>
+
+            <div class="concept-box">
+                <strong>📌 Recursion Nedir?</strong><br>
+                Bir fonksiyonun kendi kendini çağırmasına <strong>recursion</strong> denir.
+            </div>
+
+            <h3>Faktöriyel Hesaplama</h3>
+
+            <div class="diagram-container">
+                <div class="mermaid">
+graph TD
+    A["faktoriyel(5)"] --> B["5 × faktoriyel(4)"]
+    B --> C["5 × 4 × faktoriyel(3)"]
+    C --> D["5 × 4 × 3 × faktoriyel(2)"]
+    D --> E["5 × 4 × 3 × 2 × faktoriyel(1)"]
+    E --> F["5 × 4 × 3 × 2 × 1"]
+    F --> G["120"]
+
+    style A fill:#667eea,color:#fff
+    style E fill:#ffc107,color:#333
+    style G fill:#28a745,color:#fff
+                </div>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(10)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(10)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def faktoriyel(n):
+    """Recursive faktöriyel hesaplama"""
+    # Base case
+    if n == 0 or n == 1:
+        return 1
+
+    # Recursive case
+    return n * faktoriyel(n - 1)
+
+# Test
+print("Faktöriyel hesaplamaları:")
+for i in range(1, 8):
+    print(f"{i}! = {faktoriyel(i)}")</code></pre>
+
+                <div class="output" id="output-10"></div>
+            </div>
+
+            <h3>Fibonacci Serisi</h3>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(11)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(11)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <pre class="line-numbers"><code class="language-python">def fibonacci(n):
+    """
+    N. Fibonacci sayısını hesaplar
+    Fibonacci: 0, 1, 1, 2, 3, 5, 8, 13, 21, ...
+    """
+    # Base cases
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+
+    # Recursive case
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+# İlk 10 Fibonacci sayısı
+print("Fibonacci Serisi:")
+for i in range(10):
+    print(f"F({i}) = {fibonacci(i)}")</code></pre>
+
+                <div class="output" id="output-11"></div>
+            </div>
+        </div>
+
+        <!-- Editable Code -->
+        <div class="section">
+            <h2>📝 Kendiniz Deneyin!</h2>
+
+            <p>Aşağıdaki kod alanını düzenleyebilir ve kendi kodlarınızı yazabilirsiniz:</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-header-title">🐍 Düzenlenebilir Python Kodu</span>
+                    <div class="code-actions">
+                        <button class="code-btn" onclick="CodeBlocks.run(99)">▶️ Çalıştır</button>
+                        <button class="code-btn" onclick="CodeBlocks.copy(99)">📋 Kopyala</button>
+                    </div>
+                </div>
+
+                <div id="editor-99" style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;"></div>
+
+                <div class="output" id="output-99"></div>
+            </div>
+        </div>
+
+        <footer>
+            <h3>📚 Özet</h3>
+            <p><strong>Bu derste öğrendiklerimiz:</strong></p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>Fonksiyon tanımlama ve çağırma (<code>def</code>, <code>return</code>)</li>
+                <li>Parametreler ve argümanlar</li>
+                <li>Pass by Value vs Pass by Reference</li>
+                <li>Önceki algoritmaları fonksiyon olarak yazdık</li>
+                <li>Recursive fonksiyonlar</li>
+                <li>Pratik örnekler ve uygulamalar</li>
+            </ul>
+        </footer>
+
+        <!-- Auto-generated navigation -->
+        <div class="nav-footer"></div>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Unified JS -->
+    <script src="../src/main.js"></script>
+    <script src="../src/visualizations.js"></script>
+
+    <!-- Page-specific JS -->
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#764ba2',
+                secondaryColor: '#f093fb',
+                tertiaryColor: '#f8f9ff'
+            }
+        });
+
+        // Setup editable editor for code block 99
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultCode = `# Buraya kendi kodunuzu yazın!
+
+def merhaba():
+    print("Merhaba Dünya!")
+
+merhaba()
+
+# Örnek: Bir liste oluşturup işlemler yapın
+sayilar = [1, 2, 3, 4, 5]
+print(f"Sayılar: {sayilar}")
+print(f"Toplam: {sum(sayilar)}")
+`;
+
+            // Create CodeMirror editor for block 99
+            if (window.CodeMirror && window.CodeMirror.EditorView) {
+                const editor = new window.CodeMirror.EditorView({
+                    doc: defaultCode,
+                    extensions: [
+                        window.CodeMirror.basicSetup,
+                        window.CodeMirror.python(),
+                        window.CodeMirror.oneDark
+                    ],
+                    parent: document.getElementById('editor-99')
+                });
+
+                // Store editor reference for code execution
+                if (!window.codeEditors) window.codeEditors = {};
+                window.codeEditors[99] = editor;
+            }
+        });
+    </script>
+</body>
+</html>
