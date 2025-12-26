@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LLM Benchmark Report - 20251226_085731</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px; background: #f5f5f5; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-bottom: 10px; }
+        h2 { color: #666; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 40px; }
+        h3 { color: #888; margin-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; position: sticky; top: 0; user-select: none; }
+        th:hover { background: #e8e8e8; }
+        th.sort-asc::after { content: ' ▲'; font-size: 10px; color: #2196F3; }
+        th.sort-desc::after { content: ' ▼'; font-size: 10px; color: #2196F3; }
+        tr:hover { background: #f5f5f5; }
+        .metric { font-weight: bold; color: #2196F3; }
+        .good { color: #4CAF50; font-weight: bold; }
+        .bad { color: #f44336; }
+        .neutral { color: #ff9800; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-right: 5px; }
+        .badge-blue { background: #e3f2fd; color: #1976D2; }
+        .badge-green { background: #e8f5e9; color: #388E3C; }
+        .badge-orange { background: #fff3e0; color: #f57c00; }
+        .badge-purple { background: #f3e5f5; color: #7b1fa2; }
+        .summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 20px 0; }
+        .summary-card { background: #2196F3; padding: 20px; border-radius: 10px; text-align: center; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .summary-card.alt { background: #4CAF50; }
+        .summary-card.alt2 { background: #FF9800; }
+        .summary-card h3 { margin: 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.95); }
+        .summary-card p { margin: 10px 0 0; font-size: 28px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .metric-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0; }
+        .metric-box { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+        .metric-box .value { font-size: 20px; font-weight: bold; color: #333; }
+        .metric-box .label { font-size: 11px; color: #666; margin-top: 5px; }
+        .text-preview { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #666; }
+        .collapsible { cursor: pointer; padding: 15px; background: #f8f9fa; border: none; width: 100%; text-align: left; font-size: 16px; font-weight: bold; border-radius: 8px; margin: 10px 0; }
+        .collapsible:hover { background: #e0e0e0; }
+        .content { display: none; padding: 10px 0; overflow-x: auto; }
+        .tabs { display: flex; gap: 10px; margin: 20px 0; }
+        .tab { padding: 10px 20px; background: #e0e0e0; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: bold; }
+        .tab.active { background: #2196F3; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .error-bar { height: 8px; border-radius: 4px; background: #e0e0e0; }
+        .error-fill { height: 100%; border-radius: 4px; }
+        .text-cell { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; cursor: pointer; color: #1976D2; }
+        .text-cell:hover { text-decoration: underline; }
+        .text-cell.expanded { white-space: normal; max-width: none; }
+        .show-full-btn { font-size: 10px; padding: 2px 6px; margin-left: 5px; cursor: pointer; background: #e0e0e0; border: none; border-radius: 3px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 900px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .modal-close { font-size: 24px; cursor: pointer; color: #999; background: none; border: none; }
+        .modal-close:hover { color: #333; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .modal-section { background: #f9f9f9; padding: 15px; border-radius: 8px; }
+        .modal-section h4 { margin: 0 0 10px; color: #333; font-size: 14px; }
+        .modal-section pre { white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; }
+    </style>
+    <script>
+        function toggleFullText(btn) {
+            const table = btn.closest('table');
+            const cells = table.querySelectorAll('.text-cell');
+            const isCurrentlyExpanded = btn.textContent.includes('Less');
+            
+            cells.forEach(cell => {
+                const fullText = cell.getAttribute('title') || '';
+                if (isCurrentlyExpanded) {
+                    cell.textContent = fullText.substring(0, 60) + '...';
+                    cell.classList.remove('expanded');
+                } else {
+                    cell.textContent = fullText;
+                    cell.classList.add('expanded');
+                }
+            });
+            btn.textContent = isCurrentlyExpanded ? 'Show Full' : 'Show Less';
+        }
+        
+        // Sortable tables
+        function sortTable(th) {
+            const table = th.closest('table');
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            
+            const headerRow = th.parentElement;
+            const colIndex = Array.from(headerRow.children).indexOf(th);
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const isAsc = th.classList.contains('sort-asc');
+            
+            // Remove sort classes from all headers in this table
+            headerRow.querySelectorAll('th').forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                const aCell = a.cells[colIndex];
+                const bCell = b.cells[colIndex];
+                if (!aCell || !bCell) return 0;
+                
+                let aVal = aCell.textContent.trim();
+                let bVal = bCell.textContent.trim();
+                
+                // Try numeric comparison
+                const aNum = parseFloat(aVal.replace('%', '').replace('ms', '').replace('+', ''));
+                const bNum = parseFloat(bVal.replace('%', '').replace('ms', '').replace('+', ''));
+                
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return isAsc ? bNum - aNum : aNum - bNum;
+                }
+                // Fallback to string comparison
+                return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+            });
+            
+            // Add sort class
+            th.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
+            
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+        
+        // Make headers clickable
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('table thead th').forEach(function(th) {
+                th.style.cursor = 'pointer';
+                th.onclick = function() { sortTable(this); };
+            });
+        });
+        
+        function showDetailModal(text, prompt, gt, preds, responsesB64) {
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalText').textContent = text;
+            document.getElementById('modalPrompt').textContent = prompt || 'N/A (prompt not stored in this run)';
+            document.getElementById('modalGT').textContent = 'Ground Truth: ' + gt;
+            document.getElementById('modalPreds').innerHTML = 'Predictions: ' + preds;
+            
+            // Decode base64 and parse JSON for model responses
+            let responsesHtml = '';
+            try {
+                const responsesJson = atob(responsesB64);
+                const responses = JSON.parse(responsesJson);
+                for (const [model, resp] of Object.entries(responses)) {
+                    const shortModel = model.split('/').pop();
+                    responsesHtml += '<div style="margin-bottom:15px;background:#fff;padding:12px;border-radius:6px;border-left:3px solid #2196F3;">';
+                    responsesHtml += '<strong style="color:#1976D2;">' + shortModel + '</strong><br/>';
+                    responsesHtml += '<pre style="margin:8px 0 0;white-space:pre-wrap;font-size:12px;">' + resp + '</pre>';
+                    responsesHtml += '</div>';
+                }
+            } catch(e) {
+                responsesHtml = '<pre>Error parsing responses: ' + e.message + '</pre>';
+            }
+            document.getElementById('modalResponses').innerHTML = responsesHtml;
+            modal.classList.add('show');
+        }
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+    </script>
+</head>
+<body>
+<!-- Detail Modal -->
+<div id="detailModal" class="modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal-content" style="max-width:1100px;">
+        <div class="modal-header">
+            <h3>📄 Full Request/Response View</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:15px;">
+            <div id="modalGT" style="font-weight:bold;background:#e3f2fd;padding:8px 12px;border-radius:6px;"></div>
+            <div id="modalPreds" style="background:#f5f5f5;padding:8px 12px;border-radius:6px;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div class="modal-section">
+                <h4>📋 Prompt Sent to LLM</h4>
+                <pre id="modalPrompt" style="max-height:200px;overflow-y:auto;"></pre>
+            </div>
+            <div class="modal-section">
+                <h4>📝 Input Text (Truncated)</h4>
+                <pre id="modalText" style="max-height:200px;overflow-y:auto;"></pre>
+            </div>
+        </div>
+        <div class="modal-section" style="margin-top:15px;">
+            <h4>🤖 LLM Raw Responses (All Models)</h4>
+            <div id="modalResponses" style="max-height:300px;overflow-y:auto;"></div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <h1>🔬 LLM Benchmark Report</h1>
+    <p style="color: #666;">Run ID: 20251226_085731 | Generated: 2025-12-26T09:03:01.227379</p>
+    
+    <div class="summary">
+        <div class="summary-card">
+            <h3>Models Tested</h3>
+            <p>3</p>
+        </div>
+        <div class="summary-card alt">
+            <h3>Total Evaluations</h3>
+            <p>90</p>
+        </div>
+        <div class="summary-card alt2">
+            <h3>Datasets</h3>
+            <p>3</p>
+        </div>
+        <div class="summary-card">
+            <h3>Languages</h3>
+            <p>2</p>
+        </div>
+        <div class="summary-card alt">
+            <h3>Avg Latency</h3>
+            <p>1547ms</p>
+        </div>
+    </div>
+    
+    <h2>📋 Dataset Configuration</h2>
+    <p style="color:#666;font-size:13px;">Her dataset için score range ve prompt özeti</p>
+    <table style="font-size: 13px;">
+        <thead>
+            <tr>
+                <th>Dataset</th>
+                <th>Score Range</th>
+                <th>Task Type</th>
+                <th>Language</th>
+                <th>Prompt Template Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>ultrafeedback</strong></td>
+                <td style="font-family: monospace;">1 - 10</td>
+                <td>scoring</td>
+                <td>EN</td>
+                <td style="color:#666;font-size:12px;">Rate text from 1 to 10</td>
+            </tr>
+            <tr>
+                <td><strong>helpsteer2</strong></td>
+                <td style="font-family: monospace;">0 - 4</td>
+                <td>multi_aspect</td>
+                <td>EN</td>
+                <td style="color:#666;font-size:12px;">Rate 5 dimensions (helpfulness, correctness, ...) from 0-4</td>
+            </tr>
+            <tr>
+                <td><strong>bilkent_turkish_writings</strong></td>
+                <td style="font-family: monospace;">0 - 5</td>
+                <td>scoring</td>
+                <td>EN</td>
+                <td style="color:#666;font-size:12px;">Rate text from 0 to 5</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>📊 Model Performance (Advanced Metrics)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>N</th>
+                <th>MAE ↓</th>
+                <th>NMAE ↓</th>
+                <th>QWK ↑</th>
+                <th>Accuracy</th>
+                <th>Pearson</th>
+                <th>Spearman</th>
+                <th>Bias</th>
+                <th>Latency</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>litellm/openai/gpt-4o-mini</strong></td>
+                <td>30</td>
+                <td class="metric">0.667</td>
+                <td>0.074</td>
+                <td class="good">0.869</td>
+                <td class="good">93.3%</td>
+                <td>0.900</td>
+                <td>0.935</td>
+                <td class="">+0.27</td>
+                <td>2796ms</td>
+            </tr>
+            <tr>
+                <td><strong>litellm/mistral/mistral-small-latest</strong></td>
+                <td>30</td>
+                <td class="metric">0.700</td>
+                <td>0.078</td>
+                <td class="good">0.851</td>
+                <td class="good">90.0%</td>
+                <td>0.887</td>
+                <td>0.933</td>
+                <td class="">+0.33</td>
+                <td>1163ms</td>
+            </tr>
+            <tr>
+                <td><strong>litellm/groq/llama-3.1-8b-instant</strong></td>
+                <td>30</td>
+                <td class="metric">0.833</td>
+                <td>0.093</td>
+                <td class="good">0.827</td>
+                <td class="good">86.7%</td>
+                <td>0.876</td>
+                <td>0.941</td>
+                <td class="">+0.50</td>
+                <td>684ms</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>📈 Dataset-Level Performance</h2>
+    <p style="color:#666;font-size:13px;">Her model için veriseti bazında detaylı metrikler</p>
+    <table style="font-size: 13px;">
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>Dataset</th>
+                <th>Range</th>
+                <th>N</th>
+                <th>MAE ↓</th>
+                <th>QWK ↑</th>
+                <th>Accuracy</th>
+                <th>Pearson</th>
+                <th>Spearman</th>
+                <th>Bias</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td title="litellm/groq/llama-3.1-8b-instant">llama-3.1-8b-instant</td>
+                <td><strong>bilkent_turkish_writings</strong></td>
+                <td style="color:#888;">0-5</td>
+                <td>10</td>
+                <td class="metric">0.550</td>
+                <td class="">0.000</td>
+                <td class="good">100.0%</td>
+                <td>0.111</td>
+                <td>0.111</td>
+                <td class="">-0.25</td>
+            </tr>
+            <tr>
+                <td title="litellm/groq/llama-3.1-8b-instant">llama-3.1-8b-instant</td>
+                <td><strong>helpsteer2</strong></td>
+                <td style="color:#888;">0-4</td>
+                <td>10</td>
+                <td class="metric">0.800</td>
+                <td class="">0.000</td>
+                <td class="good">100.0%</td>
+                <td>0.000</td>
+                <td>0.000</td>
+                <td class="bad">+0.80</td>
+            </tr>
+            <tr>
+                <td title="litellm/groq/llama-3.1-8b-instant">llama-3.1-8b-instant</td>
+                <td><strong>ultrafeedback</strong></td>
+                <td style="color:#888;">1-10</td>
+                <td>10</td>
+                <td class="metric">1.150</td>
+                <td class="good">0.777</td>
+                <td class="good">60.0%</td>
+                <td>0.892</td>
+                <td>0.400</td>
+                <td class="bad">+0.95</td>
+            </tr>
+            <tr>
+                <td title="litellm/mistral/mistral-small-latest">mistral-small-latest</td>
+                <td><strong>bilkent_turkish_writings</strong></td>
+                <td style="color:#888;">0-5</td>
+                <td>10</td>
+                <td class="metric">0.550</td>
+                <td class="good">0.783</td>
+                <td class="good">100.0%</td>
+                <td>1.000</td>
+                <td>1.000</td>
+                <td class="bad">-0.55</td>
+            </tr>
+            <tr>
+                <td title="litellm/mistral/mistral-small-latest">mistral-small-latest</td>
+                <td><strong>helpsteer2</strong></td>
+                <td style="color:#888;">0-4</td>
+                <td>10</td>
+                <td class="metric">0.600</td>
+                <td class="">0.118</td>
+                <td class="good">100.0%</td>
+                <td>0.250</td>
+                <td>0.250</td>
+                <td class="bad">+0.60</td>
+            </tr>
+            <tr>
+                <td title="litellm/mistral/mistral-small-latest">mistral-small-latest</td>
+                <td><strong>ultrafeedback</strong></td>
+                <td style="color:#888;">1-10</td>
+                <td>10</td>
+                <td class="metric">0.950</td>
+                <td class="good">0.796</td>
+                <td class="good">70.0%</td>
+                <td>0.891</td>
+                <td>0.506</td>
+                <td class="bad">+0.95</td>
+            </tr>
+            <tr>
+                <td title="litellm/openai/gpt-4o-mini">gpt-4o-mini</td>
+                <td><strong>bilkent_turkish_writings</strong></td>
+                <td style="color:#888;">0-5</td>
+                <td>10</td>
+                <td class="metric">0.550</td>
+                <td class="good">0.783</td>
+                <td class="good">100.0%</td>
+                <td>1.000</td>
+                <td>1.000</td>
+                <td class="bad">-0.55</td>
+            </tr>
+            <tr>
+                <td title="litellm/openai/gpt-4o-mini">gpt-4o-mini</td>
+                <td><strong>helpsteer2</strong></td>
+                <td style="color:#888;">0-4</td>
+                <td>10</td>
+                <td class="metric">0.500</td>
+                <td class="">0.194</td>
+                <td class="good">100.0%</td>
+                <td>0.327</td>
+                <td>0.327</td>
+                <td class="">+0.50</td>
+            </tr>
+            <tr>
+                <td title="litellm/openai/gpt-4o-mini">gpt-4o-mini</td>
+                <td><strong>ultrafeedback</strong></td>
+                <td style="color:#888;">1-10</td>
+                <td>10</td>
+                <td class="metric">0.950</td>
+                <td class="good">0.820</td>
+                <td class="good">80.0%</td>
+                <td>0.913</td>
+                <td>0.698</td>
+                <td class="bad">+0.85</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>📚 Per-Question Model Comparison</h2>
+    
+    <button class="collapsible">
+        📖 ultrafeedback 
+        <span class="badge badge-purple">Range: 1-10</span>
+        <span class="badge badge-blue">10 questions × 3 models</span>
+        <span class="badge badge-green">MAE: 1.017</span>
+    </button>
+    <div class="content">
+        <table style="font-size: 12px;">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">#</th>
+                    <th style="width: 250px;">Text <button onclick="toggleFullText(this)" style="font-size:10px;">Show Full</button></th>
+                    <th>GT</th>
+                    <th title="litellm/groq/llama-3.1-8b-instant">llama-3.1-8b</th><th title="litellm/mistral/mistral-small-latest">mistral-smal</th><th title="litellm/openai/gpt-4o-mini">gpt-4o-mini</th>
+                    <th style="width: 200px;">LLM Response</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Can you write a C++ program that prompts the user to enter the name of a country and checks if it borders the Mediterranean Sea? Here\'s some starter code to help you out: #include <iostream> #include <string> using namespace std; int main() {     string country;     // prompt user for input     cout << &quot;Enter the name of a country: &quot;;     cin >> country;     // check if country borders the Mediterranean Sea     // [C++ code]     return 0; }  Response: int main() {     string country', '', '4.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDRcbkVYUExBTkFUSU9OOiBUaGUgcmVzcG9uc2UgaXMgaW5jb21wbGV0ZSBhbmQgaW5hY2N1cmF0ZSwgYXMgaXQgb25seSBjaGVja3MgaWYgdGhlIGNvdW50cnkncyBuYW1lIGVuZHMgd2l0aCBcIk1lZGl0ZXJyYW5lYW5cIiwgd2hpY2ggaXMgbm90IGEgcmVsaWFibGUgbWV0aG9kIHRvIGRldGVybWluZSBpZiBhIGNvdW50cnkgYm9yZGVycyB0aGUgTWVkaXRlcnJhbmVhbiBTZWEuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJTQ09SRTogNFxuRVhQTEFOQVRJT046IFRoZSByZXNwb25zZSBkb2VzIG5vdCBjb3JyZWN0bHkgYWRkcmVzcyB0aGUgdGFzay4gSXQgdXNlcyBhIG5vbi1leGlzdGVudCBmdW5jdGlvbiBgZW5kc1dpdGhgIGFuZCBkb2VzIG5vdCBwcm92aWRlIGEgY29tcHJlaGVuc2l2ZSBsaXN0IG9mIGNvdW50cmllcyB0aGF0IGJvcmRlciB0aGUgTWVkaXRlcnJhbmVhbiBTZWEuIFRoZSBsb2dpYyBpcyBmbGF3ZWQgYW5kIGluY29tcGxldGUuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIlNDT1JFOiA1ICBcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBwcm92aWRlcyBhIGJhc2ljIHN0cnVjdHVyZSBmb3IgYSBDKysgcHJvZ3JhbSBidXQgY29udGFpbnMgYSBsb2dpY2FsIGVycm9yIGluIHRoZSBjb25kaXRpb24gdXNlZCB0byBjaGVjayBpZiBhIGNvdW50cnkgYm9yZGVycyB0aGUgTWVkaXRlcnJhbmVhbiBTZWEuIFRoZSBmdW5jdGlvbiBgZW5kc1dpdGhgIGlzIG5vdCBkZWZpbmVkLCBhbmQgdGhlIGxvZ2ljIGRvZXMgbm90IGFjY3VyYXRlbHkgcmVmbGVjdCB0aGUgZ2VvZ3JhcGhpY2FsIHJlbGF0aW9uc2hpcC4gQWRkaXRpb25hbGx5LCB0aGUgcHJvZ3JhbSBsYWNrcyBhIGNvbXByZWhlbnNpdmUgbGlzdCBvZiBNZWRpdGVycmFuZWFuIGNvdW50cmllcyBmb3IgcHJvcGVyIHZhbGlkYXRpb24uIn0=')">Instruction: Can you write a C++ program that prompts the us...</td>
+                    <td><strong>4.0</strong></td>
+                    <td style="background: #4CAF5020;">4.0</td><td style="background: #4CAF5020;">4.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 4 EXPLANATION: The response is incomplete and inaccurate, as it only chec">SCORE: 4 EXPLANATION: The response is in...</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Can you write a C++ program that prompts the user to enter the name of a country and checks if it borders the Mediterranean Sea? Here\'s some starter code to help you out: #include <iostream> #include <string> using namespace std; int main() {     string country;     // prompt user for input     cout << &quot;Enter the name of a country: &quot;;     cin >> country;     // check if country borders the Mediterranean Sea     // [C++ code]     return 0; }  Response: Here\'s a C++ program that promp', '', '7.5', 'llama-3.1-: 8.0 | mistral-sm: 8.0 | gpt-4o-min: 8.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDhcbkVYUExBTkFUSU9OOiBUaGUgcmVzcG9uc2UgaXMgY2xlYXIsIGNvbmNpc2UsIGFuZCB3ZWxsLXN0cnVjdHVyZWQsIHByb3ZpZGluZyBhIGdvb2QgZXhwbGFuYXRpb24gb2YgdGhlIGNvZGUgYW5kIGl0cyBmdW5jdGlvbmFsaXR5LiBIb3dldmVyLCBpdCBjb3VsZCBiZW5lZml0IGZyb20gbW9yZSBkZXRhaWwgYW5kIGNsYXJpdHkgaW4gY2VydGFpbiBzZWN0aW9ucywgc3VjaCBhcyB0aGUgdXNlIG9mIGEgd2hpbGUgbG9vcCB0byBoYW5kbGUgaW52YWxpZCBpbnB1dHMuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJTQ09SRTogOFxuRVhQTEFOQVRJT046IFRoZSB0ZXh0IHByb3ZpZGVzIGEgY2xlYXIgYW5kIGNvbmNpc2UgcmVzcG9uc2UgdG8gdGhlIGluc3RydWN0aW9uLCB3aXRoIGEgd2VsbC1zdHJ1Y3R1cmVkIEMrKyBwcm9ncmFtIHRoYXQgZWZmZWN0aXZlbHkgY2hlY2tzIGlmIGEgY291bnRyeSBib3JkZXJzIHRoZSBNZWRpdGVycmFuZWFuIFNlYS4gVGhlIGV4cGxhbmF0aW9uIGlzIGRldGFpbGVkIGFuZCBlYXN5IHRvIHVuZGVyc3RhbmQuIEhvd2V2ZXIsIHRoZXJlIGlzIGEgbWlub3IgaW5hY2N1cmFjeSBpbiB0aGUgZXhwbGFuYXRpb24gd2hlcmUgaXQgbWVudGlvbnMgYSB3aGlsZSBsb29wIHRoYXQgaXMgbm90IHByZXNlbnQgaW4gdGhlIGNvZGUuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIlNDT1JFOiA4ICBcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBwcm92aWRlcyBhIGNsZWFyIGFuZCBmdW5jdGlvbmFsIEMrKyBwcm9ncmFtIHRoYXQgbWVldHMgdGhlIGluaXRpYWwgaW5zdHJ1Y3Rpb24uIEl0IGVmZmVjdGl2ZWx5IHVzZXMgZGF0YSBzdHJ1Y3R1cmVzIGxpa2UgYG1hcGAgYW5kIGBzZXRgIHRvIG1hbmFnZSBjb3VudHJ5IGFuZCBzZWEgcmVsYXRpb25zaGlwcywgYW5kIHRoZSBsb2dpYyBpcyBzb3VuZC4gSG93ZXZlciwgaXQgY291bGQgYmVuZWZpdCBmcm9tIGFkZGl0aW9uYWwgY29tbWVudHMgZm9yIGNsYXJpdHkgYW5kIGEgbW9yZSByb2J1c3QgaW5wdXQgaGFuZGxpbmcgbWVjaGFuaXNtIChlLmcuLCBjYXNlIHNlbnNpdGl2aXR5IG9yIGlucHV0IHZhbGlkYXRpb24pLiBPdmVyYWxsLCBpdCdzIHdlbGwtc3RydWN0dXJlZCBhbmQgaW5mb3JtYXRpdmUuIn0=')">Instruction: Can you write a C++ program that prompts the us...</td>
+                    <td><strong>7.5</strong></td>
+                    <td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">8.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 8 EXPLANATION: The response is clear, concise, and well-structured, provi">SCORE: 8 EXPLANATION: The response is cl...</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Can you write a C++ program that prompts the user to enter the name of a country and checks if it borders the Mediterranean Sea? Here\'s some starter code to help you out: #include <iostream> #include <string> using namespace std; int main() {     string country;     // prompt user for input     cout << &quot;Enter the name of a country: &quot;;     cin >> country;     // check if country borders the Mediterranean Sea     // [C++ code]     return 0; }  Response: Sure! Here\'s a C++ program that', '', '6.0', 'llama-3.1-: 9.0 | mistral-sm: 9.0 | gpt-4o-min: 7.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDlcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBpcyB3ZWxsLXN0cnVjdHVyZWQsIGVhc3kgdG8gZm9sbG93LCBhbmQgZWZmZWN0aXZlbHkgY29tbXVuaWNhdGVzIHRoZSBzb2x1dGlvbiB0byB0aGUgcHJvYmxlbS4gVGhlIGNvZGUgaXMgcHJvcGVybHkgZm9ybWF0dGVkIGFuZCBleHBsYWluZWQgaW4gYSBjbGVhciBhbmQgY29uY2lzZSBtYW5uZXIuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJTQ09SRTogOVxuRVhQTEFOQVRJT046IFRoZSB0ZXh0IGlzIGNsZWFyLCB3ZWxsLXN0cnVjdHVyZWQsIGFuZCBwcm92aWRlcyBhIGNvbXBsZXRlIGFuZCBjb3JyZWN0IHNvbHV0aW9uIHRvIHRoZSBnaXZlbiB0YXNrLiBJdCBpbmNsdWRlcyBhIGJyaWVmIGV4cGxhbmF0aW9uIG9mIHRoZSBjb2RlIGFuZCBpdHMgZnVuY3Rpb25hbGl0eS4gVGhlIG9ubHkgbWlub3IgaXNzdWUgaXMgdGhhdCB0aGUgYGZpbmRgIG1ldGhvZCBpcyBub3QgdGhlIG1vc3QgZWZmaWNpZW50IHdheSB0byBzZWFyY2ggaW4gYSB2ZWN0b3IsIGJ1dCBpdCB3b3JrcyBmb3IgdGhpcyBwdXJwb3NlLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJTQ09SRTogNyAgXG5FWFBMQU5BVElPTjogVGhlIHRleHQgcHJvdmlkZXMgYSBjbGVhciBhbmQgZnVuY3Rpb25hbCBDKysgcHJvZ3JhbSB0aGF0IG1lZXRzIHRoZSBpbml0aWFsIGluc3RydWN0aW9uLiBIb3dldmVyLCB0aGVyZSBpcyBhIG1pc3Rha2UgaW4gdGhlIHVzZSBvZiBgZmluZGAgbWV0aG9kLCBhcyBpdCBzaG91bGQgYmUgdXNlZCB3aXRoIGFuIGl0ZXJhdG9yIG9yIGEgc3BlY2lmaWMgZnVuY3Rpb24gZnJvbSB0aGUgYDxhbGdvcml0aG0+YCBsaWJyYXJ5LiBBZGRpdGlvbmFsbHksIHRoZSBleHBsYW5hdGlvbiBjb3VsZCBiZSBtb3JlIGNvbmNpc2UgYW5kIGZvY3VzZWQgb24gdGhlIGNvZGUncyBmdW5jdGlvbmFsaXR5LiBPdmVyYWxsLCBpdCBkZW1vbnN0cmF0ZXMgYSBnb29kIHVuZGVyc3RhbmRpbmcgb2YgQysrIGJ1dCBoYXMgbWlub3IgdGVjaG5pY2FsIGluYWNjdXJhY2llcy4ifQ==')">Instruction: Can you write a C++ program that prompts the us...</td>
+                    <td><strong>6.0</strong></td>
+                    <td style="background: #f4433620;">9.0</td><td style="background: #f4433620;">9.0</td><td style="background: #ff980020;">7.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 9 EXPLANATION: The text is well-structured, easy to follow, and effective">SCORE: 9 EXPLANATION: The text is well-s...</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Can you write a C++ program that prompts the user to enter the name of a country and checks if it borders the Mediterranean Sea? Here\'s some starter code to help you out: #include <iostream> #include <string> using namespace std; int main() {     string country;     // prompt user for input     cout << &quot;Enter the name of a country: &quot;;     cin >> country;     // check if country borders the Mediterranean Sea     // [C++ code]     return 0; }  Response: Sure, here is the program using', '', '3.0', 'llama-3.1-: 2.0 | mistral-sm: 3.0 | gpt-4o-min: 4.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDJcbkVYUExBTkFUSU9OOiBUaGUgcmVzcG9uc2UgY29udGFpbnMgYSBzaWduaWZpY2FudCBlcnJvciBpbiB0aGUgQysrIGNvZGUsIHVzaW5nIGFuIHVuZGVmaW5lZCBhbGdvcml0aG0gXCJjZHM6OmFsZ29yaXRobTo6R3JlYXRlckVxdWFsXCIgYW5kIGF0dGVtcHRpbmcgdG8gZmluZCBhIGNoYXJhY3RlciAnfX0nIGluIHRoZSBjb3VudHJ5IG5hbWUsIHdoaWNoIGlzIG5vdCByZWxldmFudCB0byB0aGUgdGFzay4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIlNDT1JFOiAzXG5FWFBMQU5BVElPTjogVGhlIHJlc3BvbnNlIGNvbnRhaW5zIHNldmVyYWwgZXJyb3JzIGFuZCBkb2VzIG5vdCBjb3JyZWN0bHkgYWRkcmVzcyB0aGUgdGFzay4gVGhlIHVzZSBvZiBcImNkczo6YWxnb3JpdGhtOjpHcmVhdGVyRXF1YWxcIiBpcyBpbmNvcnJlY3QgYW5kIG5vdCByZWxldmFudC4gVGhlIGxvZ2ljIGZvciBjaGVja2luZyBpZiBhIGNvdW50cnkgYm9yZGVycyB0aGUgTWVkaXRlcnJhbmVhbiBTZWEgaXMgZmxhd2VkIGFuZCBkb2VzIG5vdCBtYWtlIHNlbnNlLiBUaGUgY29kZSBpcyBhbHNvIHBvb3JseSBzdHJ1Y3R1cmVkIGFuZCBjb250YWlucyBzeW50YXggZXJyb3JzLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJTQ09SRTogNCAgXG5FWFBMQU5BVElPTjogVGhlIHRleHQgcHJvdmlkZXMgYSBiYXNpYyBzdHJ1Y3R1cmUgZm9yIGEgQysrIHByb2dyYW0gYnV0IGNvbnRhaW5zIHNpZ25pZmljYW50IGVycm9ycyBhbmQgbWlzdW5kZXJzdGFuZGluZ3MgYWJvdXQgdGhlIHRhc2suIFRoZSB1c2Ugb2YgYHN0ZDo6ZmluZF9pZmAgYW5kIHRoZSBsYW1iZGEgZnVuY3Rpb24gaXMgaW5jb3JyZWN0IGZvciBjaGVja2luZyBpZiBhIGNvdW50cnkgYm9yZGVycyB0aGUgTWVkaXRlcnJhbmVhbiBTZWEuIEFkZGl0aW9uYWxseSwgdGhlIGxvZ2ljIGZvciBkZXRlcm1pbmluZyBpZiBhIGNvdW50cnkgaXMgYm9yZGVyZWQgYnkgdGhlIE1lZGl0ZXJyYW5lYW4gaXMgZmxhd2VkIGFuZCBsYWNrcyBhIHByb3BlciBsaXN0IG9mIE1lZGl0ZXJyYW5lYW4gY291bnRyaWVzLiBPdmVyYWxsLCBpdCBkZW1vbnN0cmF0ZXMgc29tZSB1bmRlcnN0YW5kaW5nIG9mIEMrKyBidXQgZmFpbHMgdG8gbWVldCB0aGUgcmVxdWlyZW1lbnRzIGVmZmVjdGl2ZWx5LiJ9')">Instruction: Can you write a C++ program that prompts the us...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">2.0</td><td style="background: #4CAF5020;">3.0</td><td style="background: #ff980020;">4.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 2 EXPLANATION: The response contains a significant error in the C++ code,">SCORE: 2 EXPLANATION: The response conta...</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Suppose you are a content creator and want to generate compelling titles and descriptions for your YouTube videos automatically. You have decided to use GPT to solve this problem. Can you provide an example of how you would use GPT to generate titles and descriptions for your YouTube videos automatically? Please include the necessary steps and any additional information that may be helpful.  Response: To use GPT for generating compelling titles and descriptions for your YouTube vide', '', '7.5', 'llama-3.1-: 9.0 | mistral-sm: 9.0 | gpt-4o-min: 9.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDlcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBpcyB3ZWxsLXN0cnVjdHVyZWQsIGluZm9ybWF0aXZlLCBhbmQgcHJvdmlkZXMgYSBjbGVhciBleGFtcGxlIG9mIGhvdyB0byB1c2UgR1BUIGZvciBnZW5lcmF0aW5nIFlvdVR1YmUgdGl0bGVzIGFuZCBkZXNjcmlwdGlvbnMuIEl0IGluY2x1ZGVzIG5lY2Vzc2FyeSBzdGVwcywgY29kZSBzbmlwcGV0cywgYW5kIGV4cGxhbmF0aW9ucywgbWFraW5nIGl0IGVhc3kgdG8gZm9sbG93IGFuZCB1bmRlcnN0YW5kLiIsICJsaXRlbGxtL21pc3RyYWwvbWlzdHJhbC1zbWFsbC1sYXRlc3QiOiAiU0NPUkU6IDlcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBpcyB3ZWxsLXN0cnVjdHVyZWQsIGluZm9ybWF0aXZlLCBhbmQgcHJvdmlkZXMgYSBjbGVhciwgc3RlcC1ieS1zdGVwIGd1aWRlIG9uIHVzaW5nIEdQVCBmb3IgZ2VuZXJhdGluZyBZb3VUdWJlIHRpdGxlcyBhbmQgZGVzY3JpcHRpb25zLiBJdCBpbmNsdWRlcyBuZWNlc3NhcnkgZGV0YWlscywgY29kZSBleGFtcGxlcywgYW5kIGhlbHBmdWwgdGlwcy4gVGhlIG9ubHkgcmVhc29uIGl0J3Mgbm90IGEgMTAgaXMgdGhhdCBpdCBjb3VsZCBiZW5lZml0IGZyb20gYSBicmllZiBtZW50aW9uIG9mIHBvdGVudGlhbCBldGhpY2FsIGNvbnNpZGVyYXRpb25zIG9yIGJpYXNlcyBpbiBBSS1nZW5lcmF0ZWQgY29udGVudC4iLCAibGl0ZWxsbS9vcGVuYWkvZ3B0LTRvLW1pbmkiOiAiU0NPUkU6IDkgIFxuRVhQTEFOQVRJT046IFRoZSB0ZXh0IHByb3ZpZGVzIGEgY2xlYXIsIHN0ZXAtYnktc3RlcCBndWlkZSBvbiB1c2luZyBHUFQgZm9yIGdlbmVyYXRpbmcgWW91VHViZSB0aXRsZXMgYW5kIGRlc2NyaXB0aW9ucywgaW5jbHVkaW5nIHRlY2huaWNhbCBkZXRhaWxzIGFuZCBjb2RlIGV4YW1wbGVzLiBJdCBpcyB3ZWxsLXN0cnVjdHVyZWQgYW5kIGluZm9ybWF0aXZlLCBtYWtpbmcgaXQgZWFzeSBmb3IgcmVhZGVycyB0byBmb2xsb3cuIEhvd2V2ZXIsIGl0IGNvdWxkIGJlbmVmaXQgZnJvbSBhIGJyaWVmIGludHJvZHVjdGlvbiBvciBzdW1tYXJ5IHRvIGVuaGFuY2UgY29udGV4dCBmb3IgcmVhZGVycyB1bmZhbWlsaWFyIHdpdGggdGhlIHRvcGljLiJ9')">Instruction: Suppose you are a content creator and want to g...</td>
+                    <td><strong>7.5</strong></td>
+                    <td style="background: #f4433620;">9.0</td><td style="background: #f4433620;">9.0</td><td style="background: #f4433620;">9.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 9 EXPLANATION: The text is well-structured, informative, and provides a c">SCORE: 9 EXPLANATION: The text is well-s...</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Suppose you are a content creator and want to generate compelling titles and descriptions for your YouTube videos automatically. You have decided to use GPT to solve this problem. Can you provide an example of how you would use GPT to generate titles and descriptions for your YouTube videos automatically? Please include the necessary steps and any additional information that may be helpful.  Response: Sure, I\'d be happy to help! Here\'s an example of how you could use GPT to generate', '', '7.5', 'llama-3.1-: 8.0 | mistral-sm: 8.0 | gpt-4o-min: 8.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDhcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBpcyB3ZWxsLXN0cnVjdHVyZWQsIGluZm9ybWF0aXZlLCBhbmQgcHJvdmlkZXMgYSBjbGVhciBleGFtcGxlIG9mIGhvdyB0byB1c2UgR1BUIGZvciBnZW5lcmF0aW5nIHRpdGxlcyBhbmQgZGVzY3JpcHRpb25zLiBIb3dldmVyLCBpdCBjb3VsZCBiZW5lZml0IGZyb20gbW9yZSB0ZWNobmljYWwgZGV0YWlscyBhbmQgYSBtb3JlIGVuZ2FnaW5nIHdyaXRpbmcgc3R5bGUuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJTQ09SRTogOFxuRVhQTEFOQVRJT046IFRoZSB0ZXh0IGlzIHdlbGwtc3RydWN0dXJlZCwgaW5mb3JtYXRpdmUsIGFuZCBwcm92aWRlcyBhIGNsZWFyIHN0ZXAtYnktc3RlcCBndWlkZSBvbiB1c2luZyBHUFQgZm9yIGdlbmVyYXRpbmcgWW91VHViZSB0aXRsZXMgYW5kIGRlc2NyaXB0aW9ucy4gSXQgaW5jbHVkZXMgYW4gZXhhbXBsZSBhbmQgYWRkaXRpb25hbCB0aXBzLCBtYWtpbmcgaXQgcXVpdGUgY29tcHJlaGVuc2l2ZS4gSG93ZXZlciwgaXQgY291bGQgYmVuZWZpdCBmcm9tIGEgYml0IG1vcmUgY29uY2lzZW5lc3MgYW5kIGEgbW9yZSBlbmdhZ2luZyB0b25lIHRvIHJlYWNoIGEgcGVyZmVjdCBzY29yZS4iLCAibGl0ZWxsbS9vcGVuYWkvZ3B0LTRvLW1pbmkiOiAiU0NPUkU6IDggIFxuRVhQTEFOQVRJT046IFRoZSB0ZXh0IHByb3ZpZGVzIGEgY2xlYXIgYW5kIHN0cnVjdHVyZWQgYXBwcm9hY2ggdG8gdXNpbmcgR1BUIGZvciBnZW5lcmF0aW5nIFlvdVR1YmUgdGl0bGVzIGFuZCBkZXNjcmlwdGlvbnMsIHdpdGggcHJhY3RpY2FsIHN0ZXBzIGFuZCBleGFtcGxlcy4gSXQgaXMgaW5mb3JtYXRpdmUgYW5kIHdlbGwtb3JnYW5pemVkLCB0aG91Z2ggaXQgY291bGQgYmVuZWZpdCBmcm9tIG1vcmUgY29uY2lzZSBsYW5ndWFnZSBhbmQgYSBmZXcgYWRkaXRpb25hbCBkZXRhaWxzIG9uIHRoZSBpbnN0YWxsYXRpb24gYW5kIHRyYWluaW5nIHByb2Nlc3MuIn0=')">Instruction: Suppose you are a content creator and want to g...</td>
+                    <td><strong>7.5</strong></td>
+                    <td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">8.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 8 EXPLANATION: The text is well-structured, informative, and provides a c">SCORE: 8 EXPLANATION: The text is well-s...</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Suppose you are a content creator and want to generate compelling titles and descriptions for your YouTube videos automatically. You have decided to use GPT to solve this problem. Can you provide an example of how you would use GPT to generate titles and descriptions for your YouTube videos automatically? Please include the necessary steps and any additional information that may be helpful.  Response: Sure! Although GPT cannot generate text on its own, it can be utilized as a base t', '', '7.5', 'llama-3.1-: 8.0 | mistral-sm: 8.0 | gpt-4o-min: 7.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDhcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBpcyB3ZWxsLXN0cnVjdHVyZWQsIGluZm9ybWF0aXZlLCBhbmQgcHJvdmlkZXMgYSBjbGVhciBleGFtcGxlIG9mIGhvdyB0byB1c2UgR1BUIGZvciBnZW5lcmF0aW5nIFlvdVR1YmUgdGl0bGVzIGFuZCBkZXNjcmlwdGlvbnMuIEhvd2V2ZXIsIGl0IGxhY2tzIHNvbWUgdGVjaG5pY2FsIGRldGFpbHMgYW5kIGFzc3VtZXMgYSBjZXJ0YWluIGxldmVsIG9mIHByaW9yIGtub3dsZWRnZSBhYm91dCBHUFQgYW5kIGl0cyBhcHBsaWNhdGlvbnMuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJTQ09SRTogOFxuRVhQTEFOQVRJT046IFRoZSB0ZXh0IGlzIGluZm9ybWF0aXZlIGFuZCBwcm92aWRlcyBhIGNsZWFyLCBzdGVwLWJ5LXN0ZXAgZ3VpZGUgb24gdXNpbmcgR1BUIGZvciBnZW5lcmF0aW5nIFlvdVR1YmUgdGl0bGVzIGFuZCBkZXNjcmlwdGlvbnMuIEhvd2V2ZXIsIGl0IGNvdWxkIGJlbmVmaXQgZnJvbSBtb3JlIGNvbmNpc2UgbGFuZ3VhZ2UgYW5kIGZld2VyIHJlcGV0aXRpb25zLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJTQ09SRTogNyAgXG5FWFBMQU5BVElPTjogVGhlIHRleHQgcHJvdmlkZXMgYSBjbGVhciBhbmQgc3RydWN0dXJlZCBhcHByb2FjaCB0byB1c2luZyBHUFQgZm9yIGdlbmVyYXRpbmcgWW91VHViZSB0aXRsZXMgYW5kIGRlc2NyaXB0aW9ucy4gSXQgb3V0bGluZXMgbmVjZXNzYXJ5IHN0ZXBzIGFuZCBjb25zaWRlcmF0aW9ucywgbWFraW5nIGl0IGluZm9ybWF0aXZlLiBIb3dldmVyLCBpdCBjb3VsZCBiZW5lZml0IGZyb20gbW9yZSBzcGVjaWZpYyBleGFtcGxlcyBhbmQgYSBjbGVhcmVyIGV4cGxhbmF0aW9uIG9mIGhvdyB0byBwcm9tcHQgdGhlIG1vZGVsIGVmZmVjdGl2ZWx5LiJ9')">Instruction: Suppose you are a content creator and want to g...</td>
+                    <td><strong>7.5</strong></td>
+                    <td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">7.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 8 EXPLANATION: The text is well-structured, informative, and provides a c">SCORE: 8 EXPLANATION: The text is well-s...</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Suppose you are a content creator and want to generate compelling titles and descriptions for your YouTube videos automatically. You have decided to use GPT to solve this problem. Can you provide an example of how you would use GPT to generate titles and descriptions for your YouTube videos automatically? Please include the necessary steps and any additional information that may be helpful.  Response: Sure, here is an example of how you can use GPT to generate titles and description', '', '7.5', 'llama-3.1-: 8.0 | mistral-sm: 8.0 | gpt-4o-min: 8.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDhcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBpcyBjbGVhciwgY29uY2lzZSwgYW5kIHdlbGwtc3RydWN0dXJlZCwgcHJvdmlkaW5nIGEgc3RlcC1ieS1zdGVwIGd1aWRlIG9uIGhvdyB0byB1c2UgR1BUIGZvciBnZW5lcmF0aW5nIHRpdGxlcyBhbmQgZGVzY3JpcHRpb25zIGZvciBZb3VUdWJlIHZpZGVvcy4gSG93ZXZlciwgaXQgbGFja3Mgc3BlY2lmaWMgZXhhbXBsZXMgYW5kIGRldGFpbHMsIHdoaWNoIG1pZ2h0IG1ha2UgaXQgbGVzcyBlbmdhZ2luZyBmb3IgcmVhZGVycy4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIlNDT1JFOiA4XG5FWFBMQU5BVElPTjogVGhlIHRleHQgaXMgd2VsbC1zdHJ1Y3R1cmVkIGFuZCBwcm92aWRlcyBhIGNsZWFyLCBzdGVwLWJ5LXN0ZXAgZ3VpZGUgb24gdXNpbmcgR1BUIGZvciBnZW5lcmF0aW5nIFlvdVR1YmUgdGl0bGVzIGFuZCBkZXNjcmlwdGlvbnMuIEl0IG9mZmVycyBwcmFjdGljYWwgYWR2aWNlIGFuZCBjb25zaWRlcnMgaW1wb3J0YW50IGFzcGVjdHMgbGlrZSBkYXRhIHF1YWxpdHksIGJpYXMsIGFuZCBmZWVkYmFjayBtZWNoYW5pc21zLiBIb3dldmVyLCBpdCBjb3VsZCBiZW5lZml0IGZyb20gbW9yZSBzcGVjaWZpYyBleGFtcGxlcyBvciBwcm9tcHRzIHRvIGlsbHVzdHJhdGUgdGhlIHByb2Nlc3MgZnVydGhlci4iLCAibGl0ZWxsbS9vcGVuYWkvZ3B0LTRvLW1pbmkiOiAiU0NPUkU6IDggIFxuRVhQTEFOQVRJT046IFRoZSB0ZXh0IHByb3ZpZGVzIGEgY2xlYXIgYW5kIHN0cnVjdHVyZWQgZXhwbGFuYXRpb24gb2YgaG93IHRvIHVzZSBHUFQgZm9yIGdlbmVyYXRpbmcgWW91VHViZSB0aXRsZXMgYW5kIGRlc2NyaXB0aW9ucy4gSXQgb3V0bGluZXMgdGhlIG5lY2Vzc2FyeSBzdGVwcyBhbmQgY29uc2lkZXJhdGlvbnMgZWZmZWN0aXZlbHksIG1ha2luZyBpdCBpbmZvcm1hdGl2ZSBmb3IgY29udGVudCBjcmVhdG9ycy4gSG93ZXZlciwgaXQgY291bGQgYmVuZWZpdCBmcm9tIG1vcmUgc3BlY2lmaWMgZXhhbXBsZXMgb3IgYSBkZWVwZXIgZXhwbG9yYXRpb24gb2YgcG90ZW50aWFsIGNoYWxsZW5nZXMuIn0=')">Instruction: Suppose you are a content creator and want to g...</td>
+                    <td><strong>7.5</strong></td>
+                    <td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">8.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 8 EXPLANATION: The text is clear, concise, and well-structured, providing">SCORE: 8 EXPLANATION: The text is clear,...</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Identify the interrelated economic, political, and social factors that contributed to the stock market crash of 1929, including but not limited to the impact of World War I on the global economy, the role of government policies such as the Smoot-Hawley Tariff Act, the effects of speculative investment practices and margin trading, and the socioeconomic disparities of the time period. Additionally, provide a comparative analysis of the causes and effects of the 1929 stock market cras', '', '7.0', 'llama-3.1-: 9.0 | mistral-sm: 8.0 | gpt-4o-min: 8.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDlcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBpcyB3ZWxsLXN0cnVjdHVyZWQsIGluZm9ybWF0aXZlLCBhbmQgcHJvdmlkZXMgYSBjb21wcmVoZW5zaXZlIGFuYWx5c2lzIG9mIHRoZSAxOTI5IHN0b2NrIG1hcmtldCBjcmFzaCwgaW5jbHVkaW5nIGl0cyBjYXVzZXMgYW5kIGVmZmVjdHMuIEl0IGFsc28gb2ZmZXJzIGEgY29tcGFyYXRpdmUgYW5hbHlzaXMgd2l0aCBvdGhlciBub3RhYmxlIGZpbmFuY2lhbCBjcmlzZXMsIHByb3ZpZGluZyBhIGNsZWFyIGFuZCBjb25jaXNlIGV4cGxhbmF0aW9uIG9mIHRoZSBzaW1pbGFyaXRpZXMgYW5kIGRpZmZlcmVuY2VzLiBUaGUgdXNlIG9mIHByaW1hcnkgYW5kIHNlY29uZGFyeSBzb3VyY2VzIGlzIG1lbnRpb25lZCwgYnV0IG5vdCBleHBsaWNpdGx5IGNpdGVkLCB3aGljaCBpcyBhIG1pbm9yIGRyYXdiYWNrLiIsICJsaXRlbGxtL21pc3RyYWwvbWlzdHJhbC1zbWFsbC1sYXRlc3QiOiAiU0NPUkU6IDhcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBwcm92aWRlcyBhIGNvbXByZWhlbnNpdmUgYW5hbHlzaXMgb2YgdGhlIHN0b2NrIG1hcmtldCBjcmFzaCBvZiAxOTI5IGFuZCBpdHMgY29tcGFyaXNvbiB3aXRoIG90aGVyIGZpbmFuY2lhbCBjcmlzZXMuIEl0IGNvdmVycyB0aGUgbWFpbiBmYWN0b3JzIGFuZCBvZmZlcnMgYSBjbGVhciBzdHJ1Y3R1cmUuIEhvd2V2ZXIsIGl0IGxhY2tzIHNwZWNpZmljIGRhdGEsIGV4YW1wbGVzLCBhbmQgdmlzdWFsaXphdGlvbnMgYXMgaW5zdHJ1Y3RlZCwgd2hpY2ggd291bGQgaGF2ZSBlbmhhbmNlZCB0aGUgYW5hbHlzaXMgYW5kIHN1cHBvcnRlZCB0aGUgZmluZGluZ3MgbW9yZSBlZmZlY3RpdmVseS4iLCAibGl0ZWxsbS9vcGVuYWkvZ3B0LTRvLW1pbmkiOiAiU0NPUkU6IDggIFxuRVhQTEFOQVRJT046IFRoZSB0ZXh0IHByb3ZpZGVzIGEgY29tcHJlaGVuc2l2ZSBhbmFseXNpcyBvZiB0aGUgZmFjdG9ycyBjb250cmlidXRpbmcgdG8gdGhlIHN0b2NrIG1hcmtldCBjcmFzaCBvZiAxOTI5LCBlZmZlY3RpdmVseSBsaW5raW5nIGVjb25vbWljLCBwb2xpdGljYWwsIGFuZCBzb2NpYWwgZWxlbWVudHMuIEl0IGFsc28gb2ZmZXJzIGEgY29tcGFyYXRpdmUgcGVyc3BlY3RpdmUgd2l0aCBvdGhlciBmaW5hbmNpYWwgY3Jpc2VzLCB3aGljaCBlbmhhbmNlcyBpdHMgZGVwdGguIEhvd2V2ZXIsIHRoZSB0ZXh0IGNvdWxkIGJlbmVmaXQgZnJvbSBtb3JlIHNwZWNpZmljIGV4YW1wbGVzIGFuZCBkYXRhIHZpc3VhbGl6YXRpb25zIGFzIHN1Z2dlc3RlZCBpbiB0aGUgaW5zdHJ1Y3Rpb24sIHdoaWNoIHdvdWxkIHN0cmVuZ3RoZW4gdGhlIGFyZ3VtZW50IGFuZCBwcm92aWRlIGNsZWFyZXIgaW5zaWdodHMuIE92ZXJhbGwsIGl0IGlzIHdlbGwtc3RydWN0dXJlZCBhbmQgaW5mb3JtYXRpdmUuIn0=')">Instruction: Identify the interrelated economic, political, ...</td>
+                    <td><strong>7.0</strong></td>
+                    <td style="background: #f4433620;">9.0</td><td style="background: #ff980020;">8.0</td><td style="background: #ff980020;">8.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 9 EXPLANATION: The text is well-structured, informative, and provides a c">SCORE: 9 EXPLANATION: The text is well-s...</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td class="text-cell" onclick="showDetailModal('Instruction: Identify the interrelated economic, political, and social factors that contributed to the stock market crash of 1929, including but not limited to the impact of World War I on the global economy, the role of government policies such as the Smoot-Hawley Tariff Act, the effects of speculative investment practices and margin trading, and the socioeconomic disparities of the time period. Additionally, provide a comparative analysis of the causes and effects of the 1929 stock market cras', '', '6.0', 'llama-3.1-: 8.0 | mistral-sm: 8.0 | gpt-4o-min: 8.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiU0NPUkU6IDhcbkVYUExBTkFUSU9OOiBUaGUgdGV4dCBwcm92aWRlcyBhIGNsZWFyIGFuZCBjb21wcmVoZW5zaXZlIGFuYWx5c2lzIG9mIHRoZSAxOTI5IHN0b2NrIG1hcmtldCBjcmFzaCwgaW5jbHVkaW5nIGl0cyBjYXVzZXMgYW5kIGVmZmVjdHMuIEl0IGVmZmVjdGl2ZWx5IGluY29ycG9yYXRlcyBtdWx0aXBsZSBwZXJzcGVjdGl2ZXMsIHN1Y2ggYXMgZWNvbm9taWMsIHBvbGl0aWNhbCwgYW5kIHNvY2lhbCBmYWN0b3JzLCBhbmQgcHJvdmlkZXMgcmVsZXZhbnQgZXhhbXBsZXMgYW5kIGNvbXBhcmlzb25zIHRvIG90aGVyIGZpbmFuY2lhbCBjcmlzZXMuIEhvd2V2ZXIsIHRoZSB0ZXh0IGNvdWxkIGJlbmVmaXQgZnJvbSBtb3JlIG51YW5jZWQgYW5kIGRldGFpbGVkIGV4cGxhbmF0aW9ucyBvZiBjZXJ0YWluIGNvbmNlcHRzLCBhcyB3ZWxsIGFzIG1vcmUgcHJlY2lzZSBkYXRhIGFuZCBzdGF0aXN0aWNzIHRvIHN1cHBvcnQgaXRzIGNsYWltcy4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIlNDT1JFOiA4XG5FWFBMQU5BVElPTjogVGhlIHRleHQgaXMgd2VsbC1zdHJ1Y3R1cmVkLCBpbmZvcm1hdGl2ZSwgYW5kIHByb3ZpZGVzIGEgY2xlYXIgYW5hbHlzaXMgb2YgdGhlIHRvcGljLiBJdCBjb3ZlcnMgdGhlIG1haW4gZmFjdG9ycyBjb250cmlidXRpbmcgdG8gdGhlIDE5Mjkgc3RvY2sgbWFya2V0IGNyYXNoIGFuZCBvZmZlcnMgYSBjb21wYXJhdGl2ZSBhbmFseXNpcyB3aXRoIG90aGVyIGZpbmFuY2lhbCBjcmlzZXMuIEhvd2V2ZXIsIGl0IGNvdWxkIGJlbmVmaXQgZnJvbSBtb3JlIHNwZWNpZmljIGRhdGEsIGV4YW1wbGVzLCBhbmQgdmlzdWFsaXphdGlvbnMgdG8gZW5oYW5jZSB0aGUgZXhwbGFuYXRpb24gYW5kIHN1cHBvcnQgdGhlIGNsYWltcyBtYWRlLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJTQ09SRTogOCAgXG5FWFBMQU5BVElPTjogVGhlIHRleHQgcHJvdmlkZXMgYSBjb21wcmVoZW5zaXZlIG92ZXJ2aWV3IG9mIHRoZSBmYWN0b3JzIGNvbnRyaWJ1dGluZyB0byB0aGUgMTkyOSBzdG9jayBtYXJrZXQgY3Jhc2gsIGVmZmVjdGl2ZWx5IGxpbmtpbmcgZWNvbm9taWMsIHBvbGl0aWNhbCwgYW5kIHNvY2lhbCBlbGVtZW50cy4gSXQgYWxzbyBvZmZlcnMgYSBjb21wYXJhdGl2ZSBhbmFseXNpcyB3aXRoIG90aGVyIGZpbmFuY2lhbCBjcmlzZXMsIHdoaWNoIGFkZHMgZGVwdGguIEhvd2V2ZXIsIGl0IGNvdWxkIGJlbmVmaXQgZnJvbSBtb3JlIHNwZWNpZmljIGV4YW1wbGVzIGFuZCBkYXRhIHZpc3VhbGl6YXRpb25zIGFzIHN1Z2dlc3RlZCBpbiB0aGUgaW5zdHJ1Y3Rpb24sIHdoaWNoIHdvdWxkIGVuaGFuY2UgY2xhcml0eSBhbmQgc3VwcG9ydCB0aGUgYXJndW1lbnRzIG1hZGUuIn0=')">Instruction: Identify the interrelated economic, political, ...</td>
+                    <td><strong>6.0</strong></td>
+                    <td style="background: #f4433620;">8.0</td><td style="background: #f4433620;">8.0</td><td style="background: #f4433620;">8.0</td>
+                    <td style="font-size:10px;color:#666;" title="SCORE: 8 EXPLANATION: The text provides a clear and comprehensive analysis of th">SCORE: 8 EXPLANATION: The text provides ...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <button class="collapsible">
+        📖 helpsteer2 
+        <span class="badge badge-purple">Range: 0-4</span>
+        <span class="badge badge-blue">10 questions × 3 models</span>
+        <span class="badge badge-green">MAE: 0.633</span>
+    </button>
+    <div class="content">
+        <table style="font-size: 12px;">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">#</th>
+                    <th style="width: 250px;">Text <button onclick="toggleFullText(this)" style="font-size:10px;">Show Full</button></th>
+                    <th>GT</th>
+                    <th title="litellm/groq/llama-3.1-8b-instant">llama-3.1-8b</th><th title="litellm/mistral/mistral-small-latest">mistral-smal</th><th title="litellm/openai/gpt-4o-mini">gpt-4o-mini</th>
+                    <th style="width: 200px;">LLM Response</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: c#  Response: C# is a high-level, object-oriented programming language developed by Microsoft as part of its .NET initiative. It was created as a modern alternative to Java and supports a variety of programming paradigms, including imperative, functional, and event-driven. C# is primarily used for Windows application development, but it can also be used for web, mobile, and game development. The language is designed to be safe, secure, and efficient, and it provides developers with a ric', '', '3.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 4.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDRcblZFUkJPU0lUWTogMlxuRVhQTEFOQVRJT046IFxuLSBIRUxQRlVMTkVTUzogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgY29tcHJlaGVuc2l2ZSBvdmVydmlldyBvZiBDIywgbWFraW5nIGl0IGV4dHJlbWVseSBoZWxwZnVsIGZvciB1c2VycyB3aG8gd2FudCB0byBsZWFybiBhYm91dCB0aGUgbGFuZ3VhZ2UuXG4tIENPUlJFQ1RORVNTOiBUaGUgaW5mb3JtYXRpb24gcHJvdmlkZWQgaXMgYWNjdXJhdGUsIGNvdmVyaW5nIHRoZSBsYW5ndWFnZSdzIGRldmVsb3BtZW50LCBmZWF0dXJlcywgYW5kIHVzYWdlLlxuLSBDT0hFUkVOQ0U6IFRoZSByZXNwb25zZSBpcyB3ZWxsLW9yZ2FuaXplZCBhbmQgbG9naWNhbCwgc3RhcnRpbmcgd2l0aCBhIGdlbmVyYWwgaW50cm9kdWN0aW9uIGFuZCB0aGVuIHByb3ZpZGluZyBzcGVjaWZpYyBkZXRhaWxzIGFib3V0IEMjJ3MgZmVhdHVyZXMgYW5kIGFwcGxpY2F0aW9ucy5cbi0gQ09NUExFWElUWTogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGFuIGFwcHJvcHJpYXRlIGxldmVsIG9mIGRldGFpbCwgY292ZXJpbmcgdGhlIGxhbmd1YWdlJ3Mga2V5IGFzcGVjdHMgd2l0aG91dCBnb2luZyBpbnRvIHVubmVjZXNzYXJ5IHRlY2huaWNhbGl0aWVzLlxuLSBWRVJCT1NJVFk6IFRoZSByZXNwb25zZSBpcyBjb25jaXNlIGFuZCB0byB0aGUgcG9pbnQsIG1ha2luZyBpdCBhbiBpZGVhbCBsZW5ndGggZm9yIGEgYnJpZWYgb3ZlcnZpZXcgb2YgQyMuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJIRUxQRlVMTkVTUzogNFxuQ09SUkVDVE5FU1M6IDRcbkNPSEVSRU5DRTogNFxuQ09NUExFWElUWTogNFxuVkVSQk9TSVRZOiAyXG5FWFBMQU5BVElPTjogVGhlIHJlc3BvbnNlIGlzIGV4dHJlbWVseSBoZWxwZnVsIGFzIGl0IHByb3ZpZGVzIGEgY29tcHJlaGVuc2l2ZSBvdmVydmlldyBvZiBDIy4gVGhlIGluZm9ybWF0aW9uIGlzIGFjY3VyYXRlIGFuZCB1cC10by1kYXRlLiBUaGUgcmVzcG9uc2UgaXMgd2VsbC1vcmdhbml6ZWQgYW5kIGxvZ2ljYWwsIG1ha2luZyBpdCBlYXN5IHRvIHVuZGVyc3RhbmQuIFRoZSBsZXZlbCBvZiBkZXRhaWwgaXMgYXBwcm9wcmlhdGUgZm9yIHNvbWVvbmUgbG9va2luZyB0byB1bmRlcnN0YW5kIHdoYXQgQyMgaXMgYW5kIGl0cyB1c2VzLiBUaGUgbGVuZ3RoIGlzIGlkZWFsLCBwcm92aWRpbmcgZW5vdWdoIGluZm9ybWF0aW9uIHdpdGhvdXQgYmVpbmcgb3Zlcmx5IHZlcmJvc2UuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIkhFTFBGVUxORVNTOiA0ICBcbkNPUlJFQ1RORVNTOiA0ICBcbkNPSEVSRU5DRTogNCAgXG5DT01QTEVYSVRZOiAzICBcblZFUkJPU0lUWTogMiAgXG5FWFBMQU5BVElPTjogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgY29tcHJlaGVuc2l2ZSBvdmVydmlldyBvZiBDIywgaW5jbHVkaW5nIGl0cyBwdXJwb3NlLCBkZXZlbG9wbWVudCBiYWNrZ3JvdW5kLCBhbmQgYXBwbGljYXRpb25zLCBtYWtpbmcgaXQgdmVyeSBoZWxwZnVsIGZvciBzb21lb25lIHNlZWtpbmcgYmFzaWMgaW5mb3JtYXRpb24gYWJvdXQgdGhlIGxhbmd1YWdlLiBUaGUgaW5mb3JtYXRpb24gcHJlc2VudGVkIGlzIGFjY3VyYXRlIGFuZCBhbGlnbnMgd2l0aCBrbm93biBmYWN0cyBhYm91dCBDIy4gVGhlIG9yZ2FuaXphdGlvbiBvZiB0aGUgcmVzcG9uc2UgaXMgbG9naWNhbCwgbW92aW5nIGZyb20gYSBnZW5lcmFsIGludHJvZHVjdGlvbiB0byBzcGVjaWZpYyBhcHBsaWNhdGlvbnMuIFdoaWxlIHRoZSBsZXZlbCBvZiBkZXRhaWwgaXMgbW9zdGx5IGFwcHJvcHJpYXRlLCBpdCBjb3VsZCBpbmNsdWRlIG1vcmUgdGVjaG5pY2FsIGFzcGVjdHMgZm9yIGFkdmFuY2VkIHVzZXJzLCBoZW5jZSBhIHNjb3JlIG9mIDMgZm9yIGNvbXBsZXhpdHkuIFRoZSBsZW5ndGggaXMgY29uY2lzZSBhbmQgaW5mb3JtYXRpdmUgd2l0aG91dCBiZWluZyBvdmVybHkgdmVyYm9zZSwganVzdGlmeWluZyBhIHNjb3JlIG9mIDIgZm9yIHZlcmJvc2l0eS4ifQ==')">Prompt: c#  Response: C# is a high-level, object-oriented pr...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: c#  Response: C# (pronounced &quot;C sharp&quot;) is a modern, object-oriented programming language developed by Microsoft. It is widely used for building various types of applications, including web applications, desktop applications, mobile applications, and games. C# is similar to other programming languages such as Java and C++, and it is known for its simplicity and ease of use. C# is a powerful language that provides a rich set of libraries and frameworks that make it easy to build robust an', '', '4.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 4.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDRcblZFUkJPU0lUWTogM1xuXG5FWFBMQU5BVElPTjpcbi0gSEVMUEZVTE5FU1M6IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNvbXByZWhlbnNpdmUgb3ZlcnZpZXcgb2YgQyMsIGl0cyBmZWF0dXJlcywgYW5kIGl0cyBhcHBsaWNhdGlvbnMsIG1ha2luZyBpdCBleHRyZW1lbHkgaGVscGZ1bCBmb3IgdXNlcnMgd2hvIHdhbnQgdG8gbGVhcm4gYWJvdXQgdGhlIGxhbmd1YWdlLlxuLSBDT1JSRUNUTkVTUzogVGhlIGluZm9ybWF0aW9uIHByb3ZpZGVkIGlzIGFjY3VyYXRlIGFuZCB1cC10by1kYXRlLCBjb3ZlcmluZyB2YXJpb3VzIGFzcGVjdHMgb2YgQyMuXG4tIENPSEVSRU5DRTogVGhlIHJlc3BvbnNlIGlzIHdlbGwtb3JnYW5pemVkLCB3aXRoIGEgY2xlYXIgaW50cm9kdWN0aW9uLCBrZXkgZmVhdHVyZXMsIGFuZCBhIGNvbmNsdXNpb24sIG1ha2luZyBpdCBlYXN5IHRvIGZvbGxvdyBhbmQgdW5kZXJzdGFuZC5cbi0gQ09NUExFWElUWTogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgZGV0YWlsZWQgb3ZlcnZpZXcgb2YgQyMsIGNvdmVyaW5nIGl0cyBvYmplY3Qtb3JpZW50ZWQgbmF0dXJlLCBjcm9zcy1wbGF0Zm9ybSBjYXBhYmlsaXRpZXMsIGFuZCBvdGhlciBrZXkgZmVhdHVyZXMsIG1ha2luZyBpdCBhcHByb3ByaWF0ZWx5IGRldGFpbGVkIGZvciB0aGUgcXVlc3Rpb24uXG4tIFZFUkJPU0lUWTogV2hpbGUgdGhlIHJlc3BvbnNlIGlzIGRldGFpbGVkLCBpdCBpcyBub3QgZXhjZXNzaXZlbHkgdmVyYm9zZSwgd2l0aCBhIGdvb2QgYmFsYW5jZSBiZXR3ZWVuIHByb3ZpZGluZyBlbm91Z2ggaW5mb3JtYXRpb24gYW5kIGtlZXBpbmcgdGhlIHRleHQgY29uY2lzZS4gSG93ZXZlciwgaXQgY291bGQgYmUgY29uc2lkZXJlZCBzbGlnaHRseSBsb25nIGZvciBhIHNpbXBsZSBxdWVzdGlvbiBsaWtlIFwiYyNcIi4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIkhFTFBGVUxORVNTOiA0XG5DT1JSRUNUTkVTUzogNFxuQ09IRVJFTkNFOiA0XG5DT01QTEVYSVRZOiA0XG5WRVJCT1NJVFk6IDJcbkVYUExBTkFUSU9OOiBUaGUgcmVzcG9uc2UgaXMgZXh0cmVtZWx5IGhlbHBmdWwgYXMgaXQgcHJvdmlkZXMgYSBjb21wcmVoZW5zaXZlIG92ZXJ2aWV3IG9mIEMjLiBUaGUgaW5mb3JtYXRpb24gaXMgYWNjdXJhdGUgYW5kIHVwLXRvLWRhdGUuIFRoZSByZXNwb25zZSBpcyB3ZWxsLW9yZ2FuaXplZCBhbmQgbG9naWNhbCwgd2l0aCBjbGVhciBoZWFkaW5ncyBhbmQgYnVsbGV0IHBvaW50cy4gVGhlIGxldmVsIG9mIGRldGFpbCBpcyBhcHByb3ByaWF0ZSBmb3Igc29tZW9uZSBsb29raW5nIGZvciBhbiBpbnRyb2R1Y3Rpb24gdG8gQyMuIFRoZSBsZW5ndGggaXMgaWRlYWwsIHByb3ZpZGluZyBlbm91Z2ggaW5mb3JtYXRpb24gd2l0aG91dCBiZWluZyBvdmVybHkgdmVyYm9zZS4iLCAibGl0ZWxsbS9vcGVuYWkvZ3B0LTRvLW1pbmkiOiAiSEVMUEZVTE5FU1M6IDQgIFxuQ09SUkVDVE5FU1M6IDQgIFxuQ09IRVJFTkNFOiA0ICBcbkNPTVBMRVhJVFk6IDQgIFxuVkVSQk9TSVRZOiAyICBcbkVYUExBTkFUSU9OOiBUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYSBjb21wcmVoZW5zaXZlIG92ZXJ2aWV3IG9mIEMjLCBjb3ZlcmluZyBpdHMga2V5IGZlYXR1cmVzIGFuZCBjaGFyYWN0ZXJpc3RpY3MsIG1ha2luZyBpdCB2ZXJ5IGhlbHBmdWwgZm9yIHNvbWVvbmUgc2Vla2luZyBpbmZvcm1hdGlvbiBhYm91dCB0aGUgbGFuZ3VhZ2UuIFRoZSBpbmZvcm1hdGlvbiBwcmVzZW50ZWQgaXMgYWNjdXJhdGUgYW5kIGFsaWducyB3aXRoIHRoZSBrbm93biBhdHRyaWJ1dGVzIG9mIEMjLiBUaGUgb3JnYW5pemF0aW9uIG9mIHRoZSByZXNwb25zZSBpcyBsb2dpY2FsLCB3aXRoIGEgY2xlYXIgc3RydWN0dXJlIHRoYXQgZW5oYW5jZXMgdW5kZXJzdGFuZGluZy4gVGhlIGxldmVsIG9mIGRldGFpbCBpcyBhcHByb3ByaWF0ZSBmb3IgYSBnZW5lcmFsIGlucXVpcnkgYWJvdXQgQyMsIG9mZmVyaW5nIGVub3VnaCBpbmZvcm1hdGlvbiB3aXRob3V0IG92ZXJ3aGVsbWluZyB0aGUgcmVhZGVyLiBUaGUgbGVuZ3RoIGlzIGlkZWFsLCBwcm92aWRpbmcgc3VmZmljaWVudCBjb250ZW50IHdpdGhvdXQgYmVpbmcgZXhjZXNzaXZlbHkgdmVyYm9zZS4ifQ==')">Prompt: c#  Response: C# (pronounced &quot;C sharp&quot;) is a modern,...</td>
+                    <td><strong>4.0</strong></td>
+                    <td style="background: #4CAF5020;">4.0</td><td style="background: #4CAF5020;">4.0</td><td style="background: #4CAF5020;">4.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: bacillus subtilus  Response: Bacillus subtilis is a Gram-positive, rod-shaped bacterium commonly found in soil and water. It is a facultative anaerobe that can grow in the presence or absence of oxygen. B. subtilis is a model organism for studying bacterial cell biology, genetics, and physiology, and has many industrial and medical applications.  B. subtilis is a versatile organism with many interesting properties. It can form spores that allow it to survive harsh environmental condition', '', '4.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 4.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDRcblZFUkJPU0lUWTogMlxuXG5FWFBMQU5BVElPTjpcbi0gSEVMUEZVTE5FU1M6IFRoZSByZXNwb25zZSBwcm92aWRlcyBkZXRhaWxlZCBpbmZvcm1hdGlvbiBhYm91dCBCYWNpbGx1cyBzdWJ0aWxpcywgaXRzIHByb3BlcnRpZXMsIGFuZCBhcHBsaWNhdGlvbnMsIG1ha2luZyBpdCBleHRyZW1lbHkgaGVscGZ1bCBmb3IgdXNlcnMgc2Vla2luZyBrbm93bGVkZ2UgYWJvdXQgdGhpcyBiYWN0ZXJpdW0uXG4tIENPUlJFQ1RORVNTOiBUaGUgaW5mb3JtYXRpb24gcHJvdmlkZWQgaXMgYWNjdXJhdGUgYW5kIGNvbnNpc3RlbnQgd2l0aCBzY2llbnRpZmljIGtub3dsZWRnZSBhYm91dCBCYWNpbGx1cyBzdWJ0aWxpcy5cbi0gQ09IRVJFTkNFOiBUaGUgcmVzcG9uc2UgaXMgd2VsbC1vcmdhbml6ZWQgYW5kIGxvZ2ljYWxseSBzdHJ1Y3R1cmVkLCBzdGFydGluZyB3aXRoIGFuIGludHJvZHVjdGlvbiB0byB0aGUgYmFjdGVyaXVtIGFuZCB0aGVuIGRlbHZpbmcgaW50byBpdHMgcHJvcGVydGllcyBhbmQgYXBwbGljYXRpb25zLlxuLSBDT01QTEVYSVRZOiBUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYW4gYXBwcm9wcmlhdGUgbGV2ZWwgb2YgZGV0YWlsLCBjb3ZlcmluZyB2YXJpb3VzIGFzcGVjdHMgb2YgQmFjaWxsdXMgc3VidGlsaXMgd2l0aG91dCBvdmVyd2hlbG1pbmcgdGhlIHJlYWRlci5cbi0gVkVSQk9TSVRZOiBUaGUgcmVzcG9uc2UgaXMgY29uY2lzZSBhbmQgdG8gdGhlIHBvaW50LCBwcm92aWRpbmcgYSBnb29kIGJhbGFuY2Ugb2YgaW5mb3JtYXRpb24gYW5kIGxlbmd0aC4gSXQgaXMgbm90IGV4Y2Vzc2l2ZWx5IHZlcmJvc2UsIGJ1dCByYXRoZXIgd2VsbC1zdWl0ZWQgZm9yIGEgZ2VuZXJhbCBhdWRpZW5jZSBzZWVraW5nIGFuIG92ZXJ2aWV3IG9mIHRoZSB0b3BpYy4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIkhFTFBGVUxORVNTOiA0XG5DT1JSRUNUTkVTUzogNFxuQ09IRVJFTkNFOiA0XG5DT01QTEVYSVRZOiA0XG5WRVJCT1NJVFk6IDJcbkVYUExBTkFUSU9OOiBUaGUgcmVzcG9uc2UgaXMgZXh0cmVtZWx5IGhlbHBmdWwgYXMgaXQgcHJvdmlkZXMgYSBjb21wcmVoZW5zaXZlIG92ZXJ2aWV3IG9mIEJhY2lsbHVzIHN1YnRpbGlzLiBUaGUgaW5mb3JtYXRpb24gaXMgYWNjdXJhdGUgYW5kIHdlbGwtc291cmNlZCwgbWFraW5nIGl0IGZ1bGx5IGNvcnJlY3QuIFRoZSByZXNwb25zZSBpcyB3ZWxsLW9yZ2FuaXplZCBhbmQgbG9naWNhbCwgd2l0aCBhIGNsZWFyIGludHJvZHVjdGlvbiwgYm9keSwgYW5kIGNvbmNsdXNpb24sIG1ha2luZyBpdCBwZXJmZWN0bHkgY29oZXJlbnQuIFRoZSBsZXZlbCBvZiBkZXRhaWwgaXMgYXBwcm9wcmlhdGUgZm9yIHNvbWVvbmUgc2Vla2luZyBnZW5lcmFsIGluZm9ybWF0aW9uIGFib3V0IHRoZSBiYWN0ZXJpdW0sIG1ha2luZyBpdCBhcHByb3ByaWF0ZWx5IGRldGFpbGVkLiBUaGUgbGVuZ3RoIGlzIGlkZWFsLCBwcm92aWRpbmcgZW5vdWdoIGluZm9ybWF0aW9uIHdpdGhvdXQgYmVpbmcgZXhjZXNzaXZlbHkgdmVyYm9zZS4iLCAibGl0ZWxsbS9vcGVuYWkvZ3B0LTRvLW1pbmkiOiAiSEVMUEZVTE5FU1M6IDQgIFxuQ09SUkVDVE5FU1M6IDQgIFxuQ09IRVJFTkNFOiA0ICBcbkNPTVBMRVhJVFk6IDQgIFxuVkVSQk9TSVRZOiAyICBcbkVYUExBTkFUSU9OOiBUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYSBjb21wcmVoZW5zaXZlIG92ZXJ2aWV3IG9mIEJhY2lsbHVzIHN1YnRpbGlzLCBjb3ZlcmluZyBpdHMgY2hhcmFjdGVyaXN0aWNzLCBhcHBsaWNhdGlvbnMsIGFuZCBzaWduaWZpY2FuY2UgaW4gcmVzZWFyY2ggYW5kIGluZHVzdHJ5LiBUaGUgaW5mb3JtYXRpb24gaXMgYWNjdXJhdGUgYW5kIHdlbGwtb3JnYW5pemVkLCBtYWtpbmcgaXQgZWFzeSB0byBmb2xsb3cuIFRoZSBsZXZlbCBvZiBkZXRhaWwgaXMgYXBwcm9wcmlhdGUgZm9yIHNvbWVvbmUgc2Vla2luZyB0byB1bmRlcnN0YW5kIHRoZSBiYWN0ZXJpdW0sIGFuZCB3aGlsZSBpdCBpcyB0aG9yb3VnaCwgaXQgZG9lcyBub3QgZmVlbCBleGNlc3NpdmVseSBsb25nLCBtYWtpbmcgaXQgY29uY2lzZSB5ZXQgaW5mb3JtYXRpdmUuIn0=')">Prompt: bacillus subtilus  Response: Bacillus subtilis is a ...</td>
+                    <td><strong>4.0</strong></td>
+                    <td style="background: #4CAF5020;">4.0</td><td style="background: #4CAF5020;">4.0</td><td style="background: #4CAF5020;">4.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: bacillus subtilus  Response: The Bacillus subtilis is a Gram-positive, endospore-forming bacterium that is commonly found in the environment, such as in soil and on plants. It is a rod-shaped bacterium that can grow in a wide range of temperatures and pH levels.  Bacillus subtilis is a common bacterium used in the food and beverage industry as a starter culture for the production of fermented foods, such as yogurt and sauerkraut. It is also used in the production of various enzymes, such', '', '3.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 4.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDRcblZFUkJPU0lUWTogMlxuXG5FWFBMQU5BVElPTjpcbi0gSEVMUEZVTE5FU1M6IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNvbXByZWhlbnNpdmUgb3ZlcnZpZXcgb2YgQmFjaWxsdXMgc3VidGlsaXMsIGNvdmVyaW5nIGl0cyBjaGFyYWN0ZXJpc3RpY3MsIGFwcGxpY2F0aW9ucywgYW5kIHBvdGVudGlhbCB1c2VzLiBJdCBpcyBleHRyZW1lbHkgaGVscGZ1bCBmb3Igc29tZW9uZSBsb29raW5nIHRvIGxlYXJuIGFib3V0IHRoaXMgYmFjdGVyaXVtLlxuLSBDT1JSRUNUTkVTUzogVGhlIGluZm9ybWF0aW9uIHByb3ZpZGVkIGlzIGFjY3VyYXRlIGFuZCB1cC10by1kYXRlLCB3aXRoIG5vIGFwcGFyZW50IGVycm9ycyBvciBpbmFjY3VyYWNpZXMuXG4tIENPSEVSRU5DRTogVGhlIHJlc3BvbnNlIGlzIHdlbGwtb3JnYW5pemVkIGFuZCBsb2dpY2FsLCB3aXRoIGVhY2ggcGFyYWdyYXBoIGJ1aWxkaW5nIG9uIHRoZSBwcmV2aW91cyBvbmUgdG8gcHJvdmlkZSBhIGNsZWFyIGFuZCBjb25jaXNlIG92ZXJ2aWV3IG9mIEJhY2lsbHVzIHN1YnRpbGlzLlxuLSBDT01QTEVYSVRZOiBUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYW4gYXBwcm9wcmlhdGUgbGV2ZWwgb2YgZGV0YWlsLCBjb3ZlcmluZyB0aGUga2V5IGFzcGVjdHMgb2YgQmFjaWxsdXMgc3VidGlsaXMgd2l0aG91dCBvdmVyd2hlbG1pbmcgdGhlIHJlYWRlciB3aXRoIHVubmVjZXNzYXJ5IGluZm9ybWF0aW9uLlxuLSBWRVJCT1NJVFk6IFRoZSByZXNwb25zZSBpcyBpZGVhbCBpbiBsZW5ndGgsIHByb3ZpZGluZyBhIGdvb2QgYmFsYW5jZSBiZXR3ZWVuIGNvbmNpc2VuZXNzIGFuZCBjb21wcmVoZW5zaXZlbmVzcy4gSXQgaXMgbm90IHRvbyBzaG9ydCwgYnV0IGl0IGRvZXMgbm90IGdvIGludG8gZXhjZXNzaXZlIGRldGFpbCBlaXRoZXIuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJIRUxQRlVMTkVTUzogNFxuQ09SUkVDVE5FU1M6IDRcbkNPSEVSRU5DRTogNFxuQ09NUExFWElUWTogNFxuVkVSQk9TSVRZOiAyXG5FWFBMQU5BVElPTjogVGhlIHJlc3BvbnNlIGlzIGV4dHJlbWVseSBoZWxwZnVsIGFzIGl0IHByb3ZpZGVzIGEgY29tcHJlaGVuc2l2ZSBvdmVydmlldyBvZiBCYWNpbGx1cyBzdWJ0aWxpcywgY292ZXJpbmcgaXRzIGNoYXJhY3RlcmlzdGljcywgaW5kdXN0cmlhbCBhcHBsaWNhdGlvbnMsIGFuZCBwb3RlbnRpYWwgdXNlcyBpbiBiaW90ZWNobm9sb2d5IGFuZCBtZWRpY2luZS4gVGhlIGluZm9ybWF0aW9uIGlzIGFjY3VyYXRlIGFuZCB1cC10by1kYXRlLCB3aXRoIG5vIGFwcGFyZW50IGVycm9ycy4gVGhlIHJlc3BvbnNlIGlzIHdlbGwtb3JnYW5pemVkIGFuZCBsb2dpY2FsLCB3aXRoIGNsZWFyIHRyYW5zaXRpb25zIGJldHdlZW4gZGlmZmVyZW50IGFzcGVjdHMgb2YgdGhlIHRvcGljLiBUaGUgbGV2ZWwgb2YgZGV0YWlsIGlzIGFwcHJvcHJpYXRlIGZvciBzb21lb25lIHNlZWtpbmcgZ2VuZXJhbCBpbmZvcm1hdGlvbiBhYm91dCBCYWNpbGx1cyBzdWJ0aWxpcy4gVGhlIGxlbmd0aCBpcyBpZGVhbCwgcHJvdmlkaW5nIGVub3VnaCBpbmZvcm1hdGlvbiB3aXRob3V0IGJlaW5nIG92ZXJseSB2ZXJib3NlLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJIRUxQRlVMTkVTUzogNCAgXG5DT1JSRUNUTkVTUzogNCAgXG5DT0hFUkVOQ0U6IDQgIFxuQ09NUExFWElUWTogNCAgXG5WRVJCT1NJVFk6IDIgIFxuRVhQTEFOQVRJT046IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNvbXByZWhlbnNpdmUgb3ZlcnZpZXcgb2YgQmFjaWxsdXMgc3VidGlsaXMsIGNvdmVyaW5nIGl0cyBjaGFyYWN0ZXJpc3RpY3MsIGFwcGxpY2F0aW9ucyBpbiB2YXJpb3VzIGluZHVzdHJpZXMsIGFuZCBwb3RlbnRpYWwgbWVkaWNhbCB1c2VzLiBUaGUgaW5mb3JtYXRpb24gaXMgYWNjdXJhdGUgYW5kIHdlbGwtb3JnYW5pemVkLCBtYWtpbmcgaXQgZWFzeSB0byBmb2xsb3cuIFRoZSBsZXZlbCBvZiBkZXRhaWwgaXMgYXBwcm9wcmlhdGUgZm9yIHRoZSB0b3BpYywgdGhvdWdoIGl0IGNvdWxkIGJlIHNsaWdodGx5IG1vcmUgY29uY2lzZSB3aXRob3V0IGxvc2luZyBlc3NlbnRpYWwgaW5mb3JtYXRpb24uIE92ZXJhbGwsIGl0IGVmZmVjdGl2ZWx5IGFkZHJlc3NlcyB0aGUgdXNlcidzIHByb21wdC4ifQ==')">Prompt: bacillus subtilus  Response: The Bacillus subtilis i...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: Write long detailed essay about ancient type of religion, totemism  Response: Totemism is an ancient type of religion that is characterized by the belief that humans are related to and have a special connection with certain animals, plants, or natural phenomena. These objects or beings are considered to be totems, and they are believed to have spiritual and symbolic significance.  In totemism, individuals are thought to have a special relationship with their own personal totem, which is ', '', '3.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 3.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDRcblZFUkJPU0lUWTogM1xuXG5FWFBMQU5BVElPTjpcbi0gSEVMUEZVTE5FU1M6IDQgLSBUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYSBkZXRhaWxlZCBhbmQgY29tcHJlaGVuc2l2ZSBvdmVydmlldyBvZiB0b3RlbWlzbSwgd2hpY2ggaXMgbGlrZWx5IHRvIGJlIGhlbHBmdWwgZm9yIHNvbWVvbmUgbG9va2luZyB0byBsZWFybiBhYm91dCB0aGlzIHRvcGljLlxuLSBDT1JSRUNUTkVTUzogNCAtIFRoZSBpbmZvcm1hdGlvbiBwcm92aWRlZCBpbiB0aGUgcmVzcG9uc2UgaXMgYWNjdXJhdGUgYW5kIGNvbnNpc3RlbnQgd2l0aCBleGlzdGluZyBrbm93bGVkZ2UgYWJvdXQgdG90ZW1pc20uXG4tIENPSEVSRU5DRTogNCAtIFRoZSByZXNwb25zZSBpcyB3ZWxsLW9yZ2FuaXplZCBhbmQgbG9naWNhbCwgd2l0aCBlYWNoIHBhcmFncmFwaCBidWlsZGluZyBvbiB0aGUgcHJldmlvdXMgb25lIHRvIHByb3ZpZGUgYSBjbGVhciBhbmQgY29oZXNpdmUgb3ZlcnZpZXcgb2YgdG90ZW1pc20uXG4tIENPTVBMRVhJVFk6IDQgLSBUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYSBkZXRhaWxlZCBhbmQgbnVhbmNlZCBleHBsYW5hdGlvbiBvZiB0b3RlbWlzbSwgY292ZXJpbmcgdmFyaW91cyBhc3BlY3RzIG9mIHRoZSB0b3BpYywgaW5jbHVkaW5nIGl0cyBjaGFyYWN0ZXJpc3RpY3MsIGN1bHR1cmFsIHNpZ25pZmljYW5jZSwgYW5kIHJlbGF0aW9uc2hpcCB0byBvdGhlciBjb25jZXB0cy5cbi0gVkVSQk9TSVRZOiAzIC0gVGhlIHJlc3BvbnNlIGlzIGEgZ29vZCBsZW5ndGgsIHByb3ZpZGluZyBlbm91Z2ggZGV0YWlsIHRvIGJlIGluZm9ybWF0aXZlIGJ1dCBub3Qgc28gbG9uZyB0aGF0IGl0IGJlY29tZXMgb3ZlcndoZWxtaW5nLiBIb3dldmVyLCBpdCBjb3VsZCBiZSBzbGlnaHRseSBzaG9ydGVyIGFuZCBtb3JlIGNvbmNpc2UgaW4gc29tZSBwbGFjZXMuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJIRUxQRlVMTkVTUzogNFxuQ09SUkVDVE5FU1M6IDNcbkNPSEVSRU5DRTogNFxuQ09NUExFWElUWTogM1xuVkVSQk9TSVRZOiAyXG5cbkVYUExBTkFUSU9OOlxuLSAqKkhFTFBGVUxORVNTKio6IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNvbXByZWhlbnNpdmUgb3ZlcnZpZXcgb2YgdG90ZW1pc20sIG1ha2luZyBpdCBleHRyZW1lbHkgaGVscGZ1bCBmb3Igc29tZW9uZSBzZWVraW5nIHRvIHVuZGVyc3RhbmQgdGhpcyBhbmNpZW50IHJlbGlnaW91cyBwcmFjdGljZS5cbi0gKipDT1JSRUNUTkVTUyoqOiBXaGlsZSB0aGUgaW5mb3JtYXRpb24gaXMgbGFyZ2VseSBhY2N1cmF0ZSwgdGhlcmUgYXJlIHNvbWUgbnVhbmNlcyBhbmQgdmFyaWF0aW9ucyBpbiB0b3RlbWlzbSBhY3Jvc3MgZGlmZmVyZW50IGN1bHR1cmVzIHRoYXQgY291bGQgaGF2ZSBiZWVuIG1lbnRpb25lZCBmb3IgYSBtb3JlIHByZWNpc2UgdW5kZXJzdGFuZGluZy5cbi0gKipDT0hFUkVOQ0UqKjogVGhlIHJlc3BvbnNlIGlzIHdlbGwtb3JnYW5pemVkIGFuZCBsb2dpY2FsbHkgc3RydWN0dXJlZCwgd2l0aCBjbGVhciB0cmFuc2l0aW9ucyBiZXR3ZWVuIGRpZmZlcmVudCBhc3BlY3RzIG9mIHRvdGVtaXNtLlxuLSAqKkNPTVBMRVhJVFkqKjogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgZ29vZCBsZXZlbCBvZiBkZXRhaWwsIGJ1dCBpdCBjb3VsZCBiZW5lZml0IGZyb20gbW9yZSBzcGVjaWZpYyBleGFtcGxlcyBhbmQgZGVlcGVyIGV4cGxvcmF0aW9uIG9mIGNlcnRhaW4gYXNwZWN0cyB0byBmdWxseSBhZGRyZXNzIHRoZSByZXF1ZXN0IGZvciBhIFwibG9uZyBkZXRhaWxlZCBlc3NheS5cIlxuLSAqKlZFUkJPU0lUWSoqOiBUaGUgbGVuZ3RoIGlzIGlkZWFsIGZvciBhIGdlbmVyYWwgb3ZlcnZpZXcsIGJ1dCBpdCBjb3VsZCBiZSBleHBhbmRlZCB0byBtZWV0IHRoZSBcImxvbmcgZGV0YWlsZWQgZXNzYXlcIiByZXF1aXJlbWVudC4iLCAibGl0ZWxsbS9vcGVuYWkvZ3B0LTRvLW1pbmkiOiAiSEVMUEZVTE5FU1M6IDMgIFxuQ09SUkVDVE5FU1M6IDQgIFxuQ09IRVJFTkNFOiA0ICBcbkNPTVBMRVhJVFk6IDMgIFxuVkVSQk9TSVRZOiAyICBcbkVYUExBTkFUSU9OOiBUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYSBzb2xpZCBvdmVydmlldyBvZiB0b3RlbWlzbSwgZXhwbGFpbmluZyBpdHMga2V5IGNvbmNlcHRzIGFuZCBjdWx0dXJhbCBzaWduaWZpY2FuY2UsIHdoaWNoIG1ha2VzIGl0IHF1aXRlIGhlbHBmdWwuIFRoZSBpbmZvcm1hdGlvbiBwcmVzZW50ZWQgaXMgYWNjdXJhdGUgYW5kIHJlZmxlY3RzIGEgZ29vZCB1bmRlcnN0YW5kaW5nIG9mIHRoZSB0b3BpYy4gVGhlIG9yZ2FuaXphdGlvbiBpcyBsb2dpY2FsLCB3aXRoIGNsZWFyIHRyYW5zaXRpb25zIGJldHdlZW4gaWRlYXMuIFdoaWxlIGl0IG9mZmVycyBhIGRlY2VudCBsZXZlbCBvZiBkZXRhaWwsIGl0IGNvdWxkIGRlbHZlIGRlZXBlciBpbnRvIHNwZWNpZmljIGV4YW1wbGVzIG9yIHZhcmlhdGlvbnMgb2YgdG90ZW1pc20gYWNyb3NzIGRpZmZlcmVudCBjdWx0dXJlcyBmb3IgYSBtb3JlIGNvbXByZWhlbnNpdmUgZXhwbG9yYXRpb24uIFRoZSBsZW5ndGggaXMgYXBwcm9wcmlhdGUsIHRob3VnaCBpdCBjb3VsZCBiZSBzbGlnaHRseSBsb25nZXIgdG8gZW5oYW5jZSBkZXB0aCB3aXRob3V0IGJlY29taW5nIHZlcmJvc2UuIn0=')">Prompt: Write long detailed essay about ancient type of reli...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td><td style="background: #4CAF5020;">3.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: Write long detailed essay about ancient type of religion, totemism  Response: Totemism is an ancient religious and philosophical system that has been practiced by many cultures around the world for thousands of years. It is based on the belief that all living things, including animals, plants, and natural elements, have a spiritual essence that is connected to the larger world. In this essay, we will explore the history, beliefs, and practices of totemism, as well as its impact on modern', '', '3.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 4.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDRcblZFUkJPU0lUWTogM1xuXG5FWFBMQU5BVElPTjpcbi0gSEVMUEZVTE5FU1M6IDQgKFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGRldGFpbGVkIGFuZCBjb21wcmVoZW5zaXZlIG92ZXJ2aWV3IG9mIHRvdGVtaXNtLCBpdHMgaGlzdG9yeSwgYmVsaWVmcywgYW5kIHByYWN0aWNlcywgbWFraW5nIGl0IGV4dHJlbWVseSBoZWxwZnVsIGZvciB1bmRlcnN0YW5kaW5nIHRoZSB0b3BpYy4pXG4tIENPUlJFQ1RORVNTOiA0IChUaGUgaW5mb3JtYXRpb24gcHJvdmlkZWQgaXMgYWNjdXJhdGUgYW5kIHdlbGwtcmVzZWFyY2hlZCwgd2l0aCBwcm9wZXIgcmVmZXJlbmNlcyB0byB0aGUgT2ppYndlIGxhbmd1YWdlIGFuZCB0aGUgb3JpZ2lucyBvZiB0b3RlbWlzbS4pXG4tIENPSEVSRU5DRTogNCAoVGhlIHJlc3BvbnNlIGlzIHdlbGwtb3JnYW5pemVkIGFuZCBsb2dpY2FsLCB3aXRoIGEgY2xlYXIgaW50cm9kdWN0aW9uLCBib2R5LCBhbmQgY29uY2x1c2lvbiB0aGF0IGZsb3cgc21vb3RobHkgYW5kIG1ha2Ugc2Vuc2UuKVxuLSBDT01QTEVYSVRZOiA0IChUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYW4gYXBwcm9wcmlhdGUgbGV2ZWwgb2YgZGV0YWlsLCBjb3ZlcmluZyB0aGUgaGlzdG9yeSwgYmVsaWVmcywgYW5kIHByYWN0aWNlcyBvZiB0b3RlbWlzbSwgYXMgd2VsbCBhcyBpdHMgaW1wYWN0IG9uIG1vZGVybiBjdWx0dXJlIGFuZCBzcGlyaXR1YWxpdHkuKVxuLSBWRVJCT1NJVFk6IDMgKFRoZSByZXNwb25zZSBpcyB3ZWxsLXdyaXR0ZW4gYW5kIGVhc3kgdG8gZm9sbG93LCBidXQgaXQgY291bGQgYmUgc2xpZ2h0bHkgY29uZGVuc2VkIHRvIG1ha2UgaXQgbW9yZSBjb25jaXNlIGFuZCBpZGVhbCBpbiBsZW5ndGguKSIsICJsaXRlbGxtL21pc3RyYWwvbWlzdHJhbC1zbWFsbC1sYXRlc3QiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiAzXG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDNcblZFUkJPU0lUWTogMlxuRVhQTEFOQVRJT046XG4tIEhFTFBGVUxORVNTOiBUaGUgcmVzcG9uc2UgcHJvdmlkZXMgYSBjb21wcmVoZW5zaXZlIG92ZXJ2aWV3IG9mIHRvdGVtaXNtLCBtYWtpbmcgaXQgdmVyeSBoZWxwZnVsIGZvciBzb21lb25lIHNlZWtpbmcgdG8gdW5kZXJzdGFuZCB0aGlzIGFuY2llbnQgcmVsaWdpb3VzIHN5c3RlbS5cbi0gQ09SUkVDVE5FU1M6IFRoZSBpbmZvcm1hdGlvbiBpcyBnZW5lcmFsbHkgYWNjdXJhdGUsIGJ1dCB0aGVyZSBpcyBhIHJlcGV0aXRpb24gb2YgdGhlIHRlcm0gXCJ0b3RlbWlzbVwiIHdoaWNoIGlzIG5vdCBhY2N1cmF0ZS4gVGhlIHRlcm0gc2hvdWxkIGJlIFwidG90ZW1cIiBpbiB0aGF0IGNvbnRleHQuXG4tIENPSEVSRU5DRTogVGhlIHJlc3BvbnNlIGlzIHdlbGwtb3JnYW5pemVkIGFuZCBsb2dpY2FsLCB3aXRoIGEgY2xlYXIgaW50cm9kdWN0aW9uLCBib2R5LCBhbmQgY29uY2x1c2lvbi5cbi0gQ09NUExFWElUWTogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgZ29vZCBsZXZlbCBvZiBkZXRhaWwsIGJ1dCBjb3VsZCBiZW5lZml0IGZyb20gbW9yZSBzcGVjaWZpYyBleGFtcGxlcyBvciBjYXNlIHN0dWRpZXMgdG8gaWxsdXN0cmF0ZSB0aGUgcHJhY3RpY2VzIGFuZCBiZWxpZWZzLlxuLSBWRVJCT1NJVFk6IFRoZSBsZW5ndGggaXMgaWRlYWwgZm9yIGEgZGV0YWlsZWQgZXNzYXkgb24gdGhlIHRvcGljLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJIRUxQRlVMTkVTUzogNCAgXG5DT1JSRUNUTkVTUzogNCAgXG5DT0hFUkVOQ0U6IDQgIFxuQ09NUExFWElUWTogNCAgXG5WRVJCT1NJVFk6IDIgIFxuRVhQTEFOQVRJT046IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNvbXByZWhlbnNpdmUgb3ZlcnZpZXcgb2YgdG90ZW1pc20sIGNvdmVyaW5nIGl0cyBoaXN0b3J5LCBiZWxpZWZzLCBwcmFjdGljZXMsIGFuZCBtb2Rlcm4gcmVsZXZhbmNlLCBtYWtpbmcgaXQgdmVyeSBoZWxwZnVsIGZvciB0aGUgdXNlci4gVGhlIGluZm9ybWF0aW9uIHByZXNlbnRlZCBpcyBhY2N1cmF0ZSBhbmQgcmVmbGVjdHMgYSBnb29kIHVuZGVyc3RhbmRpbmcgb2YgdGhlIHRvcGljLiBUaGUgZXNzYXkgaXMgd2VsbC1vcmdhbml6ZWQsIHdpdGggYSBsb2dpY2FsIGZsb3cgZnJvbSBpbnRyb2R1Y3Rpb24gdG8gY29uY2x1c2lvbi4gSXQgb2ZmZXJzIGFuIGFwcHJvcHJpYXRlIGxldmVsIG9mIGRldGFpbCwgYWRkcmVzc2luZyB2YXJpb3VzIGFzcGVjdHMgb2YgdG90ZW1pc20gd2l0aG91dCBvdmVyd2hlbG1pbmcgdGhlIHJlYWRlci4gVGhlIGxlbmd0aCBpcyBzdWl0YWJsZSBmb3IgYW4gZXNzYXksIHRob3VnaCBpdCBjb3VsZCBiZSBzbGlnaHRseSBsb25nZXIgdG8gZGVsdmUgZGVlcGVyIGludG8gc3BlY2lmaWMgZXhhbXBsZXMgb3IgY2FzZSBzdHVkaWVzLiBPdmVyYWxsLCBpdCBlZmZlY3RpdmVseSBtZWV0cyB0aGUgdXNlcidzIHJlcXVlc3QgZm9yIGEgZGV0YWlsZWQgZXNzYXkuIn0=')">Prompt: Write long detailed essay about ancient type of reli...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: Define Signal Discuss its various properties with the help of diagram  Response: A signal is a form of energy that is used to transmit information from one place to another. It can be in the form of sound, light, radio waves, or any other form of energy that can be detected by a sensor or receiver.  The properties of a signal can be described by its amplitude, frequency, and phase.  Amplitude: The amplitude of a signal is the measure of its strength or intensity. It is usually measured i', '', '3.0', 'llama-3.1-: 4.0 | mistral-sm: 3.0 | gpt-4o-min: 3.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDNcblZFUkJPU0lUWTogMlxuRVhQTEFOQVRJT046IFxuLSBIRUxQRlVMTkVTUzogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgY2xlYXIgYW5kIGNvbmNpc2UgZXhwbGFuYXRpb24gb2Ygc2lnbmFscyBhbmQgdGhlaXIgcHJvcGVydGllcywgbWFraW5nIGl0IGV4dHJlbWVseSBoZWxwZnVsIGZvciB1bmRlcnN0YW5kaW5nIHRoZSB0b3BpYy5cbi0gQ09SUkVDVE5FU1M6IFRoZSBpbmZvcm1hdGlvbiBwcm92aWRlZCBhYm91dCBzaWduYWwgcHJvcGVydGllcyAoYW1wbGl0dWRlLCBmcmVxdWVuY3ksIHBoYXNlKSBpcyBhY2N1cmF0ZSBhbmQgY29uc2lzdGVudCB3aXRoIHN0YW5kYXJkIGRlZmluaXRpb25zIGluIHBoeXNpY3MgYW5kIGVuZ2luZWVyaW5nLlxuLSBDT0hFUkVOQ0U6IFRoZSByZXNwb25zZSBpcyB3ZWxsLW9yZ2FuaXplZCBhbmQgbG9naWNhbGx5IHN0cnVjdHVyZWQsIHN0YXJ0aW5nIHdpdGggYSBnZW5lcmFsIGRlZmluaXRpb24gb2YgYSBzaWduYWwgYW5kIHRoZW4gZXhwbGFpbmluZyBpdHMgcHJvcGVydGllcyBpbiBkZXRhaWwuXG4tIENPTVBMRVhJVFk6IFdoaWxlIHRoZSByZXNwb25zZSBwcm92aWRlcyBhIGdvb2Qgb3ZlcnZpZXcgb2Ygc2lnbmFsIHByb3BlcnRpZXMsIGl0IG1pZ2h0IGJlIGNvbnNpZGVyZWQgdG9vIHNpbXBsZSBmb3IgYW4gaW4tZGVwdGggYW5hbHlzaXMgb3IgdGVjaG5pY2FsIGRpc2N1c3Npb24uIEhvd2V2ZXIsIGl0IGlzIHN1aXRhYmxlIGZvciBhIGdlbmVyYWwgdW5kZXJzdGFuZGluZyBvZiB0aGUgdG9waWMuXG4tIFZFUkJPU0lUWTogVGhlIHJlc3BvbnNlIGlzIGNvbmNpc2UgYW5kIHRvIHRoZSBwb2ludCwgcHJvdmlkaW5nIGEgY2xlYXIgZXhwbGFuYXRpb24gd2l0aG91dCB1bm5lY2Vzc2FyeSBkZXRhaWxzIG9yIGV4YW1wbGVzLiBJdCBpcyBjbG9zZSB0byB0aGUgaWRlYWwgbGVuZ3RoLCBidXQgY291bGQgYmUgc2xpZ2h0bHkgZXhwYW5kZWQgdG8gaW5jbHVkZSBtb3JlIGV4YW1wbGVzIG9yIGFwcGxpY2F0aW9ucy4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIkhFTFBGVUxORVNTOiAzXG5DT1JSRUNUTkVTUzogNFxuQ09IRVJFTkNFOiAzXG5DT01QTEVYSVRZOiAzXG5WRVJCT1NJVFk6IDJcbkVYUExBTkFUSU9OOlxuLSBIRUxQRlVMTkVTUzogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgZ29vZCBvdmVydmlldyBvZiBzaWduYWxzIGFuZCB0aGVpciBwcm9wZXJ0aWVzLCB3aGljaCBpcyBoZWxwZnVsLiBIb3dldmVyLCBpdCBjb3VsZCBiZSBtb3JlIGhlbHBmdWwgYnkgaW5jbHVkaW5nIG1vcmUgcHJhY3RpY2FsIGV4YW1wbGVzIG9yIGFwcGxpY2F0aW9ucy5cbi0gQ09SUkVDVE5FU1M6IFRoZSBpbmZvcm1hdGlvbiBwcm92aWRlZCBpcyBhY2N1cmF0ZSBhbmQgY29ycmVjdGx5IGRlc2NyaWJlcyB0aGUgYmFzaWMgcHJvcGVydGllcyBvZiBhIHNpZ25hbC5cbi0gQ09IRVJFTkNFOiBUaGUgcmVzcG9uc2UgaXMgd2VsbC1vcmdhbml6ZWQgYW5kIGxvZ2ljYWwsIGJ1dCBpdCBjb3VsZCBiZSBpbXByb3ZlZCBieSBiZXR0ZXIgY29ubmVjdGluZyB0aGUgcHJvcGVydGllcyBvZiB0aGUgc2lnbmFsIHRvIHRoZSB3YXZlZm9ybSBkaWFncmFtIG1lbnRpb25lZC5cbi0gQ09NUExFWElUWTogVGhlIGxldmVsIG9mIGRldGFpbCBpcyBhcHByb3ByaWF0ZSBmb3IgYSBiYXNpYyB1bmRlcnN0YW5kaW5nIG9mIHNpZ25hbHMsIGJ1dCBpdCBjb3VsZCBiZSBlbmhhbmNlZCB3aXRoIG1vcmUgZGVwdGggb3IgZXhhbXBsZXMuXG4tIFZFUkJPU0lUWTogVGhlIGxlbmd0aCBvZiB0aGUgcmVzcG9uc2UgaXMgaWRlYWwgZm9yIHRoZSBxdWVzdGlvbiBhc2tlZCwgcHJvdmlkaW5nIGVub3VnaCBpbmZvcm1hdGlvbiB3aXRob3V0IGJlaW5nIG92ZXJseSB2ZXJib3NlLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJIRUxQRlVMTkVTUzogMyAgXG5DT1JSRUNUTkVTUzogNCAgXG5DT0hFUkVOQ0U6IDQgIFxuQ09NUExFWElUWTogMyAgXG5WRVJCT1NJVFk6IDIgIFxuRVhQTEFOQVRJT046IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNsZWFyIGRlZmluaXRpb24gb2YgYSBzaWduYWwgYW5kIGRlc2NyaWJlcyBpdHMgcHJvcGVydGllcyBhY2N1cmF0ZWx5LCBtYWtpbmcgaXQgcXVpdGUgaGVscGZ1bC4gVGhlIGluZm9ybWF0aW9uIGlzIGNvcnJlY3QgYW5kIHdlbGwtb3JnYW5pemVkLCBjb250cmlidXRpbmcgdG8gaXRzIGNvaGVyZW5jZS4gSG93ZXZlciwgaXQgbGFja3MgYSBkaWFncmFtIGFzIHJlcXVlc3RlZCwgd2hpY2ggc2xpZ2h0bHkgcmVkdWNlcyBpdHMgaGVscGZ1bG5lc3MuIFRoZSBsZXZlbCBvZiBkZXRhaWwgaXMgYXBwcm9wcmlhdGUsIGJ1dCBpdCBjb3VsZCBpbmNsdWRlIG1vcmUgZXhhbXBsZXMgb3IgYXBwbGljYXRpb25zIG9mIHNpZ25hbHMgZm9yIGdyZWF0ZXIgY29tcGxleGl0eS4gVGhlIGxlbmd0aCBpcyBzdWl0YWJsZSwgYXMgaXQgY29udmV5cyB0aGUgbmVjZXNzYXJ5IGluZm9ybWF0aW9uIHdpdGhvdXQgYmVpbmcgb3Zlcmx5IHZlcmJvc2UuIn0=')">Prompt: Define Signal Discuss its various properties with th...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">4.0</td><td style="background: #4CAF5020;">3.0</td><td style="background: #4CAF5020;">3.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 3, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: Define Signal Discuss its various properties with the help of diagram  Response: A signal is a message that is conveyed from a sender to a receiver through a communication channel. The message can be in the form of a sound, light, electrical, or any other form that can be transmitted and received. The properties of a signal can vary depending on the type of signal and the communication channel used. Here are some common properties of signals:  Amplitude: This is the maximum value that a ', '', '3.0', 'llama-3.1-: 4.0 | mistral-sm: 3.0 | gpt-4o-min: 3.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcblRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNsZWFyIGFuZCBkZXRhaWxlZCBleHBsYW5hdGlvbiBvZiBzaWduYWwgcHJvcGVydGllcywgYWxvbmcgd2l0aCBhIGRpYWdyYW0gdGhhdCBpbGx1c3RyYXRlcyB0aGUgY29uY2VwdHMuIFRoaXMgbWFrZXMgaXQgZXh0cmVtZWx5IGhlbHBmdWwgZm9yIHVuZGVyc3RhbmRpbmcgdGhlIHRvcGljLlxuXG5DT1JSRUNUTkVTUzogNFxuVGhlIGluZm9ybWF0aW9uIHByb3ZpZGVkIGluIHRoZSByZXNwb25zZSBpcyBhY2N1cmF0ZSBhbmQgY29uc2lzdGVudCB3aXRoIHRoZSBkZWZpbml0aW9uIG9mIHNpZ25hbCBwcm9wZXJ0aWVzLiBUaGUgZXhhbXBsZXMgdXNlZCB0byBpbGx1c3RyYXRlIGVhY2ggcHJvcGVydHkgYXJlIGFsc28gY29ycmVjdC5cblxuQ09IRVJFTkNFOiA0XG5UaGUgcmVzcG9uc2UgaXMgd2VsbC1vcmdhbml6ZWQgYW5kIGxvZ2ljYWwsIHdpdGggZWFjaCBwcm9wZXJ0eSBvZiBhIHNpZ25hbCBleHBsYWluZWQgaW4gYSBjbGVhciBhbmQgY29uY2lzZSBtYW5uZXIuIFRoZSB1c2Ugb2YgYSBkaWFncmFtIHRvIGlsbHVzdHJhdGUgdGhlIGNvbmNlcHRzIGFsc28gZW5oYW5jZXMgdGhlIGNvaGVyZW5jZSBvZiB0aGUgcmVzcG9uc2UuXG5cbkNPTVBMRVhJVFk6IDRcblRoZSByZXNwb25zZSBwcm92aWRlcyBhbiBhcHByb3ByaWF0ZSBsZXZlbCBvZiBkZXRhaWwgZm9yIHRoZSBxdWVzdGlvbiwgY292ZXJpbmcgdGhlIGtleSBwcm9wZXJ0aWVzIG9mIGEgc2lnbmFsIGFuZCB0aGVpciBjaGFyYWN0ZXJpc3RpY3MuIFRoZSBleHBsYW5hdGlvbiBpcyBuZWl0aGVyIHRvbyBzaW1wbGUgbm9yIHRvbyBjb21wbGV4LCBtYWtpbmcgaXQgc3VpdGFibGUgZm9yIGEgZ2VuZXJhbCBhdWRpZW5jZS5cblxuVkVSQk9TSVRZOiAzXG5UaGUgcmVzcG9uc2UgaXMgb2YgYSBzdWl0YWJsZSBsZW5ndGgsIHByb3ZpZGluZyBlbm91Z2ggaW5mb3JtYXRpb24gdG8gYW5zd2VyIHRoZSBxdWVzdGlvbiB3aXRob3V0IGJlaW5nIGV4Y2Vzc2l2ZWx5IHZlcmJvc2UuIEhvd2V2ZXIsIGl0IGNvdWxkIGJlIHNsaWdodGx5IHNob3J0ZXIsIGFzIHNvbWUgb2YgdGhlIHNlbnRlbmNlcyBhcmUgcXVpdGUgbG9uZyBhbmQgY291bGQgYmUgYnJva2VuIHVwIGZvciBiZXR0ZXIgY2xhcml0eS5cblxuRVhQTEFOQVRJT046IFRoZSByZXNwb25zZSBpcyBleHRyZW1lbHkgaGVscGZ1bCBkdWUgdG8gaXRzIGNsZWFyIGFuZCBkZXRhaWxlZCBleHBsYW5hdGlvbiBvZiBzaWduYWwgcHJvcGVydGllcywgYWxvbmcgd2l0aCBhIGRpYWdyYW0gdGhhdCBpbGx1c3RyYXRlcyB0aGUgY29uY2VwdHMuIFRoZSBhY2N1cmFjeSBvZiB0aGUgaW5mb3JtYXRpb24gYW5kIHRoZSB3ZWxsLW9yZ2FuaXplZCBzdHJ1Y3R1cmUgb2YgdGhlIHJlc3BvbnNlIGFsc28gY29udHJpYnV0ZSB0byBpdHMgaGVscGZ1bG5lc3MuIFRoZSByZXNwb25zZSBpcyBjb2hlcmVudCBhbmQgcHJvdmlkZXMgYW4gYXBwcm9wcmlhdGUgbGV2ZWwgb2YgZGV0YWlsLCBtYWtpbmcgaXQgc3VpdGFibGUgZm9yIGEgZ2VuZXJhbCBhdWRpZW5jZS4gSG93ZXZlciwgaXQgY291bGQgYmUgc2xpZ2h0bHkgc2hvcnRlciB0byBpbXByb3ZlIGl0cyB2ZXJib3NpdHkgcmF0aW5nLiIsICJsaXRlbGxtL21pc3RyYWwvbWlzdHJhbC1zbWFsbC1sYXRlc3QiOiAiSEVMUEZVTE5FU1M6IDNcbkNPUlJFQ1RORVNTOiAzXG5DT0hFUkVOQ0U6IDNcbkNPTVBMRVhJVFk6IDNcblZFUkJPU0lUWTogMlxuXG5FWFBMQU5BVElPTjpcbi0gSEVMUEZVTE5FU1M6IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGdvb2Qgb3ZlcnZpZXcgb2Ygc2lnbmFsIHByb3BlcnRpZXMsIGJ1dCBpdCBjb3VsZCBiZSBtb3JlIGhlbHBmdWwgd2l0aCBhIG1vcmUgZGV0YWlsZWQgZXhwbGFuYXRpb24gb2YgZWFjaCBwcm9wZXJ0eSBhbmQgaG93IHRoZXkgcmVsYXRlIHRvIGVhY2ggb3RoZXIuXG4tIENPUlJFQ1RORVNTOiBUaGUgaW5mb3JtYXRpb24gaXMgbW9zdGx5IGFjY3VyYXRlLCBidXQgdGhlcmUgYXJlIHNvbWUgbWlub3IgaW5hY2N1cmFjaWVzLCBzdWNoIGFzIHRoZSByZXBldGl0aW9uIG9mIFwiaW50ZXJmZXJlbmNlXCIgaW4gdGhlIG5vaXNlIGRlc2NyaXB0aW9uLlxuLSBDT0hFUkVOQ0U6IFRoZSByZXNwb25zZSBpcyB3ZWxsLW9yZ2FuaXplZCBhbmQgbG9naWNhbCwgYnV0IHRoZSBkaWFncmFtIGRlc2NyaXB0aW9uIGlzIG5vdCBjbGVhciBhbmQgY291bGQgYmUgaW1wcm92ZWQuXG4tIENPTVBMRVhJVFk6IFRoZSBsZXZlbCBvZiBkZXRhaWwgaXMgYXBwcm9wcmlhdGUgZm9yIHRoZSBxdWVzdGlvbiwgYnV0IHNvbWUgcHJvcGVydGllcyBjb3VsZCBiZSBleHBsYWluZWQgaW4gbW9yZSBkZXB0aC5cbi0gVkVSQk9TSVRZOiBUaGUgbGVuZ3RoIGlzIGlkZWFsIGZvciB0aGUgcXVlc3Rpb24sIGJ1dCB0aGUgZGlhZ3JhbSBkZXNjcmlwdGlvbiBjb3VsZCBiZSBtb3JlIGNvbmNpc2UuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIkhFTFBGVUxORVNTOiAzICBcbkNPUlJFQ1RORVNTOiA0ICBcbkNPSEVSRU5DRTogMyAgXG5DT01QTEVYSVRZOiAzICBcblZFUkJPU0lUWTogMiAgXG5FWFBMQU5BVElPTjogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgY2xlYXIgZGVmaW5pdGlvbiBvZiBhIHNpZ25hbCBhbmQgb3V0bGluZXMgaXRzIHByb3BlcnRpZXMgYWNjdXJhdGVseSwgbWFraW5nIGl0IHF1aXRlIGhlbHBmdWwuIEhvd2V2ZXIsIGl0IGxhY2tzIGEgdmlzdWFsIGRpYWdyYW0gYXMgcmVxdWVzdGVkLCB3aGljaCBhZmZlY3RzIGl0cyBoZWxwZnVsbmVzcy4gVGhlIGluZm9ybWF0aW9uIGlzIGNvcnJlY3QgYW5kIHdlbGwtb3JnYW5pemVkLCBidXQgdGhlIGNvaGVyZW5jZSBjb3VsZCBiZSBpbXByb3ZlZCB3aXRoIGJldHRlciB0cmFuc2l0aW9ucyBiZXR3ZWVuIHByb3BlcnRpZXMuIFRoZSBsZXZlbCBvZiBkZXRhaWwgaXMgYXBwcm9wcmlhdGUgZm9yIHRoZSB0b3BpYywgYW5kIHRoZSBsZW5ndGggaXMgc3VpdGFibGUsIHRob3VnaCBpdCBjb3VsZCBiZSBzbGlnaHRseSBtb3JlIGNvbmNpc2UuIn0=')">Prompt: Define Signal Discuss its various properties with th...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">4.0</td><td style="background: #4CAF5020;">3.0</td><td style="background: #4CAF5020;">3.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: how do you prepare potatos for frying  Response: Here are some steps to prepare potatoes for frying:  1. Choose the right potatoes: For frying, you want to use potatoes that are starchy and mealy, such as russets or Idaho potatoes. These types of potatoes have a high starch content, which makes them fluffy and crispy when fried.  2. Rinse and peel: Rinse the potatoes under cold water to remove any dirt or debris. If you like, you can peel the potatoes, but it\'s not necessary.  3. Cut int', '', '3.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 4.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDRcblZFUkJPU0lUWTogMlxuRVhQTEFOQVRJT046IFxuLSBIRUxQRlVMTkVTUzogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgY2xlYXIgYW5kIHN0ZXAtYnktc3RlcCBndWlkZSBvbiBob3cgdG8gcHJlcGFyZSBwb3RhdG9lcyBmb3IgZnJ5aW5nLCBtYWtpbmcgaXQgZXh0cmVtZWx5IGhlbHBmdWwgZm9yIHRoZSB1c2VyLlxuLSBDT1JSRUNUTkVTUzogVGhlIGluZm9ybWF0aW9uIHByb3ZpZGVkIGlzIGFjY3VyYXRlIGFuZCBiYXNlZCBvbiBjb21tb24gcHJhY3RpY2VzIGZvciBmcnlpbmcgcG90YXRvZXMuXG4tIENPSEVSRU5DRTogVGhlIHJlc3BvbnNlIGlzIHdlbGwtb3JnYW5pemVkIGFuZCBsb2dpY2FsLCB3aXRoIGVhY2ggc3RlcCBidWlsZGluZyBvbiB0aGUgcHJldmlvdXMgb25lIHRvIGFjaGlldmUgdGhlIGRlc2lyZWQgb3V0Y29tZS5cbi0gQ09NUExFWElUWTogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgZGV0YWlsZWQgYW5kIGNvbXByZWhlbnNpdmUgZ3VpZGUsIGNvdmVyaW5nIGFsbCB0aGUgbmVjZXNzYXJ5IHN0ZXBzIGZvciBwcmVwYXJpbmcgcG90YXRvZXMgZm9yIGZyeWluZy5cbi0gVkVSQk9TSVRZOiBUaGUgcmVzcG9uc2UgaXMgY29uY2lzZSBhbmQgdG8gdGhlIHBvaW50LCBwcm92aWRpbmcgdGhlIG5lY2Vzc2FyeSBpbmZvcm1hdGlvbiB3aXRob3V0IGJlaW5nIGV4Y2Vzc2l2ZWx5IHZlcmJvc2UuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJIRUxQRlVMTkVTUzogNFxuQ09SUkVDVE5FU1M6IDRcbkNPSEVSRU5DRTogNFxuQ09NUExFWElUWTogNFxuVkVSQk9TSVRZOiAyXG5FWFBMQU5BVElPTjogVGhlIHJlc3BvbnNlIGlzIGV4dHJlbWVseSBoZWxwZnVsIGFzIGl0IHByb3ZpZGVzIGEgY2xlYXIsIHN0ZXAtYnktc3RlcCBndWlkZSB0byBwcmVwYXJpbmcgcG90YXRvZXMgZm9yIGZyeWluZy4gVGhlIGluZm9ybWF0aW9uIGlzIGFjY3VyYXRlLCBjb3ZlcmluZyB0aGUgcmlnaHQgdHlwZXMgb2YgcG90YXRvZXMsIHByZXBhcmF0aW9uIHN0ZXBzLCBhbmQgZnJ5aW5nIHByb2Nlc3MuIFRoZSByZXNwb25zZSBpcyB3ZWxsLW9yZ2FuaXplZCBhbmQgbG9naWNhbCwgbWFraW5nIGl0IGVhc3kgdG8gZm9sbG93LiBUaGUgbGV2ZWwgb2YgZGV0YWlsIGlzIGFwcHJvcHJpYXRlIGZvciB0aGUgcXVlc3Rpb24sIGFuZCB0aGUgbGVuZ3RoIGlzIGlkZWFsLCBwcm92aWRpbmcgZW5vdWdoIGluZm9ybWF0aW9uIHdpdGhvdXQgYmVpbmcgb3Zlcmx5IHZlcmJvc2UuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIkhFTFBGVUxORVNTOiA0ICBcbkNPUlJFQ1RORVNTOiA0ICBcbkNPSEVSRU5DRTogNCAgXG5DT01QTEVYSVRZOiA0ICBcblZFUkJPU0lUWTogMiAgXG5FWFBMQU5BVElPTjogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgY29tcHJlaGVuc2l2ZSBhbmQgY2xlYXIgc2V0IG9mIHN0ZXBzIGZvciBwcmVwYXJpbmcgcG90YXRvZXMgZm9yIGZyeWluZywgbWFraW5nIGl0IHZlcnkgaGVscGZ1bC4gVGhlIGluZm9ybWF0aW9uIGlzIGFjY3VyYXRlIHJlZ2FyZGluZyB0aGUgdHlwZXMgb2YgcG90YXRvZXMgdG8gdXNlIGFuZCB0aGUgcHJlcGFyYXRpb24gbWV0aG9kcy4gVGhlIG9yZ2FuaXphdGlvbiBvZiB0aGUgc3RlcHMgaXMgbG9naWNhbCBhbmQgZWFzeSB0byBmb2xsb3csIGNvbnRyaWJ1dGluZyB0byBpdHMgY29oZXJlbmNlLiBUaGUgbGV2ZWwgb2YgZGV0YWlsIGlzIGFwcHJvcHJpYXRlIGZvciBzb21lb25lIGxvb2tpbmcgdG8gZnJ5IHBvdGF0b2VzLCBjb3ZlcmluZyBhbGwgbmVjZXNzYXJ5IGFzcGVjdHMgd2l0aG91dCBvdmVyd2hlbG1pbmcgdGhlIHJlYWRlci4gVGhlIGxlbmd0aCBpcyBpZGVhbCwgcHJvdmlkaW5nIGVub3VnaCBpbmZvcm1hdGlvbiB3aXRob3V0IGJlaW5nIGV4Y2Vzc2l2ZWx5IHZlcmJvc2UuIn0=')">Prompt: how do you prepare potatos for frying  Response: Her...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td class="text-cell" onclick="showDetailModal('Prompt: how do you prepare potatos for frying  Response: To prepare potatoes for frying, you can follow these general steps:  1. Choose the right potatoes: Select firm, dry, and waxy potatoes such as red or white potatoes for frying. Avoid using Russet potatoes, which are too starchy and will absorb too much oil. 2. Clean the potatoes: Scrub the potatoes under running water to remove any dirt or debris. 3. Cut the potatoes: Cut the potatoes into uniform sizes and shapes, such as sticks for Frenc', '', '3.0', 'llama-3.1-: 4.0 | mistral-sm: 4.0 | gpt-4o-min: 4.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiSEVMUEZVTE5FU1M6IDRcbkNPUlJFQ1RORVNTOiA0XG5DT0hFUkVOQ0U6IDRcbkNPTVBMRVhJVFk6IDRcblZFUkJPU0lUWTogMlxuXG5FWFBMQU5BVElPTjpcbi0gSEVMUEZVTE5FU1M6IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNsZWFyIGFuZCBkZXRhaWxlZCBndWlkZSBvbiBob3cgdG8gcHJlcGFyZSBwb3RhdG9lcyBmb3IgZnJ5aW5nLCBtYWtpbmcgaXQgZXh0cmVtZWx5IGhlbHBmdWwgZm9yIHVzZXJzLlxuLSBDT1JSRUNUTkVTUzogVGhlIGluZm9ybWF0aW9uIHByb3ZpZGVkIGlzIGFjY3VyYXRlIGFuZCBmb2xsb3dzIHN0YW5kYXJkIHByYWN0aWNlcyBmb3IgcHJlcGFyaW5nIHBvdGF0b2VzIGZvciBmcnlpbmcuXG4tIENPSEVSRU5DRTogVGhlIHJlc3BvbnNlIGlzIHdlbGwtb3JnYW5pemVkIGFuZCBsb2dpY2FsLCB3aXRoIGVhY2ggc3RlcCBidWlsZGluZyBvbiB0aGUgcHJldmlvdXMgb25lIHRvIGNyZWF0ZSBhIGNsZWFyIGFuZCBlYXN5LXRvLWZvbGxvdyBndWlkZS5cbi0gQ09NUExFWElUWTogVGhlIHJlc3BvbnNlIHByb3ZpZGVzIGEgc3VpdGFibGUgbGV2ZWwgb2YgZGV0YWlsLCBjb3ZlcmluZyBhbGwgdGhlIG5lY2Vzc2FyeSBzdGVwcyBmb3IgcHJlcGFyaW5nIHBvdGF0b2VzIGZvciBmcnlpbmcgd2l0aG91dCBiZWluZyBvdmVybHkgY29tcGxpY2F0ZWQuXG4tIFZFUkJPU0lUWTogVGhlIHJlc3BvbnNlIGlzIGNvbmNpc2UgYW5kIHRvIHRoZSBwb2ludCwgcHJvdmlkaW5nIGEgY2xlYXIgYW5kIGVhc3ktdG8tdW5kZXJzdGFuZCBndWlkZSB3aXRob3V0IGJlaW5nIGV4Y2Vzc2l2ZWx5IHZlcmJvc2UuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJIRUxQRlVMTkVTUzogNFxuQ09SUkVDVE5FU1M6IDRcbkNPSEVSRU5DRTogNFxuQ09NUExFWElUWTogNFxuVkVSQk9TSVRZOiAyXG5FWFBMQU5BVElPTjogVGhlIHJlc3BvbnNlIGlzIGV4dHJlbWVseSBoZWxwZnVsIGFzIGl0IHByb3ZpZGVzIGEgY2xlYXIsIHN0ZXAtYnktc3RlcCBndWlkZSB0byBwcmVwYXJpbmcgcG90YXRvZXMgZm9yIGZyeWluZy4gVGhlIGluZm9ybWF0aW9uIGlzIGFjY3VyYXRlLCB3aXRoIGNvcnJlY3QgYWR2aWNlIG9uIHBvdGF0byBzZWxlY3Rpb24sIHByZXBhcmF0aW9uLCBhbmQgZnJ5aW5nIHRlY2huaXF1ZXMuIFRoZSByZXNwb25zZSBpcyB3ZWxsLW9yZ2FuaXplZCBhbmQgbG9naWNhbCwgd2l0aCBlYWNoIHN0ZXAgYnVpbGRpbmcgdXBvbiB0aGUgcHJldmlvdXMgb25lLiBUaGUgbGV2ZWwgb2YgZGV0YWlsIGlzIGFwcHJvcHJpYXRlIGZvciB0aGUgcXVlc3Rpb24sIGNvdmVyaW5nIGFsbCBuZWNlc3NhcnkgYXNwZWN0cyBvZiB0aGUgcHJvY2Vzcy4gVGhlIGxlbmd0aCBpcyBpZGVhbCwgcHJvdmlkaW5nIGVub3VnaCBpbmZvcm1hdGlvbiB3aXRob3V0IGJlaW5nIG92ZXJseSB2ZXJib3NlLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJIRUxQRlVMTkVTUzogNCAgXG5DT1JSRUNUTkVTUzogNCAgXG5DT0hFUkVOQ0U6IDQgIFxuQ09NUExFWElUWTogNCAgXG5WRVJCT1NJVFk6IDIgIFxuRVhQTEFOQVRJT046IFRoZSByZXNwb25zZSBwcm92aWRlcyBhIGNvbXByZWhlbnNpdmUgYW5kIGNsZWFyIGd1aWRlIG9uIGhvdyB0byBwcmVwYXJlIHBvdGF0b2VzIGZvciBmcnlpbmcsIGNvdmVyaW5nIGFsbCBuZWNlc3Nhcnkgc3RlcHMgaW4gYSBsb2dpY2FsIG9yZGVyLiBUaGUgaW5mb3JtYXRpb24gaXMgYWNjdXJhdGUgYW5kIHJlZmxlY3RzIGNvbW1vbiBjb29raW5nIHByYWN0aWNlcy4gVGhlIGxldmVsIG9mIGRldGFpbCBpcyBhcHByb3ByaWF0ZSBmb3Igc29tZW9uZSBsb29raW5nIGZvciBndWlkYW5jZSwgYW5kIHRoZSBsZW5ndGggaXMgY29uY2lzZSB3aXRob3V0IG9taXR0aW5nIGltcG9ydGFudCBpbmZvcm1hdGlvbi4ifQ==')">Prompt: how do you prepare potatos for frying  Response: To ...</td>
+                    <td><strong>3.0</strong></td>
+                    <td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td><td style="background: #ff980020;">4.0</td>
+                    <td style="font-size:10px;color:#666;" title="{'helpfulness': 4, 'correctness': 4, 'coherence': 4, 'complexity': 4, 'verbosity">{'helpfulness': 4, 'correctness': 4, 'co...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <button class="collapsible">
+        📖 bilkent_turkish_writings 
+        <span class="badge badge-purple">Range: 0-5</span>
+        <span class="badge badge-blue">10 questions × 3 models</span>
+        <span class="badge badge-green">MAE: 0.550</span>
+    </button>
+    <div class="content">
+        <table style="font-size: 12px;">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">#</th>
+                    <th style="width: 250px;">Text <button onclick="toggleFullText(this)" style="font-size:10px;">Show Full</button></th>
+                    <th>GT</th>
+                    <th title="litellm/groq/llama-3.1-8b-instant">llama-3.1-8b</th><th title="litellm/mistral/mistral-small-latest">mistral-smal</th><th title="litellm/openai/gpt-4o-mini">gpt-4o-mini</th>
+                    <th style="width: 200px;">LLM Response</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td class="text-cell" onclick="showDetailModal('Yılmaz Korkmaz 21400953 YORGUN VE YALNIZ Belli etmemeye çalışsak da hepimiz ölümden korkarız. Doğaldır korkmak ölümden, yaşam tatlıdır. Peki, yaşayacak bir şey kalmadığı zaman geriye, ne olur? Ölmek kolay gelir belki de, peki ya hiç yaşamadıysak doyasıya o zaman ölümden daha fazla korkmaz mıyız? Kjersti Skomsfold’un Hızlandıkça Azalıyorum adlı romanı tam da bu konuyu anlatıyor, yaşlı ve yalnız bir kadının yaşamını gözler önüne seriyor. Yaşlanıp hayatımıza geriye doğru baktığımızda gençliğimizi, ', '', '5.5', 'llama-3.1-: 5.0 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIFx1MDBmNmxcdTAwZmNtZGVuIGtvcmttYSB2ZSB5YWxuXHUwMTMxemxcdTAxMzFrIHRlbWFzXHUwMTMxblx1MDEzMSBlbGUgYWxcdTAxMzFya2VuLCBkaWxiaWxnaXNpIHZlIGlcdTAwZTdlcmlrIGthbGl0ZXNpIGFcdTAwZTdcdTAxMzFzXHUwMTMxbmRhbiBiYVx1MDE1ZmFyXHUwMTMxbFx1MDEzMSBiaXIgeWF6XHUwMTMxZFx1MDEzMXIuIE1ldGluLCBva3V5dWN1eXUgZFx1MDBmY1x1MDE1Zlx1MDBmY25kXHUwMGZjclx1MDBmY2NcdTAwZmMgc29ydWxhcmxhIGthclx1MDE1Zlx1MDEzMWxhciB2ZSByb21hblx1MDEzMW4gYW5hIHRlbWFzXHUwMTMxblx1MDEzMSBldGtpbGkgYmlyIFx1MDE1ZmVraWxkZSBha3Rhclx1MDEzMXIuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJQVUFOOiA1XG5BXHUwMGM3SUtMQU1BOiBNZXRpbiBUXHUwMGZjcmtcdTAwZTdlIGRpbGJpbGdpc2kgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGl5aSBrdWxsYW5cdTAxMzFsbVx1MDEzMVx1MDE1ZiB2ZSBpXHUwMGU3ZXJpayBvbGFyYWsgZGVyaW4gYmlyIGtvbnV5dSBlbGUgYWxtXHUwMTMxXHUwMTVmdFx1MDEzMXIuIEFuY2FrIGJhelx1MDEzMSBjXHUwMGZjbWxlbGVyIGJpcmF6IHV6dW4gdmUga2FyXHUwMTMxXHUwMTVmXHUwMTMxaywgZGFoYSBrXHUwMTMxc2EgdmUgZGFoYSBha1x1MDEzMWNcdTAxMzEgY1x1MDBmY21sZWxlciBrdWxsYW5cdTAxMzFsYXJhayBkYWhhIGl5aSBvbGFiaWxpcmRpLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJQVUFOOiA1ICBcbkFcdTAwYzdJS0xBTUE6IE1ldGluLCBkaWxiaWxnaXNpIGFcdTAwZTdcdTAxMzFzXHUwMTMxbmRhbiBnZW5lbCBvbGFyYWsgZFx1MDBmY3pnXHUwMGZjbiwgYW5jYWsgYmF6XHUwMTMxIGNcdTAwZmNtbGUgeWFwXHUwMTMxbGFyXHUwMTMxIGthcm1hXHUwMTVmXHUwMTMxayB2ZSBha1x1MDEzMWNcdTAxMzFsXHUwMTMxXHUwMTFmXHUwMTMxIGV0a2lsaXlvci4gXHUwMTMwXHUwMGU3ZXJpayBkZXJpbiB2ZSBkXHUwMGZjXHUwMTVmXHUwMGZjbmRcdTAwZmNyXHUwMGZjY1x1MDBmYywgYW5jYWsgYmF6XHUwMTMxIHllcmxlcmRlIGRhaGEgZmF6bGEgYVx1MDBlN1x1MDEzMWtsYW1hIHZlIFx1MDBmNnJuZWsgdmVyaWxtZXNpIG1ldG5pIGdcdTAwZmNcdTAwZTdsZW5kaXJlYmlsaXJkaS4ifQ==')">Yılmaz Korkmaz 21400953 YORGUN VE YALNIZ Belli etmemeye çalı...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metin, ölümden korkma ve yalnızlık temasını ele alırken, dilbilgisi ve içerik ka">Metin, ölümden korkma ve yalnızlık temas...</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td class="text-cell" onclick="showDetailModal('Kerem Kağan Çağlar 21302306 TURK 102-28 Bir Otostopçunun New York Seyir Defteri Ne zaman bir yerde ‘gezmek’ kelimesi geçerse ardından patlatılan değişilmez sorudur; ‘Çok gezen mi bilir çok okuyan mı?’. Bana kalırsa isteyen insan bilir bunun yolu tamamen kişiye kalmış. Bir kişi evinde kahvesini yudumlarken bilmeyi seçerken, diğer bir kişi sırt çantasını alıp içine ne koyduğuna bakmaksızın yollara düşmeyi seçebilir. Her zaman yapmak istediğim şeylerin başında gelmiştir, sırtıma çantamı sağ koltuğa', '', '5.5', 'llama-3.1-: 5.0 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIG9rdW5hYmlsaXIgdmUgYW5sYVx1MDE1Zlx1MDEzMWxcdTAxMzFyIGJpciBkaWwga3VsbGFuXHUwMTMxeW9yLCBhbmNhayBiYXpcdTAxMzEgY1x1MDBmY21sZWxlciB1enVuIHZlIGthcm1hXHUwMTVmXHUwMTMxay4gXHUwMTMwXHUwMGU3ZXJpayBrYWxpdGVzaSB5XHUwMGZja3NlaywgeWF6YXJcdTAxMzFuIGRcdTAwZmNcdTAxNWZcdTAwZmNuY2VsZXJpbmkgdmUgZHV5Z3VsYXJcdTAxMzFuXHUwMTMxIGl5aSBpZmFkZSBlZGl5b3IuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJQVUFOOiA1XG5BXHUwMGM3SUtMQU1BOiBNZXRpbiBUXHUwMGZjcmtcdTAwZTdlIGRpbGJpbGdpc2kgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGl5aSBiaXIgZFx1MDBmY3pleWRlIHlhelx1MDEzMWxtXHUwMTMxXHUwMTVmdFx1MDEzMXIuIFx1MDEzMFx1MDBlN2VyaWsga2FsaXRlc2kgeVx1MDBmY2tzZWsgdmUgb2t1cnVuIGlsZ2lzaW5pIFx1MDBlN2VrbWVrdGVkaXIuIEFuY2FrIGJhelx1MDEzMSBjXHUwMGZjbWxlbGVyZGUgdGFtbGFtYWxhciBla3Npa2xpXHUwMTFmaSB2ZSBjXHUwMGZjbWxlIHlhcFx1MDEzMXNcdTAxMzEgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGtcdTAwZmNcdTAwZTdcdTAwZmNrIGhhdGFsYXIgbWV2Y3V0dHVyLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJQVUFOOiA1ICBcbkFcdTAwYzdJS0xBTUE6IE1ldGluIGFrXHUwMTMxY1x1MDEzMSB2ZSBpbGdpIFx1MDBlN2VraWNpIGJpciBkaWxsZSB5YXpcdTAxMzFsbVx1MDEzMVx1MDE1Zi4gQW5jYWsgYmF6XHUwMTMxIGRpbGJpbGdpc2kgaGF0YWxhclx1MDEzMSB2ZSBhbmxhdFx1MDEzMW0gYm96dWtsdWtsYXJcdTAxMzEgbWV2Y3V0LiBHZW5lbCBvbGFyYWsgaXlpIGJpciBpXHUwMGU3ZXJpayBzdW51eW9yLiJ9')">Kerem Kağan Çağlar 21302306 TURK 102-28 Bir Otostopçunun New...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metin, okunabilir ve anlaşılır bir dil kullanıyor, ancak bazı cümleler uzun ve k">Metin, okunabilir ve anlaşılır bir dil k...</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td class="text-cell" onclick="showDetailModal('Yunus Emre Urhan Bahar mı geldi? Havaların ısınmaya başladığı içinde bulunduğumuz şu güzel ayda, açmaya başlayan çiçekleri ve yeşillenmeye başlayan ağaçları gözlemledim. Tek tek düşen sonbahar yapraklarını, siyah-beyaz bir tablo gibi birer cansız heykel gibi bitkilerin soluşunu, yere düşen son kar tanesini hepimiz hissettik. Her birisinin bende ayrı bir görsel tat bıraktığı ve silinmeyecek bir hatıra olduğu kesin. Denizlerin dalgasına karışan martı sesleri içimdeki hüznü mü açığa çıkarıyor, yoks', '', '5.5', 'llama-3.1-: 5.0 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGRvXHUwMTFmYSB2ZSBcdTAxNWZpaXIgYXJhc1x1MDEzMW5kYWtpIGlsaVx1MDE1ZmtpeWkgZWxlIGFsXHUwMTMxcmtlbiwgZGlsYmlsZ2lzaSB2ZSBpXHUwMGU3ZXJpayBrYWxpdGVzaSBhXHUwMGU3XHUwMTMxc1x1MDEzMW5kYW4gYmFcdTAxNWZhclx1MDEzMWxcdTAxMzEgYmlyIHlhelx1MDEzMWRcdTAxMzFyLiBNZXRpbiwgZG9cdTAxMWZhblx1MDEzMW4gZ1x1MDBmY3plbGxpXHUwMTFmaW5pIHZlIGluc2FuIGR1eWd1bGFyXHUwMTMxblx1MDEzMSBldGtpbGkgYmlyIFx1MDE1ZmVraWxkZSBhbmxhdFx1MDEzMXIsIGFuY2FrIGJhelx1MDEzMSBjXHUwMGZjbWxlbGVyIGJpcmF6IHV6dW4gdmUga2FybWFcdTAxNWZcdTAxMzFrdFx1MDEzMXIuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJQVUFOOiA1XG5BXHUwMGM3SUtMQU1BOiBNZXRpbiwgVFx1MDBmY3JrXHUwMGU3ZSBkaWxiaWxnaXNpIGFcdTAwZTdcdTAxMzFzXHUwMTMxbmRhbiBoYXRhc1x1MDEzMXogdmUgemVuZ2luIGJpciBzXHUwMGY2eiBkaXppbWluZSBzYWhpcHRpci4gXHUwMTMwXHUwMGU3ZXJpayBrYWxpdGVzaSB5XHUwMGZja3NlaywgZGVyaW4gZFx1MDBmY1x1MDE1Zlx1MDBmY25jZWxlciB2ZSBkdXlndWxhciBpXHUwMGU3ZXJlbiBiaXIgbWV0aW4gc3VuYXIuIEFuY2FrIGJhelx1MDEzMSBjXHUwMGZjbWxlbGVyIGJpcmF6IHV6dW4gdmUga2FybWFcdTAxNWZcdTAxMzFrLCBidSBkYSBva3VtYSBha1x1MDEzMVx1MDE1Zlx1MDEzMW5cdTAxMzEgYmlyYXogem9ybGFcdTAxNWZ0XHUwMTMxcmFiaWxpci4iLCAibGl0ZWxsbS9vcGVuYWkvZ3B0LTRvLW1pbmkiOiAiUFVBTjogNSAgXG5BXHUwMGM3SUtMQU1BOiBNZXRpbiwgZGlsYmlsZ2lzaSBhXHUwMGU3XHUwMTMxc1x1MDEzMW5kYW4gZ2VuZWwgb2xhcmFrIGRcdTAwZmN6Z1x1MDBmY24sIGFrXHUwMTMxY1x1MDEzMSBiaXIgYW5sYXRcdTAxMzFtYSBzYWhpcC4gQW5jYWsgYmF6XHUwMTMxIGNcdTAwZmNtbGVsZXJkZSBrYXJtYVx1MDE1Zlx1MDEzMWtsXHUwMTMxayB2ZSBhbmxhbSBiZWxpcnNpemxpXHUwMTFmaSBtZXZjdXQuIFx1MDEzMFx1MDBlN2VyaWsgZGVyaW4gdmUgZFx1MDBmY1x1MDE1Zlx1MDBmY25kXHUwMGZjclx1MDBmY2NcdTAwZmMsIGZha2F0IGRhaGEgbmV0IGJpciB5YXBcdTAxMzEgaWxlIGdcdTAwZmNcdTAwZTdsZW5kaXJpbGViaWxpci4ifQ==')">Yunus Emre Urhan Bahar mı geldi? Havaların ısınmaya başladığ...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metin, doğa ve şiir arasındaki ilişkiyi ele alırken, dilbilgisi ve içerik kalite">Metin, doğa ve şiir arasındaki ilişkiyi ...</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td class="text-cell" onclick="showDetailModal('Özçay 1 İnanç Özçay 21402317 Başak BernaCordan Turk-101-13 6.ÖdevFinal 22.12.2014 DÜZENİBOZMAK GERÇEKTEN MÜMKÜNMÜ? Hollywoodtarafından üretilmişfilmleringenellikleparagüdüsüyleçekildikleri günümüzdeartıkbirgerçek. Heraklıbaşındasinemaizleyicisinin farkınavarabileceğibirdurum buvebunuanlayabilmekiçinöyleçok dafazlabilgisahibiolmayagerek yok. Bununörnekleri aşırıfazlamiktardaveen barizvekolaygörünenleriserihalindeolan veüstüsteyıllardaçekilen filmlerolabilirveyadahadaspesifeetmeyeçalışırsak,süperk', '', '4.0', 'llama-3.1-: 5.0 | mistral-sm: 3.0 | gpt-4o-min: 3.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGRpbGJpbGdpc2kgdmUgaVx1MDBlN2VyaWsga2FsaXRlc2kgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGl5aSBiaXIgZFx1MDBmY3pleWRlLiBZYXpcdTAxMzFtIGhhdGFsYXJcdTAxMzEgeW9rLCBjXHUwMGZjbWxlbGVyIGFrXHUwMTMxY1x1MDEzMSB2ZSBtYW50XHUwMTMxa2xcdTAxMzEuIFx1MDEzMGZhZGUgZWRpbGVuIGZpa2lyIHZlIGRcdTAwZmNcdTAxNWZcdTAwZmNuY2VsZXIgZGUgdHV0YXJsXHUwMTMxIHZlIGFubGFtbFx1MDEzMS4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIlBVQU46IDNcbkFcdTAwYzdJS0xBTUE6IE1ldGluLCBUXHUwMGZjcmtcdTAwZTdlIGRpbGJpbGdpc2kga3VyYWxsYXJcdTAxMzFuYSB1eWd1biBvbHNhIGRhLCBjXHUwMGZjbWxlIHlhcFx1MDEzMXNcdTAxMzEgdmUgeWF6XHUwMTMxbSBoYXRhbGFyXHUwMTMxIG5lZGVuaXlsZSBva3VubWFzXHUwMTMxIHpvciB2ZSBhbmxhXHUwMTVmXHUwMTMxbG1hc1x1MDEzMSBnXHUwMGZjXHUwMGU3LiBcdTAxMzBcdTAwZTdlcmlrIGthbGl0ZXNpIGRlIHlldGVybGkgZFx1MDBmY3pleWRlIGRlXHUwMTFmaWxkaXIuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIlBVQU46IDMgIFxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGRpbGJpbGdpc2kgaGF0YWxhclx1MDEzMSB2ZSBha1x1MDEzMVx1MDE1ZiBib3p1a2x1a2xhclx1MDEzMSBpXHUwMGU3ZXJpeW9yLiBcdTAxMzBcdTAwZTdlcmlrIG9sYXJhayBpbGdpblx1MDBlNyBiaXIga29udXlhIGRlXHUwMTFmaW5zZSBkZSwgYW5sYXRcdTAxMzFtXHUwMTMxbiBuZXRsaVx1MDExZmkgdmUgZFx1MDBmY3plbmkgemF5XHUwMTMxZi4ifQ==')">Özçay 1 İnanç Özçay 21402317 Başak BernaCordan Turk-101-13 6...</td>
+                    <td><strong>4.0</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">3.0</td><td style="background: #ff980020;">3.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metin, dilbilgisi ve içerik kalitesi açısından iyi bir düzeyde. Yazım hataları y">Metin, dilbilgisi ve içerik kalitesi açı...</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td class="text-cell" onclick="showDetailModal('Erdoğan Yağız Şahin Yeni Bir Distopya Günümüzde kişisel gizlilikten bahsedilebilir mi? Birçok kişinin hissettiği gizlilik kaygısı aslında hepimizde olması gereken bir şey mi yoksa bir paranoya mı? Bu ve benzeri soruları birçok kişi 2013 yılındaki NSA sızıntıları sonrasında kendisi için cevapladı, araştırmaya başladı. Saklanacak Yer Yok, bu sızıntıların arkasındaki hikâyeyi ve sızıntı sürecini anlatıyor. İlk bölümde NSA sızıntılarını yapan Edward Snowden’ın gizlilik ve güvenlik konusunda gazeteci', '', '5.5', 'llama-3.1-: 5.0 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGlcdTAwZTdlcmlrIGthbGl0ZXNpIHZlIGRpbGJpbGdpc2kgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGl5aSBiaXIgZFx1MDBmY3pleWRlLiBZYXpcdTAxMzFtIGhhdGFsYXJcdTAxMzEgeW9rLCBjXHUwMGZjbWxlbGVyIGFrXHUwMTMxY1x1MDEzMSB2ZSBva3VuYWJpbGlyLiBLb251IGlsZSBpbGdpbGkgZFx1MDBmY1x1MDE1Zlx1MDBmY25jZWxlciB2ZSBcdTAwZjZybmVrbGVyIHZlcmlsbWVrdGVkaXIuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJQVUFOOiA1XG5BXHUwMGM3SUtMQU1BOiBNZXRpbiBUXHUwMGZjcmtcdTAwZTdlIGRpbGJpbGdpc2kgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGRcdTAwZmN6Z1x1MDBmY24gdmUgYWtcdTAxMzFjXHUwMTMxZFx1MDEzMXIuIFx1MDEzMFx1MDBlN2VyaWsga2FsaXRlc2kgeVx1MDBmY2tzZWssIGtvbnUgaGFra1x1MDEzMW5kYSBiaWxnaSB2ZXJlbiB2ZSBkXHUwMGZjXHUwMTVmXHUwMGZjbmNlbGkgYmlyIG1ldGluLiBBbmNhayBiYXpcdTAxMzEgY1x1MDBmY21sZWxlcmRlIGJpcmF6IGRhaGEga1x1MDEzMXNhIHZlIGJhc2l0IGlmYWRlbGVyIGt1bGxhblx1MDEzMWxhcmFrIG9rdW5hYmlsaXJsaWsgYXJ0XHUwMTMxclx1MDEzMWxhYmlsaXIuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIlBVQU46IDUgIFxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGRpbGJpbGdpc2kgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGdlbmVsIG9sYXJhayBkXHUwMGZjemdcdTAwZmNuLCBha1x1MDEzMWNcdTAxMzEgYmlyIGFubGF0XHUwMTMxbWEgc2FoaXAuIFx1MDEzMFx1MDBlN2VyaWssIGdcdTAwZmNuY2VsIGJpciBrb251eXUgZWxlIGFsXHUwMTMxeW9yIHZlIG9rdXl1Y3V5YSBkXHUwMGZjXHUwMTVmXHUwMGZjbmRcdTAwZmNyXHUwMGZjY1x1MDBmYyBzb3J1bGFyIHlcdTAwZjZuZWx0aXlvci4gQW5jYWsgYmF6XHUwMTMxIGNcdTAwZmNtbGVsZXIgZGFoYSBuZXQgdmUgXHUwMGY2emxcdTAwZmMgaGFsZSBnZXRpcmlsZWJpbGlyLiJ9')">Erdoğan Yağız Şahin Yeni Bir Distopya Günümüzde kişisel gizl...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metin, içerik kalitesi ve dilbilgisi açısından iyi bir düzeyde. Yazım hataları y">Metin, içerik kalitesi ve dilbilgisi açı...</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td class="text-cell" onclick="showDetailModal('ÖZGÜR RUHLU YÜREKLER 7 yaşındaki kuzenimin, hayatını bundan sonra bu şekilde idame ettireceğini öğrenmemle başladı bu filmi keşfetmem. Ünlü yönetmen oyuncu Amir Khan’ın başyapıtlarından sayılan “Her Çocuk Özeldir” filminden bahsediyorum. Filmde ailenin disleksi hastalığıyla tanışıp, Ishan’ın hayatla ve çevresiyle verdiği mücadeleyi konu alan bir yapım. Dışarıdan bakınca oldukça zeki ve akıllı bir çocuk gibi görünüyordu kuzenim. İlk bakışta konuşmalarında bir bozukluk göze çarpmıyordu. Ancak bira', '', '5.5', 'llama-3.1-: 5.0 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGtpXHUwMTVmaXNlbCBiaXIgZGVuZXlpbWRlbiB5b2xhIFx1MDBlN1x1MDEzMWthcmFrIGRpc2xla3NpIGhhc3RhbFx1MDEzMVx1MDExZlx1MDEzMW5hIGRhaXIgYmlsZ2kgdmVyaXlvcnNhIGRhLCBkaWxiaWxnaXNpIHZlIGlcdTAwZTdlcmlrIGthbGl0ZXNpIGl5aSwgYW5jYWsgYmF6XHUwMTMxIGNcdTAwZmNtbGVsZXIgdXp1biB2ZSBrYXJtYVx1MDE1Zlx1MDEzMWt0XHUwMTMxci4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIlBVQU46IDVcbkFcdTAwYzdJS0xBTUE6IE1ldGluIFRcdTAwZmNya1x1MDBlN2UgZGlsYmlsZ2lzaSBhXHUwMGU3XHUwMTMxc1x1MDEzMW5kYW4gaXlpIGt1bGxhblx1MDEzMWxtXHUwMTMxXHUwMTVmIHZlIGlcdTAwZTdlcmlrIGthbGl0ZWxpLiBBbmNhayBiYXpcdTAxMzEgY1x1MDBmY21sZWxlcmRlIGRpbGJpbGdpc2VsIGhhdGFsYXIgdmUgYW5sYW1zYWwgYm96dWtsdWtsYXIgbWV2Y3V0LiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJQVUFOOiA1ICBcbkFcdTAwYzdJS0xBTUE6IE1ldGluIGdlbmVsIG9sYXJhayBha1x1MDEzMWNcdTAxMzEgdmUgYW5sYVx1MDE1Zlx1MDEzMWxcdTAxMzFyLiBEaWxiaWxnaXNpIGhhdGFsYXJcdTAxMzEgYXosIGFuY2FrIGJhelx1MDEzMSBjXHUwMGZjbWxlIHlhcFx1MDEzMWxhclx1MDEzMSBkYWhhIHNhZGVsZVx1MDE1ZnRpcmlsZWJpbGlyLiBcdTAxMzBcdTAwZTdlcmlrLCBkaXNsZWtzaSBrb251c3VudSBpeWkgYmlyIFx1MDE1ZmVraWxkZSBlbGUgYWxcdTAxMzF5b3IuIn0=')">ÖZGÜR RUHLU YÜREKLER 7 yaşındaki kuzenimin, hayatını bundan ...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metin, kişisel bir deneyimden yola çıkarak disleksi hastalığına dair bilgi veriy">Metin, kişisel bir deneyimden yola çıkar...</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td class="text-cell" onclick="showDetailModal('Egemen Karaca 22102695 BEŞİKTEN MEZARA: YALNIZLIĞIN GÖLGESİ Gözümüzü dünyaya ilk açtığımız andan itibaren hayat denen senaryosu belirsiz tiyatroya birileri oyuncu olarak giriyor. Annemiz ve babamız gibi kişiler çoğunlukla sahnede bir şekilde bulunurken sınıf arkadaşlarımız gibi kişiler ise figüran misali kısa rollerini oynayıp sahneyi terk ediyorlar. Başrol, yani hayatın sahibi olan biz, etrafımızdakilerle hep bir temas hâlindeyiz. Bu, oyuncu listesindebirçok kişinin olduğu izlenimini verse de b', '', '5.5', 'llama-3.1-: 6 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNlxuQVx1MDBjN0lLTEFNQTogTWV0bmluIGRpbGJpbGdpc2kgdmUgaVx1MDBlN2VyaWsga2FsaXRlc2kgbVx1MDBmY2tlbW1lbCwgZGVyaW5sZW1lc2luZSB2ZSBkdXlndXNhbCBiaXIgYW5sYXRcdTAxMzFtIHN1bnV5b3IuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJQVUFOOiA1XG5BXHUwMGM3SUtMQU1BOiBNZXRpbiwgVFx1MDBmY3JrXHUwMGU3ZSBkaWxiaWxnaXNpIGFcdTAwZTdcdTAxMzFzXHUwMTMxbmRhbiBoYXRhc1x1MDEzMXogdmUgemVuZ2luIGJpciBzXHUwMGY2eiBkaXppbWluZSBzYWhpcHRpci4gXHUwMTMwXHUwMGU3ZXJpayBvbGFyYWsgZGVyaW4gdmUgZHV5Z3VzYWwgYmlyIGFubGF0XHUwMTMxbSBzdW5hciwgYW5jYWsgYmF6XHUwMTMxIGJcdTAwZjZsXHUwMGZjbWxlcmRlIGFrXHUwMTMxXHUwMTVmIGJvenVsbWFzXHUwMTMxIHZlIHRhbWFtbGFtYSBla3Npa2xpXHUwMTFmaSBnXHUwMGY2emxlbmlyLiIsICJsaXRlbGxtL29wZW5haS9ncHQtNG8tbWluaSI6ICJQVUFOOiA1ICBcbkFcdTAwYzdJS0xBTUE6IE1ldGluLCBkZXJpbiBiaXIgeWFsblx1MDEzMXpsXHUwMTMxayB0ZW1hc1x1MDEzMSBldHJhZlx1MDEzMW5kYSBpeWkgYmlyIGFubGF0XHUwMTMxbSBzdW51eW9yLiBEaWxiaWxnaXNpIGFcdTAwZTdcdTAxMzFzXHUwMTMxbmRhbiBnZW5lbCBvbGFyYWsgZG9cdTAxMWZydSwgYW5jYWsgYmF6XHUwMTMxIHllcmxlcmRlIGFrXHUwMTMxY1x1MDEzMWxcdTAxMzFrIHZlIHlhcFx1MDEzMSBhXHUwMGU3XHUwMTMxc1x1MDEzMW5kYW4gZ2VsaVx1MDE1ZnRpcmlsbWVzaSBnZXJla2VuIG5va3RhbGFyIHZhci4gXHUwMTMwXHUwMGU3ZXJpayBvbGR1a1x1MDBlN2EgZXRraWxleWljaSB2ZSBkXHUwMGZjXHUwMTVmXHUwMGZjbmRcdTAwZmNyXHUwMGZjY1x1MDBmYy4ifQ==')">Egemen Karaca 22102695 BEŞİKTEN MEZARA: YALNIZLIĞIN GÖLGESİ ...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">6.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metnin dilbilgisi ve içerik kalitesi mükemmel, derinlemesine ve duygusal bir anl">Metnin dilbilgisi ve içerik kalitesi mük...</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td class="text-cell" onclick="showDetailModal('Alptekin Öksüz Çoktan Gitmişsin “Sesin kapıyı çalıyor sandım Senin sesin ağır Boşluğun koyu Ben şimdi hangi semtin Gözlerine bakacağım Şaşırdım Ben şimdi hangi evin Gözlerine baksam Boş Benden çoktan taşınmışsın.” En çaresiz hissettiğiniz anı hatırlıyor musunuz? Her şeyi yapmaya hazırsınız ama yapacak bir şeyiniz kalmamış. Sanki sıkıca tuttuğunuz balonun ipi bir anlığına elinizden kaçmış, tutmak için zıplıyorsunuz ama her zıpladığınızda sizden daha çok uzaklaşıyor. O saatten sonra sadece izliyor', '', '5.5', 'llama-3.1-: 5.0 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogR1x1MDBmY1x1MDBlN2xcdTAwZmMgZHV5Z3VzYWwgaVx1MDBlN2VyaWsgdmUgZGlsYmlsZ2lzZWwgZG9cdTAxMWZydWx1ayBpbGUgeWF6XHUwMTMxbG1cdTAxMzFcdTAxNWYsIG9rdXJ1IGV0a2lsZXllbiBiaXIgbWV0aW4uIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJQVUFOOiA1XG5BXHUwMGM3SUtMQU1BOiBNZXRpbiwgVFx1MDBmY3JrXHUwMGU3ZSBkaWxiaWxnaXNpIGFcdTAwZTdcdTAxMzFzXHUwMTMxbmRhbiBoYXRhc1x1MDEzMXogdmUgemVuZ2luIGJpciBpXHUwMGU3ZXJpayBzdW51eW9yLiBBbmNhaywgYmF6XHUwMTMxIGNcdTAwZmNtbGVsZXJpbiB1enVubHVcdTAxMWZ1IHZlIHlhcFx1MDEzMXNcdTAxMzEgb2t1bWEgYWtcdTAxMzFcdTAxNWZcdTAxMzFuXHUwMTMxIHpvcmxhXHUwMTVmdFx1MDEzMXJcdTAxMzF5b3IuIER1eWd1c2FsIGRlcmlubGlrIHZlIGlcdTAwZTdlcmlcdTAxMWZlIGRhaXIgeWV0ZXJsaSBiaXIgYVx1MDBlN1x1MDEzMWtsYW1hIHN1bnV5b3IuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIlBVQU46IDUgIFxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGR1eWd1c2FsIGJpciBkZXJpbmxpayB0YVx1MDE1Zlx1MDEzMXlvciB2ZSBhbmxhdFx1MDEzMW0gYWtcdTAxMzFjXHUwMTMxLiBBbmNhayBiYXpcdTAxMzEgeWVybGVyZGUgZGlsIGJpbGdpc2kgaGF0YWxhclx1MDEzMSB2ZSBhbmxhdFx1MDEzMW0gYm96dWtsdWtsYXJcdTAxMzEgbWV2Y3V0LiBHZW5lbCBvbGFyYWsgZXRraWxleWljaSBiaXIgaVx1MDBlN2VyaWsuIn0=')">Alptekin Öksüz Çoktan Gitmişsin “Sesin kapıyı çalıyor sandım...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Güçlü duygusal içerik ve dilbilgisel doğruluk ile yazılmış, okuru etkileyen bir ">Güçlü duygusal içerik ve dilbilgisel doğ...</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td class="text-cell" onclick="showDetailModal('Bartu Özcan BEŞ DUYU Hepimiz bu dünyada duyularımız sayesinde yaşıyoruz. Benzin istasyonlarının boğaz yakan kokusuyla, gece içine girdiğimizde içimizi üşüten yorganın soğukluğuyla, çikolatanın o dilimize mutluluk saçan tadıyla, her duyduğumuzda bizi hüzünlendiren o şarkının tınısıyla, o çok güzel küçük çocuğun gözlerinin görüntüsüyle varız. Hayatımıza anlam katan, devam etmemizi sağlayan duyularımızla algıladıklarımız aslında. Bizi mutlu eden şeyler de bunlar. Mesela ben kendimi koku duyusu olma', '', '5.5', 'llama-3.1-: 5.0 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGR1eWd1c2FsIHZlIGRcdTAwZmNcdTAxNWZcdTAwZmNuc2VsIGJpciBpXHUwMGU3ZXJpayBzdW51eW9yLCBhbmNhayBiYXpcdTAxMzEgZGlsYmlsZ2lzaSBoYXRhbGFyXHUwMTMxIHZlIGNcdTAwZmNtbGUgeWFwXHUwMTMxc1x1MDEzMSB2YXIuIiwgImxpdGVsbG0vbWlzdHJhbC9taXN0cmFsLXNtYWxsLWxhdGVzdCI6ICJQVUFOOiA1XG5BXHUwMGM3SUtMQU1BOiBNZXRpbiBUXHUwMGZjcmtcdTAwZTdlIGRpbGJpbGdpc2kgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGRcdTAwZmN6Z1x1MDBmY24gdmUgemVuZ2luIGJpciBzXHUwMGY2eiBkaXppbWluZSBzYWhpcHRpci4gXHUwMTMwXHUwMGU3ZXJpayBrYWxpdGVzaSB5XHUwMGZja3NlayB2ZSBva3VydW4gaWxnaXNpbmkgXHUwMGU3ZWttZWt0ZWRpci4gQW5jYWssIG1ldGluIHRhbWFtbGFubWFtXHUwMTMxXHUwMTVmIHZlIGJhelx1MDEzMSBjXHUwMGZjbWxlbGVyIGtlc2ludGlsaSwgdGFtYW1sYW5tYW1cdTAxMzFcdTAxNWYgZHVydW1kYWRcdTAxMzFyLiBCdSBuZWRlbmxlLCBpXHUwMGU3ZXJpayBrYWxpdGVzaSB2ZSBkaWxiaWxnaXNpIGFcdTAwZTdcdTAxMzFzXHUwMTMxbmRhbiA1IHB1YW4gdmVyaWxlYmlsaXIuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIlBVQU46IDUgIFxuQVx1MDBjN0lLTEFNQTogTWV0aW4gYWtcdTAxMzFjXHUwMTMxIHZlIGR1eWd1c2FsIGJpciBhbmxhdFx1MDEzMW1hIHNhaGlwLiBEaWxiaWxnaXNpIGFcdTAwZTdcdTAxMzFzXHUwMTMxbmRhbiBnZW5lbCBvbGFyYWsgZG9cdTAxMWZydSwgYW5jYWsgYmF6XHUwMTMxIGNcdTAwZmNtbGVsZXJkZSBkYWhhIGZhemxhIGFrXHUwMTMxY1x1MDEzMWxcdTAxMzFrIHNhXHUwMTFmbGFuYWJpbGlyZGkuIFx1MDEzMFx1MDBlN2VyaWsgZGVyaW4gdmUgZFx1MDBmY1x1MDE1Zlx1MDBmY25kXHUwMGZjclx1MDBmY2NcdTAwZmMsIGFuY2FrIHNvbiBjXHUwMGZjbWxlIHRhbWFtbGFubWFtXHUwMTMxXHUwMTVmLiJ9')">Bartu Özcan BEŞ DUYU Hepimiz bu dünyada duyularımız sayesind...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metin, duygusal ve düşünsel bir içerik sunuyor, ancak bazı dilbilgisi hataları v">Metin, duygusal ve düşünsel bir içerik s...</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td class="text-cell" onclick="showDetailModal('BENLİK OKYANUSUM Benlik okyanusumda kendimi boğulmaktan nasıl alıkoyabileceğimi gün geçtikçe daha iyi öğreniyorum sanki. Tecrübe ettiğim her olay, içinde istemli veya istemsiz bulunduğum her durum bana bünyemde barındırdığım ve yalnızca benim görüp, duyup, hissedebileceğim farklı insanları tanıma fırsatı sunuyor. Özellikle de tatsız olan tecrübeler. İşte ben onları çok seviyorum. Çünkü her tatsız tecrübeden sonra mutlaka farklı bir ben ile tanışıyorum. İşin bir diğer güzel tarafı, tanıştığım bu ', '', '5.5', 'llama-3.1-: 5.0 | mistral-sm: 5.0 | gpt-4o-min: 5.0', 'eyJsaXRlbGxtL2dyb3EvbGxhbWEtMy4xLThiLWluc3RhbnQiOiAiUFVBTjogNVxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIFx1MDBmNnpnXHUwMGZjbiB2ZSBkXHUwMGZjXHUwMTVmXHUwMGZjbmNlbGkgYmlyIFx1MDE1ZmVraWxkZSB5YXpcdTAxMzFsbVx1MDEzMVx1MDE1ZiwgYW5jYWsgYmF6XHUwMTMxIGRpbGJpbGdpc2kgaGF0YWxhclx1MDEzMSB2ZSBjXHUwMGZjbWxlIHV6dW5sdVx1MDExZnUgbmVkZW5peWxlIHB1YW5cdTAxMzEgNidkYW4gZFx1MDBmY1x1MDE1Zm1cdTAwZmNcdTAxNWZ0XHUwMGZjci4iLCAibGl0ZWxsbS9taXN0cmFsL21pc3RyYWwtc21hbGwtbGF0ZXN0IjogIlBVQU46IDVcbkFcdTAwYzdJS0xBTUE6IE1ldGluLCBUXHUwMGZjcmtcdTAwZTdlIGRpbGJpbGdpc2kgYVx1MDBlN1x1MDEzMXNcdTAxMzFuZGFuIGhhdGFzXHUwMTMxeiB2ZSB6ZW5naW4gYmlyIHNcdTAwZjZ6IGRpemltaW5lIHNhaGlwdGlyLiBcdTAxMzBcdTAwZTdlcmlrIGthbGl0ZXNpIHlcdTAwZmNrc2VrIHZlIGRlcmluIGJpciBkXHUwMGZjXHUwMTVmXHUwMGZjbmNleWkgaWZhZGUgZXRtZWt0ZWRpci4gQW5jYWsgYmF6XHUwMTMxIGNcdTAwZmNtbGVsZXIgYmlyYXogdXp1biB2ZSBrYXJtYVx1MDE1Zlx1MDEzMWssIGJ1IGRhIG9rdW5hYmlsaXJsaVx1MDExZmkgYXphbHRhYmlsaXIuIiwgImxpdGVsbG0vb3BlbmFpL2dwdC00by1taW5pIjogIlBVQU46IDUgIFxuQVx1MDBjN0lLTEFNQTogTWV0aW4sIGRlcmluIGJpciBpXHUwMGU3c2VsIHlvbGN1bHVcdTAxMWZ1IHZlIGR1eWd1c2FsIGRlbmV5aW1sZXJpIGV0a2lsZXlpY2kgYmlyIFx1MDE1ZmVraWxkZSBpZmFkZSBlZGl5b3IuIERpbCBrdWxsYW5cdTAxMzFtXHUwMTMxIGdlbmVsIG9sYXJhayBha1x1MDEzMWNcdTAxMzEgdmUgYW5sYW1sXHUwMTMxLCBhbmNhayBiYXpcdTAxMzEgY1x1MDBmY21sZWxlciBkYWhhIHNhZGVsZVx1MDE1ZnRpcmlsZWJpbGlyLiBZaW5lIGRlIGlcdTAwZTdlcmlrIGthbGl0ZXNpIHlcdTAwZmNrc2VrLiJ9')">BENLİK OKYANUSUM Benlik okyanusumda kendimi boğulmaktan nası...</td>
+                    <td><strong>5.5</strong></td>
+                    <td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td><td style="background: #ff980020;">5.0</td>
+                    <td style="font-size:10px;color:#666;" title="Metin, özgün ve düşünceli bir şekilde yazılmış, ancak bazı dilbilgisi hataları v">Metin, özgün ve düşünceli bir şekilde ya...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>📝 Metric Definitions</h2>
+    <div class="metric-grid">
+        <div class="metric-box">
+            <div class="label">MAE</div>
+            <div style="font-size: 12px; color: #666;">Mean Absolute Error</div>
+        </div>
+        <div class="metric-box">
+            <div class="label">NMAE</div>
+            <div style="font-size: 12px; color: #666;">Normalized MAE (0-1)</div>
+        </div>
+        <div class="metric-box">
+            <div class="label">QWK</div>
+            <div style="font-size: 12px; color: #666;">Quadratic Weighted Kappa</div>
+        </div>
+        <div class="metric-box">
+            <div class="label">Pearson</div>
+            <div style="font-size: 12px; color: #666;">Pearson Correlation</div>
+        </div>
+        <div class="metric-box">
+            <div class="label">Spearman</div>
+            <div style="font-size: 12px; color: #666;">Rank Correlation</div>
+        </div>
+        <div class="metric-box">
+            <div class="label">Bias</div>
+            <div style="font-size: 12px; color: #666;">+Over / -Under scoring</div>
+        </div>
+    </div>
+    
+    <p style="color: #999; margin-top: 40px; font-size: 12px;">
+        Generated by LLM Benchmark Suite | 2025-12-26T09:03:01.227379
+    </p>
+</div>
+
+<script>
+// Collapsible sections
+document.querySelectorAll('.collapsible').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        content.style.display = content.style.display === 'block' ? 'none' : 'block';
+    });
+});
+</script>
+</body>
+</html>
